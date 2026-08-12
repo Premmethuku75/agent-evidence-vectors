@@ -1,0 +1,251 @@
+# aee-vocabulary — canonical term registry
+#
+# This file is CC0-1.0 (public domain). Reuse, fork, or cite it freely; no
+# attribution required. The surrounding repository (docs, scripts, CI) is
+# Apache-2.0 — see LICENSE.
+#
+# Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
+#
+# version: "0.1.0"
+# status: "draft - open for review"
+
+meta:
+  version: "0.1.0"
+  status: "draft - open for review"
+  spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
+  spec_anchor_repo: "https://github.com/astrogilda/aee-conformance"
+  purpose: >
+    A closed, versioned vocabulary for terms that describe adversarial-execution
+    evidence: what an executed artifact attempted, what a substrate beneath it
+    observed or refused, how directly and from what vantage a claim was obtained,
+    and how much of a declared population a claim actually covers. This registry
+    does not define identity, reputation, wallet, or reasoning-integrity terms —
+    those are out of scope by design (see out_of_scope below); other registries
+    already cover that ground and this one does not compete with them.
+  promotion_lifecycle: >
+    Every term starts proposed. A term is promoted to canonical only once a
+    SECOND independently-maintained system emits it in a real, running artifact
+    (not a plan, not a mock) and files a crosswalk declaring evidence: emitted
+    with a resolvable source_path. A term with zero production issuers after its
+    review_by date is demoted to reserved and removed at the following review,
+    unless a production issuer surfaces in the interim. This mirrors the one
+    genuinely well-run mechanism found in the nearest comparable registry
+    (agent-governance-vocabulary, aeoess/agent-governance-vocabulary) — its
+    review-and-strip cycle is real discipline and worth matching — while fixing
+    the defect found there: promotion requires an evidence: emitted declaration
+    with a resolvable source_path, not merely a listed issuer name.
+
+# ---------------------------------------------------------------------------
+# evidence_dimensions — properties of HOW a claim was obtained, not WHAT it
+# claims. Every signal_type term below should declare these where applicable.
+# ---------------------------------------------------------------------------
+evidence_dimensions:
+
+  observation_vantage:
+    status: canonical
+    values: [substrate, artifact]
+    definition: >
+      Whether every input a claim depends on was obtained at a vantage the
+      executed artifact could neither forge nor suppress (substrate — a network
+      boundary, syscall supervision, a hypervisor's read of guest state), or
+      whether the claim rests on artifacts the executed party could have
+      influenced (artifact). Composes by weakest input: a claim derived from a
+      mix of substrate and artifact observations inherits artifact.
+      A consumer with no policy-pinned substrate root MUST treat every
+      substrate-vantage row as unattested and MUST NOT infer the root from the
+      claim itself (no trust-on-first-use).
+    source_path: "predicate.attackResults[].basis"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    why_this_registry: >
+      No comparable registry names the relation between the observer and the
+      observed at all. Contributors to adjacent registries reach for the
+      concept in free-text prose repeatedly and have no field to put it in.
+
+  observation_directness:
+    status: canonical
+    values: [intercepted, reconstructed]
+    definition: >
+      Whether a claim rests on events captured as they occurred (intercepted),
+      or on state examined after the fact — a snapshot-to-snapshot diff
+      (reconstructed), which can miss a transient condition raised and undone
+      between the states compared. Orthogonal to observation_vantage; composes
+      by weakest input.
+    source_path: "predicate.attackResults[].method"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    why_this_registry: >
+      This is the axis that separates a live capture from a periodic re-scan.
+      Nothing else names it, and it is the exact distinction that separated a
+      genuine live-capture system from a weekly static scanner making an
+      equivalent-sounding claim in a 2026-08-11 competitive teardown.
+
+  field_evidence_partition:
+    status: proposed
+    review_by: "2027-02-11"
+    values: [substrate_covered, producer_asserted]
+    definition: >
+      A per-artifact declaration of which identity's signature backs which
+      field within a mixed claim: which values are covered by an observation
+      the observed party could not have produced, and which are backed only by
+      the enclosing envelope and are therefore the producer's own assertion.
+      Most execution-evidence artifacts mix observed and self-declared fields
+      under one signature with no way to tell which is which from the wire
+      alone; this term names the split explicitly.
+    issuers_in_production: []
+    promotion_trigger: >
+      A second independent implementation that declares this field per-artifact
+      (not merely in prose) and files a crosswalk with evidence: emitted.
+
+  issuance_time_basis:
+    status: proposed
+    review_by: "2027-02-11"
+    values: [beacon_anchored, asserted]
+    definition: >
+      Whether a record's earliest-possible signing time is PROVEN — the signed
+      pre-image folds in a publicly datable value that was unpredictable before
+      its round (e.g. a drand round output, or an RFC 9334 §10.3 epoch
+      identifier), so the signature cannot predate its round — or merely
+      ASSERTED by the issuer with no such binding. Deliberately one-sided: a
+      proven floor and an asserted ceiling, never claimed as a two-sided proof
+      of freshness.
+    source_path: "predicate.observationRecords[].payload (arming pre-image)"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    promotion_trigger: "A second independent implementation with a real beacon binding."
+
+# ---------------------------------------------------------------------------
+# posture_and_coverage — what an execution environment was actually in, and
+# how much of a declared population a claim actually assessed.
+# ---------------------------------------------------------------------------
+posture_and_coverage:
+
+  containment_posture:
+    status: canonical
+    values: [no_network, allowlist, sinkhole, unsafe_bypass_egress]
+    definition: >
+      The network-egress posture of the execution environment a governed
+      artifact actually ran inside — digest-committed and substrate-
+      authoritative, never runner-asserted. Closed and fail-closed: an absent,
+      non-string, or unregistered value makes the enclosing statement
+      malformed rather than defaulting to a permissive reading.
+    source_path: "predicate.observationEnvironment.networkPosture.posture"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    why_this_registry: >
+      This is the runtime half of a claim class ("what environment did the
+      execution run in") that every comparable claimant surveyed in a
+      2026-08-11 audit disclaimed for one of three reasons: a static artifact
+      subject instead of a runtime one, no signed environment artifact at all,
+      or self-disqualification for lacking exactly this — a digest-committed,
+      substrate-authoritative posture value.
+
+  coverage_denominator:
+    status: canonical
+    values: null
+    definition: >
+      A digest-committed partition of the population a claim is drawn from
+      into three pairwise-disjoint sets — assessed, out-of-scope-with-a-reason,
+      and routed-elsewhere — whose union MUST equal the keys of a
+      digest-committed manifest the producer does not control. Without this, a
+      claim of "found nothing" and a claim of "looked at nothing" are
+      indistinguishable on the wire.
+    source_path: "predicate.coverage.{assessedClasses,outOfScope,routedElsewhere}"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    why_this_registry: >
+      No comparable registry has a term for a producer committing to its own
+      coverage population. The nearest analog found elsewhere is a bare
+      withheld-if-sample-too-small rule, which is a refusal condition, not a
+      committed population.
+
+  does_not_assert:
+    status: canonical
+    values: null
+    definition: >
+      A machine-readable list of short strings, carried inside the signed
+      statement itself, stating what this evidence explicitly cannot claim.
+      Single canonical spelling per claim, no accepted alias, never buried in
+      free-text documentation where a consumer has to go looking for it.
+    source_path: "predicate.doesNotAssert"
+    issuers_in_production: ["aee-conformance reference verifier"]
+    why_this_registry: >
+      Comparable registries carry this concept, when they carry it at all, as
+      file-level prose (a repository-wide "out of scope" list) rather than a
+      per-artifact field. Systems that need this and don't have it have been
+      observed hand-building narrower special cases of it independently.
+
+# ---------------------------------------------------------------------------
+# outcome_lattice — the recomputable verdict a consumer derives, never a
+# policy threshold and never producer-asserted.
+# ---------------------------------------------------------------------------
+outcome_lattice:
+
+  result:
+    status: canonical
+    values: [fail, degraded, pass_indirect, pass]
+    definition: >
+      A total, deterministic, severity-independent minimum over the declared
+      conditions, in the fixed order fail < degraded < pass_indirect < pass —
+      recomputable by any consumer from carried bytes alone, against a
+      normative recompute table published with the spec. Not a policy verdict:
+      it carries no threshold and no severity input, and a consumer applying
+      its own policy threshold does so on top of this value, never inside it.
+    source_path: "predicate.result"
+    issuers_in_production: ["aee-conformance reference verifier"]
+
+# ---------------------------------------------------------------------------
+# system_attributes — declared together, per promotion criterion below. Only
+# declaring all of these together (plus at least one signal_type/evidence_
+# dimension term with evidence: emitted) satisfies canonical-status review.
+# ---------------------------------------------------------------------------
+system_attributes:
+  values:
+    signature_capability: [classical, post_quantum_hybrid]
+    canonicalization_profile: [jcs_rfc_8785, other]
+    hash_family: [sha_256, other]
+    domain_separation_profile: [declared, undeclared]
+  definition: >
+    Four attributes every crosswalk-in system should declare together.
+    domain_separation_profile is the one comparable registries omit entirely:
+    whether signed pre-images across an implementation's different artifact
+    types are tagged with distinct, per-format identifiers (so one signing key
+    cannot be confused across formats), or whether all formats share one
+    undifferentiated pre-image shape. Declaring canonicalization_profile alone
+    is necessary but not sufficient for byte-equal signatures across two
+    implementations — an interoperability lesson learned from a comparable
+    registry's own crosswalk corpus, where two systems that both declared the
+    same canonicalization profile did not in fact produce byte-identical
+    output without a separately-named interoperable input set.
+
+# ---------------------------------------------------------------------------
+# crosswalk_match_types and crosswalk_evidence_states — the vocabulary a
+# THIRD PARTY uses when filing a crosswalk against this registry.
+# ---------------------------------------------------------------------------
+crosswalk_match_types:
+  exact: "Same definition, same subject, same values."
+  structural: "Same mechanism and same question answered, different concrete shape (e.g. a set of digests vs. one version hash)."
+  partial: "Real overlap, with at least one named, material divergence recorded in the crosswalk."
+  non_equivalent_similar_label: "Same or similar term name, materially different definition — a false friend. Declared explicitly so neither side is misread as claiming the other's ground."
+  no_mapping: "Honest gap. The filing system does not do this; the crosswalk says so and stops."
+
+crosswalk_evidence_states:
+  emitted: "The declared value is a field in a real, signed statement a third party can fetch and read without computing or inferring anything. The ONLY state that counts toward promotion."
+  inferred: "The declared value is computed by the filer from other fields, not carried directly."
+  asserted: "The declared value is claimed in prose (a README, a spec) with no machine-checkable artifact behind it."
+  definition: >
+    This axis is the single highest-leverage mechanism in this registry and is
+    under-used everywhere it has been observed elsewhere: a promotion trigger
+    keyed to evidence: emitted with a resolvable source_path, checked by
+    running validate_crosswalks.py against the cited URL, not merely reading
+    the declaration on trust.
+
+# ---------------------------------------------------------------------------
+# out_of_scope — explicit non-goals, stated so a filer knows this registry
+# will never contest ground it does not claim.
+# ---------------------------------------------------------------------------
+out_of_scope:
+  - "Agent identity, reputation, or wallet-bound scoring of any kind. This registry describes claims about an execution, never a scored assessment of an actor over time."
+  - "Renaming or reinterpreting a live signed envelope's own type/format field. A verifier MUST reject an unregistered enum value for a known field; the wire bytes of that field are never renamed by this registry."
+  - "Policy thresholds. This registry's outcome_lattice term is a recomputable minimum, never a pass/fail threshold a consumer's own policy applies on top."
+
+# ---------------------------------------------------------------------------
+# reserved / removed — terms considered and explicitly declined, kept here so
+# the decision is not silently re-litigated.
+# ---------------------------------------------------------------------------
+reserved: []
