@@ -41,8 +41,8 @@ repository proves an implementation actually speaks it.
 
 ## Status
 
-`v0.1.0-draft`. The initial term set here was seeded from a first-principles audit of the nearest
+`v0.1.0`, tagged. The initial term set here was seeded from a first-principles audit of the nearest
 comparable registry, kept honest about which terms are genuinely open ground versus genuine
-overlap with existing work — see each term's `why_this_registry` note in `vocabulary.yaml` for the
-specific gap it fills. Not yet tagged, not yet advertised for external filing. First external
-crosswalk welcome once this reaches a tagged `v0.1.0`.
+overlap with existing work: see each term's `why_this_registry` note in `vocabulary.yaml` for the
+specific gap it fills. The repository is still private; a tag exists so a future crosswalk has a
+fixed version to file against, not as a signal that this is now advertised for external filing.

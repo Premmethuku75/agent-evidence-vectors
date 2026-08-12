@@ -1,0 +1,64 @@
+# OpenSSF Scorecard -- scores this repository's own supply-chain hygiene
+# (branch protection, review discipline, pinned dependencies, workflow
+# permissions) and uploads the result to the repository's code-scanning view.
+#
+# Two settings depend on this repository being public, and are set for the
+# private state it is in today:
+#   - publish_results is false. Publishing to the public OpenSSF API requires a
+#     public repository; flip it to true at the same time visibility changes.
+#   - The SARIF upload to code scanning needs GitHub Advanced Security while the
+#     repository is private. The artifact upload below keeps the result readable
+#     either way.
+#
+# A registry that grades other people's evidence should be willing to have its
+# own review discipline graded by a tool it does not control. GOVERNANCE.md's
+# merge-discipline rules are exactly what Scorecard's Branch-Protection,
+# Code-Review and Dangerous-Workflow checks measure.
+
+name: scorecard
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "27 4 * * 1"
+  push:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the SARIF result to code scanning.
+      security-events: write
+      # Needed to publish results and get a badge, once the repository is public.
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: false
+
+      - name: Upload the raw SARIF as an artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload the SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: results.sarif
