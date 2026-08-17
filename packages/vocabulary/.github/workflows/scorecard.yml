@@ -10,6 +10,19 @@
 #     repository is private. The artifact upload below keeps the result readable
 #     either way.
 #
+# Both of those were right and both were incomplete: the ANALYSIS itself also
+# needs a public repository, and fails before it reaches either setting with
+# "ListCommits: Resource not accessible by integration". So this has been red on
+# every push and every weekly schedule since 2026-08-12, alongside the CodeQL
+# workflow failing for the sibling reason. Two permanently red checks on a
+# four-workflow repository is most of its signal saying nothing.
+#
+# The analysis is gated on visibility by the same self-expiring mechanism the
+# CodeQL workflow uses: read the answer once from the API, print it, run when
+# public, say plainly what is suspended when private, and FAIL rather than guess
+# if the answer cannot be read. When visibility flips, this starts running on its
+# own and `publish_results` is the only line left to change by hand.
+#
 # A registry that grades other people's evidence should be willing to have its
 # own review discipline graded by a tool it does not control. GOVERNANCE.md's
 # merge-discipline rules are exactly what Scorecard's Branch-Protection,
@@ -27,8 +40,41 @@ on:
 permissions: read-all
 
 jobs:
+  # Deliberately duplicated from codeql.yml rather than factored into a reusable
+  # workflow. This is a read of one API field, not a rule: there is nothing here
+  # for the two copies to disagree about, and an indirection would cost more to
+  # follow than the six lines it saved.
+  visibility:
+    name: Can Scorecard run here
+    runs-on: ubuntu-latest
+    outputs:
+      public: ${{ steps.read.outputs.public }}
+    steps:
+      - id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          private="$(gh api "repos/${{ github.repository }}" --jq .private)"
+          case "$private" in
+            false)
+              echo "public=true" >> "$GITHUB_OUTPUT"
+              echo "repository is public; Scorecard runs."
+              ;;
+            true)
+              echo "public=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::Repository is private, so Scorecard cannot read its commit history and this analysis is SUSPENDED. It re-arms automatically when visibility changes. Nothing is claimed here about this repository's supply-chain hygiene, and in particular its branch protection is NOT being graded while this is suspended."
+              ;;
+            *)
+              echo "::error::Could not read repository visibility (got '$private'). Refusing to guess: a check that cannot tell whether it should run has established nothing."
+              exit 1
+              ;;
+          esac
+
   analysis:
     name: Scorecard analysis
+    needs: visibility
+    if: needs.visibility.outputs.public == 'true'
     runs-on: ubuntu-latest
     permissions:
       # Needed to upload the SARIF result to code scanning.

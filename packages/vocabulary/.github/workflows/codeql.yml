@@ -13,8 +13,21 @@
 # crosswalk-rendering or publishing tool is added later in another language, add
 # it to the matrix then rather than pre-declaring it now.
 #
-# While this repository is private, the code-scanning upload needs GitHub
-# Advanced Security. Nothing here changes when it goes public.
+# While this repository is private, code scanning is unavailable, so this
+# analysis cannot complete: the run fails with "Code scanning is not enabled for
+# this repository." That was written down here from the start and the workflow
+# ran anyway, so it has been red on every push and every weekly schedule since
+# 2026-08-12. A permanently red check is one nobody reads, and a repository whose
+# whole claim is enforced discipline cannot afford a red that means nothing.
+#
+# The analysis is therefore gated on visibility, and the gate is built so that it
+# expires by itself. Nobody has to remember to re-enable anything: the moment the
+# repository goes public the scan starts running, and the suspension notice stops
+# being printed. Visibility is read from the API rather than from the event
+# payload, because the payload's shape differs across push, schedule and
+# branch_protection_rule, and a read that silently yields nothing on one event
+# type would suspend the scan on that event forever. An unreadable answer FAILS:
+# a check that cannot tell whether it should run has not established anything.
 
 name: codeql
 
@@ -30,8 +43,40 @@ permissions:
   contents: read
 
 jobs:
+  # One place decides whether the scans below can run, and it prints what it
+  # decided. Every other job branches on this output rather than re-deriving the
+  # answer, so there is one reading and it is visible in the log.
+  visibility:
+    name: Can code scanning run here
+    runs-on: ubuntu-latest
+    outputs:
+      public: ${{ steps.read.outputs.public }}
+    steps:
+      - id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          private="$(gh api "repos/${{ github.repository }}" --jq .private)"
+          case "$private" in
+            false)
+              echo "public=true" >> "$GITHUB_OUTPUT"
+              echo "repository is public; code scanning runs."
+              ;;
+            true)
+              echo "public=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::Repository is private, so code scanning is unavailable and this analysis is SUSPENDED. It re-arms automatically when visibility changes; nothing has to be re-enabled by hand. Nothing is claimed here about whether the code is clean."
+              ;;
+            *)
+              echo "::error::Could not read repository visibility (got '$private'). Refusing to guess: a check that cannot tell whether it should run has established nothing."
+              exit 1
+              ;;
+          esac
+
   analyze:
     name: Analyze (${{ matrix.language }})
+    needs: visibility
+    if: needs.visibility.outputs.public == 'true'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
