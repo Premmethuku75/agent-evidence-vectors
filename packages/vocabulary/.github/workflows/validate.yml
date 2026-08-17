@@ -1,3 +1,8 @@
+# Two gates, both hermetic: the crosswalk validator, and the forbidden-string
+# scan that keeps this repository publishable. Neither depends on a credential
+# or on anyone else's uptime, so both belong on every push rather than on a
+# schedule.
+
 name: validate
 
 on:
@@ -16,3 +21,27 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python3 scripts/validate_crosswalks.py
+
+      - name: Reject forbidden strings in tracked files
+        run: |
+          # Product names and internal-only markers, held as salted digests in
+          # .githooks/commit-msg.forbidden-words and shared with the commit-msg
+          # hook so the message surface and the content surface cannot drift
+          # apart. Nothing readable is in the tree and nothing is echoed when a
+          # match is found: printing it would reproduce the string into this log.
+          #
+          # This repository is private today and product-neutral by design. The
+          # guard is installed BEFORE publication rather than after, because the
+          # cost of arriving late is a name in a history that is already public.
+          #
+          # Exit 2 means the rule list did not load, which is a failure: a guard
+          # that could not read its rules has verified nothing.
+          python3 scripts/forbidden-word-scan.py
+          status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::error::A tracked file contains a forbidden string. Product names and drafting notes belong in the private research tree."
+            exit 1
+          elif [ "$status" -ne 0 ]; then
+            echo "::error::The forbidden-string rule list failed to load; nothing was verified."
+            exit 1
+          fi
