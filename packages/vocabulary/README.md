@@ -60,5 +60,5 @@ that note is a field in the file, so a reader who disagrees can point at the lin
 make their case in the definition itself.
 
 Every term is meant to land as a field inside a signed statement. Nobody consuming one should have
-to go hunting through documentation to learn what a claim withholds. The tag gives a crosswalk a
-fixed version to file against; external filings are not being solicited yet.
+to go hunting through documentation to learn what a claim withholds. Each release is tagged so a
+crosswalk has a fixed version to file against; external filings are not being solicited yet.

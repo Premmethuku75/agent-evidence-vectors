@@ -24,6 +24,7 @@ Exit 0 the example validates, 1 it does not, 2 the check could not run.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -82,9 +83,16 @@ def main() -> int:
         handle.write(example)
 
     try:
+        # Offline, because the example carries an https source_path on an
+        # emitted claim and the validator resolves those with a live HEAD
+        # request. Running this test in CI is what put a network call into
+        # every build. Shape is what this test checks; resolvability is the
+        # human reviewer's job under GOVERNANCE, and the validator says so
+        # itself when it skips.
         run = subprocess.run(
             [sys.executable, str(_VALIDATOR)],
             capture_output=True, text=True, check=False, cwd=_ROOT,
+            env={**os.environ, "VALIDATE_CROSSWALKS_OFFLINE": "1"},
         )
     finally:
         probe.unlink(missing_ok=True)

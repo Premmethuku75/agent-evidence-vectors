@@ -22,7 +22,14 @@ WHAT THIS DOES NOT DO. It does not read fenced code blocks, where a quoted
 transcript or a third party's own text may legitimately contain anything. It does
 not read `.githooks/`, whose contents are shared byte-identically with sibling
 repositories and cannot be edited here alone without breaking that property. Both
-exemptions are narrow and both are stated rather than silent.
+exemptions are narrow, and both are stated here where a reader meets them, never
+left silent in the code.
+
+It also holds ITSELF to the rule. Only the three compiled pattern lines are
+exempt, because they have to spell what they forbid. Every other line in this
+file, this sentence included, is checked. The first version exempted the whole
+path, and the paragraph you are reading carried a violation for as long as that
+lasted.
 
 Exit 0 clean, 1 finding, 2 refused.
 """
@@ -73,11 +80,28 @@ def _tracked() -> list[str] | None:
     return [line for line in result.stdout.splitlines() if line]
 
 
+#: This file has to spell the three phrases to match them, so the lines holding
+#: the patterns are exempt. NOT the whole file: an earlier version exempted the
+#: path outright and the prose above went unchecked as a result, which is the
+#: same shape as the guard this file was written to replace, where a rule existed
+#: and covered nothing. A checker that cannot be checked is not a checker.
+_SELF = "scripts/lint_ruled_out_phrases.py"
+
+
+def _self_exempt_line(line: str) -> bool:
+    """True for a line in THIS file that must contain a ruled-out phrase.
+
+    Only the compiled patterns qualify. Every other line here, comment and
+    docstring alike, is prose this project publishes and is held to the rule it
+    enforces on everything else.
+    """
+    stripped = line.strip()
+    return stripped.startswith("(re.compile(") and "_RULED_OUT" not in stripped
+
+
 def _in_scope(rel: str) -> bool:
     if rel.startswith(_EXEMPT_PREFIXES) or rel.startswith(_EXEMPT_DIRS):
         return False
-    if rel == "scripts/lint_ruled_out_phrases.py":
-        return False  # this file names all three by necessity
     return rel.endswith(_SUBJECT_SUFFIXES)
 
 
@@ -133,9 +157,12 @@ def main() -> int:
             )
             return 2
         prose = _blank_fenced(raw)
+        lines = prose.splitlines()
         for pattern, label in _RULED_OUT:
             for hit in pattern.finditer(prose):
                 line = prose.count("\n", 0, hit.start()) + 1
+                if rel == _SELF and _self_exempt_line(lines[line - 1]):
+                    continue
                 start = max(0, hit.start() - 45)
                 end = min(len(prose), hit.end() + 45)
                 context = " ".join(prose[start:end].split())

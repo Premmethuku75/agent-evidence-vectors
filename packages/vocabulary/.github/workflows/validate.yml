@@ -1,6 +1,19 @@
-# Two gates, both hermetic: the crosswalk validator, and the forbidden-string
-# scan that keeps this repository publishable. Neither depends on a credential
-# or on anyone else's uptime, so both belong on every push, not on a schedule.
+# Four checks, none of which needs a credential, so all belong on every push and
+# none on a schedule: the crosswalk validator, the guide's own worked example run
+# through it, the ruled-out-phrase check, and the forbidden-string scan.
+#
+# Hermetic is a claim worth making precisely. The validator CAN reach the network:
+# it resolves an https source_path on an emitted claim with a live HEAD request,
+# which is correct when a reviewer is checking a real filing. The header here once
+# called both its gates hermetic while every run did exactly that, because the
+# contribution guide's example carries such a path and the test that runs the
+# example handed it straight through. Nobody wrote a network call into CI; one
+# arrived through an example.
+#
+# So the example test now sets VALIDATE_CROSSWALKS_OFFLINE, and the validator
+# records each skipped resolution as a warning naming what went unchecked. CI is
+# hermetic because it is made so and says where, never because nothing in it
+# could reach out.
 
 name: validate
 

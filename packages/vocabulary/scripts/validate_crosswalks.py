@@ -19,6 +19,7 @@ Exit 2: the run could not happen. The registry is unreadable or one of its
         checker be read as a strict one.
 """
 
+import os
 import sys
 import urllib.request
 from pathlib import Path
@@ -103,9 +104,27 @@ def fail(filename, message, errors):
 def check_source_path_url(source_path, filename, term_name, warnings):
     """Best-effort resolvability check. A non-URL source_path (e.g. a bare
     repo-relative file path) cannot be fetched here and is not a validator
-    failure -- it is flagged for the human reviewer instead, per
-    GOVERNANCE.md: the validator does not replace the fetch-and-confirm
-    review step for anything non-public."""
+    failure -- it is flagged for the human reviewer, per GOVERNANCE.md: the
+    validator does not replace the fetch-and-confirm review step for anything
+    non-public.
+
+    THIS FUNCTION IS THE ONE PLACE THIS REPOSITORY TOUCHES THE NETWORK, and it is
+    why `VALIDATE_CROSSWALKS_OFFLINE` exists. The workflow header called both its
+    gates hermetic while every CI run issued a live HEAD request, because the
+    contribution guide's worked example carries an https source_path and the test
+    that runs that example hands it straight to this check. Nobody wrote a network
+    call into CI; one arrived through an example.
+
+    Offline mode records the skip as a WARNING naming what went unchecked. It
+    never reports a skipped check as a clean one, which is the whole reason it
+    prints anything at all."""
+    if os.environ.get("VALIDATE_CROSSWALKS_OFFLINE"):
+        warnings.append(
+            f"{filename}: term '{term_name}' source_path '{source_path}' was NOT "
+            f"checked for resolvability, because this run is offline. That is a "
+            f"check that did not happen, never a check that passed."
+        )
+        return
     if not source_path.startswith(("http://", "https://")):
         warnings.append(
             f"{filename}: term '{term_name}' source_path '{source_path}' is not a "

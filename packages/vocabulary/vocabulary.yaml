@@ -1,8 +1,13 @@
 # aee-vocabulary: canonical term registry
 #
 # This file is CC0-1.0 (public domain). Reuse, fork, or cite it freely; no
-# attribution required. The surrounding repository (docs, scripts, CI) is
-# Apache-2.0. See `LICENSE`.
+# attribution required. The full grant is in `LICENSE-CC0`, which is the
+# unmodified Creative Commons legal text. The surrounding repository (docs,
+# scripts, CI) is Apache-2.0, in `LICENSE`.
+#
+# Both files are present on purpose. Until 2026-08-30 this header claimed CC0 and
+# pointed at a LICENSE carrying only Apache-2.0, so the permissive grant a reader
+# was invited to rely on was asserted here and granted nowhere.
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
@@ -40,8 +45,10 @@ meta:
   status_at_this_version: >
     No term in this file is canonical and no term lists an issuer. Both follow
     from the rule directly above, and both were wrong at 0.1.0.
-    Six terms carried status canonical, and every term listed one issuer, this
-    project's own aee-conformance reference verifier. A listing means, in this
+    Six of the eight terms carried status canonical, and seven of the eight
+    listed one issuer, this project's own aee-conformance reference verifier.
+    field_evidence_partition listed none and never had, which is why the two
+    counts differ and why neither is simply eight. A listing means, in this
     registry's own words, that a system emits the value in a real running
     artifact AND that a crosswalk saying so has been filed. Zero crosswalks have
     ever been filed here by anyone, us included; the directory holds a template.
@@ -246,10 +253,10 @@ system_attributes:
     cannot be confused across formats), or whether all formats share one
     undifferentiated pre-image shape. Declaring canonicalization_profile alone
     is necessary but not sufficient for byte-equal signatures across two
-    implementations. That is an interoperability lesson learned from a comparable
-    registry's own crosswalk corpus, where two systems that both declared the
-    same canonicalization profile did not in fact produce byte-identical
-    output without a separately-named interoperable input set.
+    implementations. Two systems can both declare the same canonicalization
+    profile and still fail to produce byte-identical output, because the profile
+    fixes the algorithm and not the set of inputs it is applied to, so the
+    interoperable input set has to be named separately.
 
 # `crosswalk_match_types` and `crosswalk_evidence_states`: the vocabulary a
 # THIRD PARTY uses when filing a crosswalk against this registry.

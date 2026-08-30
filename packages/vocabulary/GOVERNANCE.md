@@ -40,7 +40,7 @@ declared interest in the system it describes, and if this project has no such re
 filing, that filing waits. Promotion needs an emitter that is not us. Every cited source path is
 fetched and confirmed by hand before a merge, including ours.
 
-The measurable consequence at version 0.1.0 is that no term here is canonical, because our own
+The measurable consequence at every version so far is that no term here is canonical, because our own
 issuer does not count toward a promotion and nobody else has filed yet. That is the rule working
 against the person who wrote it, which is the only evidence that it is a rule at all.
 
