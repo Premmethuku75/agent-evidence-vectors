@@ -94,8 +94,11 @@ earns none.
 
 ## Amending this document
 
-Changes to this file go through the same second-maintainer merge as any other change, per Merge
-discipline above. A change that
-weakens any rule under "Merge discipline" above additionally requires a stated reason in the pull
-request description and a 14-day open comment window before merge, regardless of how many
-maintainers there are at the time.
+Changes to this file take the same route as any other change, so today that means a direct push
+under the suspension above, and it means a second-maintainer merge from the moment a second row
+exists in MAINTAINERS.md.
+
+One requirement does not move with the suspension. A change weakening any rule under Merge
+discipline needs a stated reason and a 14-day open comment window before it lands, whatever the
+maintainer count is at the time. The suspension itself was written under that requirement and its
+reason is the paragraph that states it.

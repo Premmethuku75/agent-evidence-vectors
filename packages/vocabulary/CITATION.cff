@@ -5,7 +5,7 @@ title: >-
 message: >-
   If a term or crosswalk-match verdict from this registry is cited, cite a
   released version. A registry is a moving target until it is tagged, so a
-  citation of the branch names something that has already changed.
+  citation of the branch names whatever it happens to hold when someone follows it.
 type: software
 authors:
   - family-names: Gilda
