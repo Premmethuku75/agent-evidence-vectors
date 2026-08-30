@@ -139,7 +139,11 @@ posture_and_coverage:
   containment_posture:
     status: proposed
     review_by: "2027-02-11"
-    values: [no_network, allowlist, sinkhole, unsafe_bypass_egress]
+    values:
+      - no_network
+      - allowlist
+      - sinkhole
+      - unsafe_bypass_egress
     definition: >
       The network-egress posture of the execution environment a governed
       artifact actually ran inside. Digest-committed and substrate-authoritative,
@@ -152,9 +156,9 @@ posture_and_coverage:
       Most evidence about software describes an artifact. This term describes
       the environment the artifact was actually running in, which is a different
       claim and a harder one, because it needs a value the running code could
-      not have chosen for itself. Hence the two conditions: the posture is
-      committed by digest, and it comes from the substrate rather than from the
-      process being observed. A posture the subject could set is decoration.
+      not have chosen for itself. So the posture is committed by digest, and it
+      is read from the substrate, never from the process being observed. A
+      posture the subject could set for itself is decoration.
 
   coverage_denominator:
     status: proposed
