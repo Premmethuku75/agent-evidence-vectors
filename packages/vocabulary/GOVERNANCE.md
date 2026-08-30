@@ -47,9 +47,9 @@ person's careful work, and that person is normally its most rigorous participant
 where rigor is not mechanically enforced, and the place that reliably escapes enforcement is the
 maintainer's own entry, because reviewing it is the one review nobody is available for.
 
-So it binds here first. No reviewer without a declared interest exists yet, so no crosswalk has
-merged, including ours. Promotion needs an emitter that is not us. Every cited path is fetched by
-hand before a merge, ours included.
+So it binds here first. The declared interest covers one system, so a filing from anyone else has a
+conflict-free reviewer today; a filing from that system does not, and waits. Promotion needs an
+emitter that is not us. Every cited path is fetched by hand before a merge, ours included.
 
 The measurable consequence at 0.1.1 is that not one term here is canonical, because our own issuer
 does not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
@@ -61,14 +61,15 @@ against the person who wrote it has not yet been tested.
 
 ## Promotion and demotion
 
-A term starts as proposed. Promotion to canonical requires a SECOND independently-maintained
-system to file a crosswalk declaring `evidence: emitted` with a resolvable path, verified by an
-independent reviewer per the merge discipline above. One issuer, however large, does not promote a
-term.
+A term starts as proposed. Promotion to canonical requires one independently-maintained system that
+is not us to file a crosswalk declaring `evidence: emitted` with a resolvable path, verified by an
+independent reviewer per the merge discipline above. Our own issuer never counted toward it, so the
+bar is a first qualifying emitter and not a second one. One issuer, however large, does not promote
+a term.
 
 Every proposed term carries a review-by date. If no second independent issuer emitting the term
-has surfaced by that date, the term is demoted to reserved, and removed at the following review
-unless a production issuer surfaces before then. A demoted term moves into the reserved block at
+has surfaced by that date, the term is demoted to reserved. It is removed at the next review-by date
+set on it, unless a production issuer surfaces first. A demoted term moves into the reserved block at
 the foot of `vocabulary.yaml` and is not silently deleted. That block holds two kinds of row and
 each says which it is: a term explicitly declined before it was ever proposed, and a term that was
 proposed and found none.
@@ -76,8 +77,8 @@ proposed and found none.
 ## Conflict of interest
 
 Any maintainer with a commercial or research interest in a system that has filed, or is considering
-filing, must disclose that interest in MAINTAINERS.md before reviewing anything from that system,
-and may never be its sole reviewer.
+filing, discloses it in MAINTAINERS.md and does not review that system's filings at all. Not as sole
+reviewer, not alongside another. This is the same bar CONTRIBUTING.md and MAINTAINERS.md state.
 
 ## Committer access
 
