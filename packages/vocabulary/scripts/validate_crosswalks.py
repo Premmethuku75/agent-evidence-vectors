@@ -12,6 +12,11 @@ Run: python3 scripts/validate_crosswalks.py
 Exit 0: every crosswalk file is valid.
 Exit 1: at least one crosswalk file failed validation; see stderr for which
         file and which check.
+Exit 2: the run could not happen. The registry is unreadable or one of its
+        closed vocabularies is missing, so NOTHING was checked. This is kept
+        distinct from exit 1 on purpose: a check that failed and a check that
+        never ran are different states, and collapsing them lets a broken
+        checker be read as a strict one.
 """
 
 import sys
@@ -24,14 +29,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 VOCAB_PATH = REPO_ROOT / "vocabulary.yaml"
 CROSSWALK_DIR = REPO_ROOT / "crosswalk"
 
-MATCH_TYPES = {
-    "exact",
-    "structural",
-    "partial",
-    "non_equivalent_similar_label",
-    "no_mapping",
-}
-EVIDENCE_STATES = {"emitted", "inferred", "asserted"}
 REQUIRED_MATCH_EVIDENCE = {"exact", "structural", "partial"}
 TERM_SECTIONS = (
     "evidence_dimensions",
@@ -40,15 +37,63 @@ TERM_SECTIONS = (
 )
 REQUIRED_TOP_LEVEL = ("system", "system_url", "crosswalk_version", "vocabulary_version_targeted")
 
+#: The two enumerations are READ from the registry, never restated here.
+#:
+#: They used to be literal sets in this file, and a stray `definition:` key sat
+#: as a fourth sibling under `crosswalk_evidence_states` for the whole of
+#: 0.1.0 without anything noticing. A consumer enumerating that mapping saw four
+#: registered states; this validator saw the three it had been told about, and
+#: the two answers never had to agree. `out_of_scope` says a verifier MUST reject
+#: an unregistered enum value, so the registry was publishing one against its own
+#: rule and its own checker could not see it.
+#:
+#: A checker that restates the thing it checks can only ever verify that somebody
+#: typed the same words twice. So the sets below come from the file, and a
+#: registry edit that adds or removes a member reaches this validator on the next
+#: run with nobody remembering to mirror it.
+_MIN_MEMBERS = 2
 
-def load_known_terms():
+
+def _enum_from(vocab, key):
+    """The registered members of one closed vocabulary, read from the registry.
+
+    Refuses rather than guesses. A missing or tiny enumeration means the registry
+    is malformed or this validator is pointed at the wrong file, and an empty set
+    would silently accept every value a crosswalk could name, which is the exact
+    inversion of what this function is for."""
+    members = vocab.get(key)
+    if not isinstance(members, dict):
+        print(
+            f"validate_crosswalks: REFUSED -- vocabulary.yaml has no mapping at "
+            f"'{key}', so the registered members cannot be read. Nothing was "
+            f"validated. This is a broken run, never a clean one.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    if len(members) < _MIN_MEMBERS:
+        print(
+            f"validate_crosswalks: REFUSED -- '{key}' carries {len(members)} "
+            f"member(s), fewer than the {_MIN_MEMBERS} any closed vocabulary "
+            f"needs to be worth checking against. Nothing was validated.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    return set(members)
+
+
+def load_registry():
+    """Known terms and both closed vocabularies, all from vocabulary.yaml."""
     with open(VOCAB_PATH) as f:
         vocab = yaml.safe_load(f)
     known_terms = {}
     for section in TERM_SECTIONS:
         for term_name in vocab.get(section, {}):
             known_terms[term_name] = section
-    return known_terms
+    return (
+        known_terms,
+        _enum_from(vocab, "crosswalk_match_types"),
+        _enum_from(vocab, "crosswalk_evidence_states"),
+    )
 
 
 def fail(filename, message, errors):
@@ -78,7 +123,7 @@ def check_source_path_url(source_path, filename, term_name, warnings):
         )
 
 
-def validate_crosswalk_file(path, known_terms, errors, warnings):
+def validate_crosswalk_file(path, known_terms, match_types, evidence_states, errors, warnings):
     filename = path.name
     try:
         with open(path) as f:
@@ -131,21 +176,21 @@ def validate_crosswalk_file(path, known_terms, errors, warnings):
                 )
                 continue
             match = entry["match"]
-            if match not in MATCH_TYPES:
+            if match not in match_types:
                 fail(
                     filename,
                     f"term '{term_name}' has match='{match}', which is not one of "
-                    f"the five registered crosswalk_match_types: {sorted(MATCH_TYPES)}",
+                    f"the registered crosswalk_match_types: {sorted(match_types)}",
                     errors,
                 )
                 continue
             if match in REQUIRED_MATCH_EVIDENCE:
                 evidence = entry.get("evidence")
-                if evidence not in EVIDENCE_STATES:
+                if evidence not in evidence_states:
                     fail(
                         filename,
                         f"term '{term_name}' has match='{match}' and therefore MUST "
-                        f"declare evidence: one of {sorted(EVIDENCE_STATES)} (got "
+                        f"declare evidence: one of {sorted(evidence_states)} (got "
                         f"'{evidence}')",
                         errors,
                     )
@@ -184,7 +229,7 @@ def main():
         print(f"FATAL: {VOCAB_PATH} not found", file=sys.stderr)
         return 1
 
-    known_terms = load_known_terms()
+    known_terms, match_types, evidence_states = load_registry()
 
     errors = []
     warnings = []
@@ -195,7 +240,9 @@ def main():
         return 0
 
     for path in files:
-        validate_crosswalk_file(path, known_terms, errors, warnings)
+        validate_crosswalk_file(
+            path, known_terms, match_types, evidence_states, errors, warnings
+        )
 
     for w in warnings:
         print(f"WARNING: {w}", file=sys.stderr)

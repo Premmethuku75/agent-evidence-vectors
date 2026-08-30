@@ -6,11 +6,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.1.0"
+# version: "0.1.1"
 # status: "draft - open for review"
 
 meta:
-  version: "0.1.0"
+  version: "0.1.1"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/astrogilda/aee-conformance"
@@ -38,16 +38,27 @@ meta:
     bar for running is deliberately narrow. A plan sits outside it, and so does
     a mock.
   status_at_this_version: >
-    No term in this file is canonical, and the reason is the rule directly
-    above. Zero crosswalks have been filed here by anyone, including us, so no
-    term has the second independently-maintained emitter its promotion needs.
-    Every term is proposed. Six of them carried status canonical when 0.1.0 was
-    tagged, on the strength of one issuer that is this project's own reference
-    verifier, which is exactly the defect the paragraph above says this registry
-    exists to fix. They were demoted on 2026-08-30 and nothing else about them
-    changed. The bar applies to the maintainer's own systems identically, and a
-    registry that grades other people's evidence has to be the first thing it
-    grades. Verify by reading every status key in this file.
+    No term in this file is canonical and no term lists an issuer. Both follow
+    from the rule directly above, and both were wrong at 0.1.0.
+    Six terms carried status canonical, and every term listed one issuer, this
+    project's own aee-conformance reference verifier. A listing means, in this
+    registry's own words, that a system emits the value in a real running
+    artifact AND that a crosswalk saying so has been filed. Zero crosswalks have
+    ever been filed here by anyone, us included; the directory holds a template.
+    The named system is also a verifier and a vector suite, so it reads these
+    fields and does not emit them from a live execution, and the paragraph above
+    puts a mock outside the bar. One condition of two, on the generous reading.
+    That is the defect this registry says it exists to fix, arrived at from our
+    own side, and it stood in three layers: the status, the issuer listing, and
+    the promotion each of those implied.
+    All three were corrected on 2026-08-30 and nothing else about any term
+    changed. Version moved to 0.1.1 in the same pass, because the 0.1.0 tag is
+    still reachable and still carries the old content; a citer pinning a version
+    has to get the corrected one.
+    The bar binds the maintainer's own systems identically. A registry that
+    grades other people's evidence is the first thing it has to grade.
+    Verify by reading every status and issuers_in_production key in this file,
+    and by listing crosswalk/.
 
 # evidence_dimensions: properties of HOW a claim was obtained. They describe the
 # obtaining. What is claimed lives in posture_and_coverage and outcome_lattice
@@ -71,7 +82,7 @@ evidence_dimensions:
       substrate-vantage row as unattested and MUST NOT infer the root from the
       claim itself (no trust-on-first-use).
     source_path: "predicate.attackResults[].basis"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     why_this_registry: >
       This is the field for a question people already ask and have nowhere to
       answer. Read the free-text notes attached to crosswalks in registries of
@@ -91,7 +102,7 @@ evidence_dimensions:
       between the states compared. Orthogonal to observation_vantage; composes
       by weakest input.
     source_path: "predicate.attackResults[].method"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     why_this_registry: >
       A live capture and a weekly re-scan can produce claims that read
       identically. One watched the execution happen; the other inferred it
@@ -129,7 +140,7 @@ evidence_dimensions:
       proven floor and an asserted ceiling, never claimed as a two-sided proof
       of freshness.
     source_path: "predicate.observationRecords[].payload (arming pre-image)"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     promotion_trigger: "A second independent implementation with a real beacon binding."
 
 # posture_and_coverage: what an execution environment was actually in, and
@@ -151,7 +162,7 @@ posture_and_coverage:
       non-string, or unregistered value makes the enclosing statement
       malformed, never defaulting to a permissive reading.
     source_path: "predicate.observationEnvironment.networkPosture.posture"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     why_this_registry: >
       Most evidence about software describes an artifact. This term describes
       the environment the artifact was actually running in, which is a different
@@ -172,10 +183,10 @@ posture_and_coverage:
       claim of "found nothing" and a claim of "looked at nothing" are
       indistinguishable on the wire.
     source_path: "predicate.coverage.{assessedClasses,outOfScope,routedElsewhere}"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     why_this_registry: >
       A producer that commits to its denominator can be caught understating it
-      later. That is the point, and it is why the field is here rather than in a
+      later. That is the point, and it is why the field is here and not in a
       methodology note. The usual substitute is a rule about withholding a
       result when the sample is too small, which decides whether to publish and
       says nothing about what the population was.
@@ -190,7 +201,7 @@ posture_and_coverage:
       Single canonical spelling per claim, no accepted alias, never buried in
       free-text documentation where a consumer has to go looking for it.
     source_path: "predicate.doesNotAssert"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
     why_this_registry: >
       Comparable registries carry this concept, when they carry it at all, as
       file-level prose (a repository-wide "out of scope" list), not as a
@@ -213,7 +224,7 @@ outcome_lattice:
       it carries no threshold and no severity input, and a consumer applying
       its own policy threshold does so on top of this value, never inside it.
     source_path: "predicate.result"
-    issuers_in_production: ["aee-conformance reference verifier"]
+    issuers_in_production: []
 
 # system_attributes: declared together, per the promotion criterion below.
 # Canonical-status review needs all of these together, plus at least one
@@ -222,7 +233,7 @@ outcome_lattice:
 # they travel as a set.
 system_attributes:
   values:
-    signature_capability: [classical, post_quantum_hybrid]
+    signature_capability: [classical, post_quantum_hybrid, other]
     canonicalization_profile: [jcs_rfc_8785, other]
     hash_family: [sha_256, other]
     domain_separation_profile: [declared, undeclared]
@@ -249,16 +260,19 @@ crosswalk_match_types:
   non_equivalent_similar_label: "Same or similar term name, materially different definition, a false friend. Declared explicitly so neither side is misread as claiming the other's ground."
   no_mapping: "Honest gap. The filing system does not do this; the crosswalk says so and stops."
 
+# crosswalk_evidence_states carries exactly three members, and every key below is
+# one of them. The axis exists so a filer's declaration is not read on trust: the
+# promotion trigger is keyed to evidence: emitted with a resolvable source_path,
+# checked by running validate_crosswalks.py against the cited URL.
+#
+# This prose sits in a comment on purpose. It was a `definition:` key here until
+# 2026-08-30, which made a fourth sibling that any consumer enumerating this
+# mapping would read as a registered state. out_of_scope below says a verifier
+# MUST reject an unregistered enum value, so the registry was publishing one.
 crosswalk_evidence_states:
   emitted: "The declared value is a field in a real, signed statement a third party can fetch and read without computing or inferring anything. The ONLY state that counts toward promotion."
   inferred: "The declared value is computed by the filer from other fields, and is distinct from a value the artifact carries directly."
   asserted: "The declared value is claimed in prose (a README, a spec) with no machine-checkable artifact behind it."
-  definition: >
-    The usual practice is to read a filer's declaration on trust. This axis
-    replaces that with a promotion trigger keyed to evidence: emitted with a
-    resolvable source_path, checked by running validate_crosswalks.py against
-    the cited URL. It is the single highest-leverage mechanism in this registry
-    and is under-used everywhere it has been observed elsewhere.
 
 # out_of_scope: explicit non-goals, stated so a filer knows this registry
 # will never contest ground it does not claim.
@@ -267,6 +281,8 @@ out_of_scope:
   - "Renaming or reinterpreting a live signed envelope's own type/format field. A verifier MUST reject an unregistered enum value for a known field; the wire bytes of that field are never renamed by this registry."
   - "Policy thresholds. This registry's outcome_lattice term is a recomputable minimum, never a pass/fail threshold a consumer's own policy applies on top."
 
-# reserved / removed: terms considered and explicitly declined, kept here so
-# the decision is not silently re-litigated.
+# reserved: terms considered and explicitly declined, kept here so the decision
+# is not silently re-litigated. Removal is the separate later step named in
+# promotion_lifecycle, and a removed term leaves the file entirely, so nothing
+# below records one.
 reserved: []
