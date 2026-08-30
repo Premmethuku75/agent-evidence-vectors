@@ -37,10 +37,9 @@ system under crosswalk/, starting from TEMPLATE.yaml there.
 The validator is scripts/validate_crosswalks.py, and CI runs it on every change. Hand it a file
 whose shape it does not recognize and it fails, loudly, naming the file.
 
-That behaviour is worth stating because the usual alternative is silence. A validator that skips
-what it cannot parse still reports a clean run, over crosswalks it never opened, and the filer who
-got the shape wrong is told nothing at all. The unrecognized-shape branch is a dozen lines. Read it
-and check.
+The usual alternative is silence. A validator that skips what it cannot parse still reports a clean
+run, over crosswalks it never opened, and the filer who got the shape wrong is told nothing at all.
+The unrecognized-shape branch is a dozen lines. Read it and check.
 
 ## Companion project
 

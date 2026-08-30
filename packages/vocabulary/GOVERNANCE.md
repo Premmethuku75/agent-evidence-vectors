@@ -17,7 +17,8 @@ running artifact, and you have filed a crosswalk saying so. It is not an endorse
 their own system goes through the identical review any other filing gets. An independent reviewer,
 never the maintainer who filed it, confirms before merge that the cited `source_path` resolves and
 carries the declared value. This binds the founding maintainer's own systems without exception,
-meaning the AEE predicate and its reference verifier.
+meaning the adversarial-execution-evidence predicate, abbreviated AEE, and its reference
+verifier.
 
 ## Merge discipline
 

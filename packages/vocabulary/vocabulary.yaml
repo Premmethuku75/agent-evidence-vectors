@@ -281,8 +281,13 @@ out_of_scope:
   - "Renaming or reinterpreting a live signed envelope's own type/format field. A verifier MUST reject an unregistered enum value for a known field; the wire bytes of that field are never renamed by this registry."
   - "Policy thresholds. This registry's outcome_lattice term is a recomputable minimum, never a pass/fail threshold a consumer's own policy applies on top."
 
-# reserved: terms considered and explicitly declined, kept here so the decision
-# is not silently re-litigated. Removal is the separate later step named in
-# promotion_lifecycle, and a removed term leaves the file entirely, so nothing
-# below records one.
+# reserved: terms that are not live, kept here so a decision is not silently
+# re-litigated. Two routes in, and they are different states worth telling apart
+# when reading a row: a term considered and explicitly declined, which was never
+# proposed here, and a term that WAS proposed and reached its review-by date with
+# no production issuer. The second was not declined by anyone; it simply found no
+# emitter. Each row says which.
+#
+# Removal is the separate later step named in promotion_lifecycle. A removed term
+# leaves the file entirely, so nothing below ever records one.
 reserved: []

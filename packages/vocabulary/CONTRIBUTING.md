@@ -77,11 +77,13 @@ evidence field takes one of emitted, inferred, or asserted, per crosswalk_eviden
 registry; claiming emitted when the reviewer cannot independently fetch and confirm the value is
 the fastest way to get a crosswalk rejected. The source path says where in your own running
 artifact the value lives, as a file path, a JSON pointer into a real example output, or a URL to a
-real endpoint. The validator only reaches a source path on an emitted claim, and what it reports is
-a warning either way, so nothing about a path can turn CI red by itself. The check that decides is
-the human one in GOVERNANCE: a reviewer fetches the path and confirms it resolves to the declared
-value, and a path that does not resolve stops the merge. A path resolves against something that runs, where a plan, a roadmap item, or a
-schema field with no producer behind it resolves against nothing. The divergences field, which a
+real endpoint. A path resolves against something that runs, where a plan, a roadmap item, or a
+schema field with no producer behind it resolves against nothing.
+
+Two things check that path and only one of them can stop you. The validator reaches it on an emitted
+claim, and what it reports is a warning, so no source path turns CI red by itself. The check that
+decides is the human one in GOVERNANCE: a reviewer fetches the path, confirms it resolves to the
+declared value, and does not merge a crosswalk whose path does not resolve. The divergences field, which a
 partial claim needs and no other claim uses, names the material way your claim differs from the
 registry's own definition; vague language there, "similar but not identical" and the like, gets sent
 back for a concrete list.
