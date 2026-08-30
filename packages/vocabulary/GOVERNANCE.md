@@ -37,8 +37,8 @@ their own, and there is one maintainer. That is not a loophole discovered later;
 arithmetic, and until a second maintainer holds the role it applies to routine repository work as
 much as to anything else.
 
-What actually happened, measured on 2026-08-30 and not recalled: no pull request has ever been
-opened here, the history carries no merge commit, and every commit including the ones repairing
+What actually happened, measured on 2026-08-30 and not recalled: not one pull request has ever
+been opened here, the history carries zero merge commits, and every commit including the ones repairing
 this file arrived by direct push. So the second rule above has been broken on every commit since the
 repository began.
 
@@ -57,12 +57,12 @@ person's careful work, and that person is normally the most rigorous participant
 opens where the rigor is not mechanically enforced, and the place that reliably escapes enforcement
 is the maintainer's own entry, because reviewing it is the one review nobody is available for.
 
-So the rules are written to bind here first. A maintainer's crosswalk is reviewed by someone with no
+So the rules are written to bind here first. A maintainer's own filing is reviewed by someone with no
 declared interest in the system it describes, and if this project has no such reviewer for a given
 filing, that filing waits. Promotion needs an emitter that is not us. Every cited source path is
 fetched and confirmed by hand before a merge, including ours.
 
-The measurable consequence at 0.1.1 is that no term here is canonical, because our own issuer does
+The measurable consequence at 0.1.1 is that not one term here is canonical, because our own issuer does
 not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
 carried canonical status on our own issuer alone. The v0.1.0 tag is still reachable, so both halves
 of this paragraph can be checked against the repository.
@@ -82,7 +82,7 @@ has surfaced by that date, the term is demoted to reserved, and removed at the f
 unless a production issuer surfaces before then. A demoted term moves into the reserved block at
 the foot of `vocabulary.yaml` and is not silently deleted. That block holds two kinds of row and
 each says which it is: a term explicitly declined before it was ever proposed, and a term that was
-proposed and found no emitter.
+proposed and found none.
 
 ## Conflict of interest
 
@@ -113,8 +113,8 @@ discipline needs a stated reason and a 14-day open comment window before it land
 maintainer count is at the time.
 
 The suspension above is such a weakening and it did not get its window. It was written and amended
-inside twenty minutes on 2026-08-30, on a private repository carrying no open pull request and no
-open issue, so no venue for a comment window existed and nobody was there to comment. Of the two
+inside twenty minutes on 2026-08-30, on a private repository with neither an open pull request nor an
+open issue, so nothing served as a venue for a comment window and nobody was there to comment. Of the two
 requirements the paragraph above satisfies one: it states its reason. It does not satisfy the
 window. Describing a half-met requirement as met is the same defect this section was written to
 disclose, one level up.

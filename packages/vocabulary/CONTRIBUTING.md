@@ -29,7 +29,7 @@ only shape: four required top-level keys, an optional maintainer block, then one
 section, keyed by the exact term names the registry uses, each carrying a match field set to one of
 the values in crosswalk_match_types. A claim of exact, structural or partial needs two more fields
 per term, `evidence` and `source_path`, and a partial claim needs a third, `divergences`. All three
-are described below. A file built from this paragraph alone is refused, and the refusal names
+are described below. A file built from this paragraph alone is refused, and the error names
 whichever of them is missing.
 
 Check it before you open anything: `python3 scripts/validate_crosswalks.py` runs the same code CI

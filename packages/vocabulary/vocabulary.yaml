@@ -221,7 +221,7 @@ posture_and_coverage:
       Comparable registries carry this concept, when they carry it at all, as
       file-level prose (a repository-wide "out of scope" list), not as a
       per-artifact field. A file-level list cannot say what one claim withholds,
-      which is the whole question a consumer of that claim is asking.
+      which is the whole question anyone relying on that claim is asking.
 
 # outcome_lattice: the recomputable verdict a consumer derives, never a
 # policy threshold and not producer-asserted.
