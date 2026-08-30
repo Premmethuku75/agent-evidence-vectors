@@ -15,8 +15,9 @@ has filed a crosswalk at all, us included. Your filing is what moves a term, and
 own systems are held to the same bar, which is why they have not moved one either.
 
 Read GOVERNANCE.md as well. In particular, your crosswalk will be reviewed by a maintainer who
-does NOT have a declared interest in your system, and a maintainer's own systems get no exemption
-from that review.
+does NOT have a declared interest in your system. A maintainer who does hold one stays off that
+review altogether: not as its sole reviewer, and not sitting alongside a clean one either. Their
+own systems get no exemption from any of it.
 
 Then decide your match type per term, honestly, using the crosswalk_match_types block in the
 registry. Answering no_mapping is a legitimate and valuable answer. A stretched partial claim that
