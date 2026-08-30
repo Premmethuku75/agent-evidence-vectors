@@ -241,11 +241,15 @@ outcome_lattice:
     source_path: "predicate.result"
     issuers_in_production: []
 
-# system_attributes: declared together, per the promotion criterion below.
-# Canonical-status review needs all of these together, plus at least one
-# evidence-dimension term declaring evidence: emitted. Any one of them on its
-# own leaves the pre-image shape undifferentiated, which is the whole reason
-# they travel as a set.
+# system_attributes: four things a FILER declares about their own system, all
+# four together. This block carries no status and no review-by date, and it is
+# not a term: nothing here is ever promoted or demoted, so the lifecycle above
+# does not reach it.
+#
+# What it gates is somebody else's promotion. A crosswalk supporting a term's
+# move to canonical must declare all four of these, alongside at least one
+# evidence-dimension term at evidence: emitted. Any one of them alone leaves the
+# signed pre-image shape undifferentiated, which is why they travel as a set.
 system_attributes:
   values:
     signature_capability: [classical, post_quantum_hybrid, other]

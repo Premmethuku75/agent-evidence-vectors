@@ -30,6 +30,29 @@ verifier.
   fetches the cited `source_path` directly and confirms it resolves to the declared value. A
   crosswalk citing a path that does not resolve is not merged, regardless of who filed it.
 
+### What those rules mean with one maintainer, stated because it is not obvious
+
+Read together they mean nothing merges. Every change needs a pull request, no maintainer merges
+their own, and there is one maintainer. That is not a loophole discovered later; it is the
+arithmetic, and until a second maintainer holds the role it applies to routine repository work as
+much as to anything else.
+
+What actually happened, measured on 2026-08-30 and not recalled: no pull request has ever been
+opened here, the history carries no merge commit, and every commit including the ones repairing
+this file arrived by direct push. So the second rule above has been broken on every commit since the
+repository began.
+
+Two of the three rules are suspended until a second maintainer is added, and they suspend
+themselves: the moment `MAINTAINERS.md` carries a second row, no-self-merge and
+pull-requests-for-everything bind normally with nothing to re-enable. Until then repository
+maintenance is direct-pushed and this paragraph is the disclosure.
+
+**The third rule is not suspended and does not depend on maintainer count.** No crosswalk merges
+without an independent evidence check by someone with no declared interest in the system it
+describes. No such reviewer exists here yet, so no crosswalk can merge, and none has. This registry's
+credibility rests on that rule. Suspending it for convenience would retire the reason the repository
+exists.
+
 Those three rules all guard one failure, and it is not fraud. A registry usually starts as one
 person's careful work, and that person is normally the most rigorous participant in it. The gap
 opens where the rigor is not mechanically enforced, and the place that reliably escapes enforcement
