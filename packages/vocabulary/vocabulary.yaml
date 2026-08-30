@@ -252,7 +252,10 @@ outcome_lattice:
 # signed pre-image shape undifferentiated, which is why they travel as a set.
 system_attributes:
   values:
-    signature_capability: [classical, post_quantum_hybrid, other]
+    signature_capability:
+      - classical
+      - post_quantum_hybrid
+      - other
     canonicalization_profile: [jcs_rfc_8785, other]
     hash_family: [sha_256, other]
     domain_separation_profile: [declared, undeclared]
