@@ -21,6 +21,20 @@ jobs:
       - run: pip install pyyaml
       - run: python3 scripts/validate_crosswalks.py
 
+      - name: Reject ruled-out constructions in tracked prose
+        run: |
+          # Three phrasings this project does not publish. Separate from the
+          # forbidden-string scan below, and separate on purpose: that scan
+          # hashes fixed-length windows and its declared lengths cannot match an
+          # eleven-character phrase, so the rule was written down, a guard
+          # existed, and the two never touched. One of the three shipped into
+          # vocabulary.yaml on 2026-08-30 inside the very commit rewriting that
+          # passage.
+          #
+          # Exit 2 means the subject set could not be built and nothing was
+          # checked, which is a broken run and never a clean one.
+          python3 scripts/lint_ruled_out_phrases.py
+
       - name: Reject forbidden strings in tracked files
         run: |
           # Product names and internal-only markers, held as salted digests in

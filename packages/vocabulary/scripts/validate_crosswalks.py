@@ -57,7 +57,7 @@ _MIN_MEMBERS = 2
 def _enum_from(vocab, key):
     """The registered members of one closed vocabulary, read from the registry.
 
-    Refuses rather than guesses. A missing or tiny enumeration means the registry
+    Refuses; it does not guess. A missing or tiny enumeration means the registry
     is malformed or this validator is pointed at the wrong file, and an empty set
     would silently accept every value a crosswalk could name, which is the exact
     inversion of what this function is for."""
