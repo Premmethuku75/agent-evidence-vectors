@@ -21,6 +21,19 @@ jobs:
       - run: pip install pyyaml
       - run: python3 scripts/validate_crosswalks.py
 
+      - name: Run the contribution guide's own worked example through the validator
+        run: |
+          # CONTRIBUTING.md shows a filer a complete crosswalk and tells them to
+          # build one like it. That is a claim about what happens when the
+          # instructions are followed, and until 2026-08-30 nobody had followed
+          # them: the example was missing three required top-level keys and used
+          # a block where the validator wants a string, so a filer copying it
+          # got three errors on their first push.
+          #
+          # Two adversarial review rounds over four vendors read that file and
+          # none found it. Reading a guide and running it are different checks.
+          python3 scripts/test_contributing_example.py
+
       - name: Reject ruled-out constructions in tracked prose
         run: |
           # Three phrasings this project does not publish. Separate from the

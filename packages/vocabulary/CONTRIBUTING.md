@@ -8,7 +8,7 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full, and read every status key while you are in there. At version 0.1.0
+Read the registry file in full, and read every status key while you are in there. At version 0.1.1
 each one says proposed, which means the term carries a review_by date and still needs a second
 independent issuer before promotion. Nothing here is canonical yet, and the reason is that nobody
 has filed a crosswalk at all, us included. Your filing is what moves a term, and the maintainer's
@@ -24,15 +24,28 @@ does not survive a reviewer fetching the source path you cited will be rejected.
 
 ## Required shape
 
-Copy the crosswalk template to `crosswalk/<your-system-name>.yaml`. The validated shape is the
-only shape: a top-level system block, then one entry per registry section, keyed by the exact term
-names the registry uses, each carrying a match field set to one of the five values in
-crosswalk_match_types.
+Copy the crosswalk template to `crosswalk/<your-system-name>.yaml`. The validated shape is the only
+shape: four required top-level keys, an optional maintainer block, then one entry per registry
+section, keyed by the exact term names the registry uses, each carrying a match field set to one of
+the values in crosswalk_match_types.
+
+The four the validator will refuse a file for missing are `system`, `system_url`,
+`crosswalk_version` and `vocabulary_version_targeted`. `system` is a plain string, not a block.
+
+The example below is a complete, valid file. It is checked against the validator by
+`scripts/test_contributing_example.py`, so a change to either the required keys or this block that
+leaves the two disagreeing turns CI red. An earlier version of this section showed a shape the
+validator rejects for three missing keys, and nothing noticed, because nobody had run the
+instructions.
 
 ```yaml
-system:
-  name: your-system-name
-  repository: https://example.invalid/your/system
+system: your-system-name
+system_url: https://example.invalid/your/system
+crosswalk_version: "0.1.0"
+vocabulary_version_targeted: "0.1.1"
+
+maintainer:
+  github: your-github-handle
   third_party_authored: false
 
 evidence_dimensions:
@@ -45,7 +58,7 @@ evidence_dimensions:
     evidence: emitted
     source_path: https://example.invalid/claims/latest.json
     divergences:
-      - reconstructed values come from a nightly diff, not from a live capture
+      - reconstructed values come from a nightly diff, never from a live capture
 
 posture_and_coverage:
   coverage_denominator:
@@ -64,10 +77,13 @@ evidence field takes one of emitted, inferred, or asserted, per crosswalk_eviden
 registry; claiming emitted when the reviewer cannot independently fetch and confirm the value is
 the fastest way to get a crosswalk rejected. The source path says where in your own running
 artifact the value lives, as a file path, a JSON pointer into a real example output, or a URL to a
-real endpoint. A path resolves against something that runs, where a plan, a roadmap item, or a
+real endpoint. The validator only reaches a source path on an emitted claim, and what it reports is
+a warning either way, so nothing about a path can turn CI red by itself. The check that decides is
+the human one in GOVERNANCE: a reviewer fetches the path and confirms it resolves to the declared
+value, and a path that does not resolve stops the merge. A path resolves against something that runs, where a plan, a roadmap item, or a
 schema field with no producer behind it resolves against nothing. The divergences field, which a
 partial claim needs and no other claim uses, names the material way your claim differs from the
-canonical definition; vague language there, "similar but not identical" and the like, gets sent
+registry's own definition; vague language there, "similar but not identical" and the like, gets sent
 back for a concrete list.
 
 For every no_mapping term, a one-line note explaining why is enough. You do not owe us a long
