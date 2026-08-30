@@ -29,9 +29,11 @@ jobs:
           # apart. Nothing readable is in the tree and nothing is echoed when a
           # match is found: printing it would reproduce the string into this log.
           #
-          # This repository is private today and product-neutral by design. The
-          # guard is installed BEFORE publication, never after, because the
-          # cost of arriving late is a name in a history that is already public.
+          # This repository is product-neutral by design. The guard was installed
+          # BEFORE publication, never after, because the cost of arriving late is
+          # a name in a history that is already public: removing one then means
+          # rewriting every commit from that point on, and the rewrite still
+          # leaves the old objects fetchable by anyone who kept a commit id.
           #
           # Exit 2 means the rule list did not load, which is a failure: a guard
           # that could not read its rules has verified nothing.

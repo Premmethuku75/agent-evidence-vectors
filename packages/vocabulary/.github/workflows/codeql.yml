@@ -13,12 +13,13 @@
 # crosswalk-rendering or publishing tool is added later in another language, add
 # it to the matrix then. Nothing is pre-declared here.
 #
-# While this repository is private, code scanning is unavailable, so this
-# analysis cannot complete: the run fails with "Code scanning is not enabled for
-# this repository." That was written down here from the start and the workflow
-# ran anyway, so it has been red on every push and every weekly schedule since
-# 2026-08-12. A permanently red check is one nobody reads, and a repository whose
-# whole claim is enforced discipline cannot afford a red that means nothing.
+# Code scanning is unavailable on a private repository, so the analysis cannot
+# complete there: the run fails with "Code scanning is not enabled for this
+# repository." That was written down here from the start and the workflow ran
+# anyway, so it was red on every push and every weekly schedule from 2026-08-12
+# until the gate below was added. A permanently red check is one nobody reads,
+# and a repository whose whole claim is enforced discipline cannot afford a red
+# that means nothing.
 #
 # The analysis is therefore gated on visibility, and the gate is built so that it
 # expires by itself. Nobody has to remember to re-enable anything: the moment the
