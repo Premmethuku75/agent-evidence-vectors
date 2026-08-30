@@ -36,14 +36,27 @@ meta:
     term: here promotion requires an evidence: emitted declaration with a
     resolvable source_path. The bar for running is deliberately narrow. A plan
     sits outside it, and so does a mock.
+  status_at_this_version: >
+    No term in this file is canonical, and the reason is the rule directly
+    above. Zero crosswalks have been filed here by anyone, including us, so no
+    term has the second independently-maintained emitter its promotion needs.
+    Every term is proposed. Six of them carried status canonical when 0.1.0 was
+    tagged, on the strength of one issuer that is this project's own reference
+    verifier, which is exactly the defect the paragraph above says this registry
+    exists to fix. They were demoted on 2026-08-30 and nothing else about them
+    changed. The bar applies to the maintainer's own systems identically, and a
+    registry that grades other people's evidence has to be the first thing it
+    grades. Verify by reading every status key in this file.
 
 # evidence_dimensions: properties of HOW a claim was obtained. They describe the
-# obtaining, while the signal_type terms carry what is claimed. Every
-# `signal_type` term below should declare these where applicable.
+# obtaining. What is claimed lives in posture_and_coverage and outcome_lattice
+# below. A claim carrying either should declare these dimensions alongside it,
+# because a result with no vantage attached says nothing about who saw it.
 evidence_dimensions:
 
   observation_vantage:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: [substrate, artifact]
     definition: >
       Whether every input a claim depends on was obtained at a vantage the
@@ -64,7 +77,8 @@ evidence_dimensions:
       concept in free-text prose repeatedly and have no field to put it in.
 
   observation_directness:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: [intercepted, reconstructed]
     definition: >
       Whether a claim rests on events captured as they occurred (intercepted),
@@ -118,7 +132,8 @@ evidence_dimensions:
 posture_and_coverage:
 
   containment_posture:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: [no_network, allowlist, sinkhole, unsafe_bypass_egress]
     definition: >
       The network-egress posture of the execution environment a governed
@@ -138,7 +153,8 @@ posture_and_coverage:
       substrate-authoritative posture value.
 
   coverage_denominator:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: null
     definition: >
       A digest-committed partition of the population a claim is drawn from
@@ -156,7 +172,8 @@ posture_and_coverage:
       condition leaves the population itself uncommitted.
 
   does_not_assert:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: null
     definition: >
       A machine-readable list of short strings, carried inside the signed
@@ -176,7 +193,8 @@ posture_and_coverage:
 outcome_lattice:
 
   result:
-    status: canonical
+    status: proposed
+    review_by: "2027-02-11"
     values: [fail, degraded, pass_indirect, pass]
     definition: >
       A total, deterministic, severity-independent minimum over the declared
@@ -188,9 +206,11 @@ outcome_lattice:
     source_path: "predicate.result"
     issuers_in_production: ["aee-conformance reference verifier"]
 
-# system_attributes: declared together, per promotion criterion below. Only
-# declaring all of these together (plus at least one signal_type/evidence_
-# dimension term with evidence: emitted) satisfies canonical-status review.
+# system_attributes: declared together, per the promotion criterion below.
+# Canonical-status review needs all of these together, plus at least one
+# evidence-dimension term declaring evidence: emitted. Any one of them on its
+# own leaves the pre-image shape undifferentiated, which is the whole reason
+# they travel as a set.
 system_attributes:
   values:
     signature_capability: [classical, post_quantum_hybrid]

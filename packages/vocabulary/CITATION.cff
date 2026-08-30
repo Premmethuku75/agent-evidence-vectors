@@ -3,9 +3,9 @@ title: >-
   aee-vocabulary: a canonical term registry for adversarial-execution
   evidence claims
 message: >-
-  If a term or crosswalk-match verdict from this registry is cited, cite the
-  released version, not the branch. A registry is a moving target
-  until it is tagged.
+  If a term or crosswalk-match verdict from this registry is cited, cite a
+  released version. A registry is a moving target until it is tagged, so a
+  citation of the branch names something that has already changed.
 type: software
 authors:
   - family-names: Gilda

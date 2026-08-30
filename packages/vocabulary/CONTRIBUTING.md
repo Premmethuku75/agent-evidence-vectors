@@ -8,9 +8,11 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full. Note which terms are canonical, meaning an established and
-promoted definition, and which are proposed, meaning the term carries a review_by date and needs a
-second independent issuer before it can be promoted.
+Read the registry file in full, and read every status key while you are in there. At version 0.1.0
+each one says proposed, which means the term carries a review_by date and still needs a second
+independent issuer before promotion. Nothing here is canonical yet, and the reason is that nobody
+has filed a crosswalk at all, us included. Your filing is what moves a term, and the maintainer's
+own systems are held to the same bar, which is why they have not moved one either.
 
 Read GOVERNANCE.md as well. In particular, your crosswalk will be reviewed by a maintainer who
 does NOT have a declared interest in your system, and a maintainer's own systems get no exemption

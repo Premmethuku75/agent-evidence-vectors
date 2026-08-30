@@ -5,23 +5,24 @@ what an executed artifact attempted, what a substrate beneath it observed or ref
 and from what vantage a claim was obtained, and how much of a declared population a claim actually
 covers.
 
-This is not an identity registry, a reputation registry, or a wallet registry. The out-of-scope
-block in the registry file says so in the file itself. One question sets the scope: when a system
-emits a claim about an execution, what does the claim actually say, and how would a distrusting
-reader check it?
+One question sets the scope. When a system emits a claim about an execution, what does that claim
+actually say, and how would a reader who trusts nobody check it? Identity, reputation and wallets
+belong to other registries, and the out-of-scope block says so in the registry file itself, where a
+parser can reach it.
 
 ## Why this exists
 
-Naming the terms in an execution-evidence claim is a well-populated space, and every registry in
-it builds the same kind of thing, a shared vocabulary that independent systems crosswalk their own
-claims onto so a term means one thing across vendors. What none of them have is a name for the
-axis that matters most to a claim a distrusting party has to rely on: who observed it, and how
-directly. Four terms here carry that axis:
+Naming the terms in an execution-evidence claim is a well-populated space. The registries in it
+share a purpose: a vocabulary that independent systems crosswalk their own claims onto, so that a
+term means one thing across vendors.
 
-- `observation_vantage` and `observation_directness` say where a claim was obtained and through
-  how many hands it passed on the way.
-- `coverage_denominator` and `does_not_assert` say what the claim leaves out, and say it inside
-  the signed bytes.
+Four terms here carry the axis that decides whether any of the rest can be relied on, which is who
+observed the execution and through how many hands the account of it passed:
+
+- `observation_vantage` and `observation_directness` say where a claim was obtained and how
+  directly.
+- `coverage_denominator` and `does_not_assert` say what the claim leaves out, and say it inside the
+  signed bytes.
 
 Full definitions and their grounding mechanisms are in vocabulary.yaml.
 
@@ -33,26 +34,31 @@ no-self-grounding-exemption rule binding the founding maintainer's own systems i
 anyone else's. CONTRIBUTING.md says how to file a crosswalk. Filed crosswalks live one file per
 system under crosswalk/, starting from TEMPLATE.yaml there.
 
-The validator is scripts/validate_crosswalks.py, and CI runs it on every change. It fails loudly
-on a file shape it does not recognize, never skipping the file quietly. A comparable registry's
-validator skipped silently, and thirteen of the thirty-four crosswalks filed against it were
-invisible to the tool meant to be checking them.
+The validator is scripts/validate_crosswalks.py, and CI runs it on every change. Hand it a file
+whose shape it does not recognize and it fails, loudly, naming the file.
+
+That behaviour is worth stating because the usual alternative is silence. A validator that skips
+what it cannot parse still reports a clean run, over crosswalks it never opened, and the filer who
+got the shape wrong is told nothing at all. The unrecognized-shape branch is a dozen lines. Read it
+and check.
 
 ## Companion project
 
 The `spec_anchor` field points at the adversarial-execution-evidence predicate specification,
 vendored and versioned in
-[astrogilda/aee-conformance](https://github.com/astrogilda/aee-conformance), the reference
-verifier and conformance vector suite for that predicate. This registry names the vocabulary. That
-repository shows an implementation speaking it.
+[astrogilda/aee-conformance](https://github.com/astrogilda/aee-conformance), the reference verifier
+and conformance vector suite for that predicate, which is where the vocabulary defined here is
+actually spoken.
 
 ## Status
 
-Version 0.1.0, tagged. The initial term set came from a first-principles audit of the nearest
-comparable registry, kept honest about which terms are open ground and which overlap work that
-already exists. Each term carries a why_this_registry note naming the gap it fills.
+Version 0.1.0, tagged.
 
-Every term is meant to land as a field inside a signed statement, so a consumer is never expected
-to go hunting through documentation to learn what a claim withholds. The tag exists so a crosswalk
-has a fixed version to file against, not as a signal that external filings are being solicited
-yet.
+The initial term set came from reading the nearest comparable registry term by term and recording,
+for each of ours, whether it names ground nobody has named yet or overlaps something already in
+use. Both answers occur. Each term carries a why_this_registry note saying which, and that note is
+a field in the file, so a reader who disagrees can point at the line.
+
+Every term is meant to land as a field inside a signed statement. Nobody consuming one should have
+to go hunting through documentation to learn what a claim withholds. The tag gives a crosswalk a
+fixed version to file against; external filings are not being solicited yet.
