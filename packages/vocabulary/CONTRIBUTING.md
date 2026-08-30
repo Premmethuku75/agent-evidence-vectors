@@ -1,6 +1,6 @@
 # Contributing a crosswalk
 
-A crosswalk maps YOUR system's own emitted claims onto the terms in `vocabulary.yaml`. Filing one
+A crosswalk maps YOUR system's own emitted claims onto the terms in vocabulary.yaml. Filing one
 does not require our permission to build your system, does not require us to agree your system is
 good, and does not transfer any ownership of your terminology to us. It is a public, checkable
 statement: "here is where my system's claims and this registry's terms agree, and here is where
@@ -24,10 +24,15 @@ does not survive a reviewer fetching the source path you cited will be rejected.
 
 ## Required shape
 
-Copy the crosswalk template to `crosswalk/<your-system-name>.yaml`. The validated shape is the only
-shape: four required top-level keys, an optional maintainer block, then one entry per registry
+Copy `crosswalk/TEMPLATE.yaml` to `crosswalk/<your-system-name>.yaml`. The validated shape is the
+only shape: four required top-level keys, an optional maintainer block, then one entry per registry
 section, keyed by the exact term names the registry uses, each carrying a match field set to one of
-the values in crosswalk_match_types.
+the values in crosswalk_match_types. A claim of exact, structural or partial needs two more fields
+per term, `evidence` and `source_path`, described below; a file built from this paragraph alone and
+nothing else is refused for their absence.
+
+Check it before you open anything: `python3 scripts/validate_crosswalks.py` runs the same code CI
+runs, needs only pyyaml, and names the file and the rule when it refuses.
 
 The four the validator will refuse a file for missing are `system`, `system_url`,
 `crosswalk_version` and `vocabulary_version_targeted`. `system` is a plain string, not a block.
@@ -67,9 +72,9 @@ posture_and_coverage:
 ```
 
 **A crosswalk in any other shape, a flat mapping list, a top-level array, anything the validator
-does not recognize, will not render in the published matrix and will not be merged.** The validator
-refuses such a file by name and CI goes red, so you find out on your first push. The alternative,
-which is common, is a validator that skips a shape it was never taught: the run stays green, the
+does not recognize, will not be merged.** The validator
+refuses such a file by name and CI goes red, so you find out on your first push. The alternative is
+a validator that skips a shape it was never taught: the run stays green, the
 matrix shows your rows as blank, and you learn nothing until somebody notices the gap months later.
 
 On every term you claim exact, structural, or partial on, three fields do the work. The
@@ -96,7 +101,9 @@ justification for ground you don't claim.
 - A reviewer without a declared interest in your system checks that every cited source path
   resolves and actually carries the declared value.
 - The validator under scripts/ runs in CI on every pull request and checks shape, enum membership,
-  and source-path resolvability wherever the path is a public URL. It does not replace the human
+  and, on an emitted claim whose path is a public URL, whether that URL answers a HEAD request. It
+  reports that last one as a warning and never a failure, so it cannot refuse a merge on its own and
+  does not replace the human
   fetch-and-confirm step for anything non-public.
 
 Expect real scrutiny, applied identically regardless of who you are. The "No self-grounding
@@ -117,5 +124,6 @@ disguise, before you do the work of drafting the term.
 You may file a crosswalk for a system you do not maintain, mapping it from its own public
 documentation. Mark `third_party_authored: true` in the crosswalk header and cite what you read.
 This is welcome: it is how the registry covers systems whose own maintainers haven't got to filing
-yet. Such a crosswalk carries a standing invitation, visible in the file, for the described
-system's actual maintainer to correct or reclaim it.
+yet. The `third_party_authored: true` marker is what a described system's own maintainer looks for:
+it says the mapping was made from outside, so correcting or reclaiming it needs no argument about
+who filed first.
