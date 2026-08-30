@@ -67,12 +67,12 @@ independent reviewer per the merge discipline above. Our own issuer never counte
 bar is a first qualifying emitter and not a second one. One issuer, however large, does not promote
 a term.
 
-Every proposed term carries a review-by date. If no second independent issuer emitting the term
-has surfaced by that date, the term is demoted to reserved. It is removed at the next review-by date
+Every proposed term carries a review-by date. If no qualifying issuer that is not us has surfaced
+by that date, the term is demoted to reserved. It is removed at the next review-by date
 set on it, unless a production issuer surfaces first. A demoted term moves into the reserved block at
-the foot of `vocabulary.yaml` and is not silently deleted. That block holds two kinds of row and
+the foot of `vocabulary.yaml` and is not silently deleted. That block takes two kinds of row and
 each says which it is: a term explicitly declined before it was ever proposed, and a term that was
-proposed and found none.
+proposed and found none. It is empty at 0.1.1, because no review-by date has come round yet.
 
 ## Conflict of interest
 

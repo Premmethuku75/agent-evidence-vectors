@@ -36,10 +36,11 @@ meta:
     Those are out of scope by design (see out_of_scope below); other registries
     already cover that ground and this one does not compete with them.
   promotion_lifecycle: >
-    Every live term starts proposed. A term is promoted to canonical only once a
-    SECOND independently-maintained system emits it in a real, running artifact
-    and files a crosswalk declaring evidence: emitted with a resolvable
-    source_path. A term with zero production issuers after its
+    Every live term starts proposed. A term is promoted to canonical only once an
+    independently-maintained system that is not us emits it in a real, running
+    artifact and files a crosswalk declaring evidence: emitted with a resolvable
+    source_path. Our own issuer does not count toward promotion, so one
+    qualifying issuer is enough. A term with zero qualifying issuers after its
     review_by date is demoted to reserved and removed at the following review,
     unless a production issuer surfaces in the interim. A review-and-strip cycle
     is the mechanism that keeps a registry from filling with terms nobody emits,
@@ -139,8 +140,9 @@ evidence_dimensions:
       alone; this term names the split explicitly.
     issuers_in_production: []
     promotion_trigger: >
-      A second independent implementation that declares this field per-artifact
-      (not merely in prose) and files a crosswalk with evidence: emitted.
+      An independent implementation that is not us, declaring this field
+      per-artifact (not merely in prose) and filing a crosswalk with
+      evidence: emitted.
 
   issuance_time_basis:
     status: proposed
@@ -156,7 +158,7 @@ evidence_dimensions:
       of freshness.
     source_path: "predicate.observationRecords[].payload (arming pre-image)"
     issuers_in_production: []
-    promotion_trigger: "A second independent implementation with a real beacon binding."
+    promotion_trigger: "An independent implementation that is not us, with a real beacon binding."
 
 # posture_and_coverage: what an execution environment was actually in, and
 # how much of a declared population a claim actually assessed.
