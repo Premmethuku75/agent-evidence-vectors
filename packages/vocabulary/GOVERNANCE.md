@@ -70,7 +70,8 @@ earns none.
 
 ## Amending this document
 
-Changes to this file require the same two-maintainer review as any other change. A change that
+Changes to this file go through the same second-maintainer merge as any other change, per Merge
+discipline above. A change that
 weakens any rule under "Merge discipline" above additionally requires a stated reason in the pull
 request description and a 14-day open comment window before merge, regardless of how many
 maintainers there are at the time.
