@@ -36,7 +36,7 @@ meta:
     Those are out of scope by design (see out_of_scope below); other registries
     already cover that ground and this one does not compete with them.
   promotion_lifecycle: >
-    Every term starts proposed. A term is promoted to canonical only once a
+    Every live term starts proposed. A term is promoted to canonical only once a
     SECOND independently-maintained system emits it in a real, running artifact
     and files a crosswalk declaring evidence: emitted with a resolvable
     source_path. A term with zero production issuers after its
@@ -220,8 +220,8 @@ posture_and_coverage:
     why_this_registry: >
       Comparable registries carry this concept, when they carry it at all, as
       file-level prose (a repository-wide "out of scope" list), not as a
-      per-artifact field. Systems that need this and don't have it have been
-      observed hand-building narrower special cases of it independently.
+      per-artifact field. A file-level list cannot say what one claim withholds,
+      which is the whole question a consumer of that claim is asking.
 
 # outcome_lattice: the recomputable verdict a consumer derives, never a
 # policy threshold and not producer-asserted.
