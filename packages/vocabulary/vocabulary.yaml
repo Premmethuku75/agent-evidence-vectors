@@ -46,7 +46,7 @@ meta:
     and it only works if the strip half actually happens, so the dates are in
     the file where anyone can hold us to them. What this adds to the usual shape
     is the evidence requirement: a listed issuer name is a claim, and a name in
-    a list has never demonstrated that a field reaches the wire. Promotion needs
+    a list does not demonstrate that a field reaches the wire. Promotion needs
     an evidence: emitted declaration with a source_path a reviewer fetches. The
     bar for running is deliberately narrow. A plan sits outside it, and so does
     a mock.
@@ -55,7 +55,7 @@ meta:
     from the rule directly above, and both were wrong at 0.1.0.
     Six of the eight terms carried status canonical, and seven of the eight
     listed one issuer, this project's own aee-conformance reference verifier.
-    field_evidence_partition listed none and never had, which is why the two
+    field_evidence_partition listed none from the start, which is why the two
     counts differ and why neither is simply eight. A listing means, in this
     registry's own words, that a system emits the value in a real running
     artifact AND that a crosswalk saying so has been filed. Zero crosswalks have
@@ -224,7 +224,7 @@ posture_and_coverage:
       observed hand-building narrower special cases of it independently.
 
 # outcome_lattice: the recomputable verdict a consumer derives, never a
-# policy threshold and never producer-asserted.
+# policy threshold and not producer-asserted.
 outcome_lattice:
 
   result:
@@ -297,7 +297,7 @@ crosswalk_evidence_states:
   asserted: "The declared value is claimed in prose (a README, a spec) with no machine-checkable artifact behind it."
 
 # out_of_scope: explicit non-goals, stated so a filer knows this registry
-# will never contest ground it does not claim.
+# does not contest ground it does not claim.
 out_of_scope:
   - "Agent identity, reputation, or wallet-bound scoring of any kind. This registry describes claims about an execution, never a scored assessment of an actor over time."
   - "Renaming or reinterpreting a live signed envelope's own type/format field. A verifier MUST reject an unregistered enum value for a known field; the wire bytes of that field are never renamed by this registry."

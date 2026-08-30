@@ -21,7 +21,7 @@ observed the execution and through how many hands the account of it passed:
 
 - `observation_vantage` and `observation_directness` say where a claim was obtained and how
   directly.
-- `coverage_denominator` and `does_not_assert` say what the claim leaves out, and say it inside the
+- `coverage_denominator` and `does_not_assert` say what it leaves out, and say so inside the
   signed bytes.
 
 Full definitions and their grounding mechanisms are in vocabulary.yaml.
@@ -31,8 +31,8 @@ Full definitions and their grounding mechanisms are in vocabulary.yaml.
 vocabulary.yaml is the registry itself, CC0-1.0 and public domain, so reuse it freely.
 GOVERNANCE.md carries the promotion and demotion rules, the merge discipline, and the
 no-self-grounding-exemption rule binding the founding maintainer's own systems identically to
-anyone else's. CONTRIBUTING.md says how to file a crosswalk. Filed crosswalks live one file per
-system under crosswalk/, starting from TEMPLATE.yaml there.
+anyone else's. CONTRIBUTING.md says how to file one. Filed crosswalks live one file per system
+under crosswalk/, starting from TEMPLATE.yaml there.
 
 The validator is scripts/validate_crosswalks.py, and CI runs it on every change. Hand it a file
 whose shape it does not recognize and it fails, loudly, naming the file.
