@@ -4,7 +4,7 @@
 Design constraint, stated explicitly because it is the reason this script
 exists: a validator that silently skips a file it doesn't recognize is worse
 than no validator, because a filed crosswalk in the wrong shape then reads as
-correct in the published matrix while actually being invisible. Every file in
+correct to anyone reading the directory while contributing nothing. Every file in
 crosswalk/ (except TEMPLATE.yaml) MUST either pass validation or fail loudly
 with a nonzero exit code. There is no third, silent outcome.
 
@@ -37,6 +37,16 @@ TERM_SECTIONS = (
     "outcome_lattice",
 )
 REQUIRED_TOP_LEVEL = ("system", "system_url", "crosswalk_version", "vocabulary_version_targeted")
+
+#: Required keys whose VALUE must be a plain scalar, not a mapping or a list.
+#:
+#: CONTRIBUTING.md has told filers "`system` is a plain string, not a block" since
+#: 2026-08-30, and nothing enforced it: a crosswalk with `system:` written as a
+#: block validated at zero errors. The rule was right and unbacked, which is the
+#: same shape as the defect that sentence was written to describe. A stated rule
+#: nothing checks is worse than no rule, because a filer who follows it gets no
+#: confirmation and a filer who ignores it gets no refusal.
+_SCALAR_TOP_LEVEL = ("system", "system_url", "crosswalk_version", "vocabulary_version_targeted")
 
 #: The two enumerations are READ from the registry, never restated here.
 #:
@@ -159,6 +169,17 @@ def validate_crosswalk_file(path, known_terms, match_types, evidence_states, err
         if key not in data:
             fail(filename, f"missing required top-level key '{key}'", errors)
 
+    for key in _SCALAR_TOP_LEVEL:
+        if key in data and isinstance(data[key], (dict, list)):
+            shape = "a block" if isinstance(data[key], dict) else "a list"
+            fail(
+                filename,
+                f"top-level key '{key}' is {shape}; it must be a plain string. "
+                f"See the worked example in CONTRIBUTING.md, which this repository "
+                f"runs through this validator on every push.",
+                errors,
+            )
+
     saw_any_term_section = False
     for section in TERM_SECTIONS + ("system_attributes",):
         if section not in data:
@@ -235,10 +256,10 @@ def validate_crosswalk_file(path, known_terms, match_types, evidence_states, err
         fail(
             filename,
             "no recognized term section found (evidence_dimensions / "
-            "posture_and_coverage / outcome_lattice) -- this file will not "
-            "render in the published matrix. If this is intentional (a "
-            "system_attributes-only filing), that is currently unsupported; "
-            "open an issue; do not file an invisible crosswalk.",
+            "posture_and_coverage / outcome_lattice) -- this file maps no term, "
+            "so nothing reading the registry would see it. If that is "
+            "intentional (a system_attributes-only filing), it is currently "
+            "unsupported; open an issue.",
             errors,
         )
 

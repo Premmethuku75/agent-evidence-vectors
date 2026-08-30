@@ -28,7 +28,7 @@ evidence_dimensions:
     # evidence: emitted   # emitted | inferred | asserted
     # source_path: "where this actually lives in a real running artifact"
     # divergences:        # partial only
-    #   - "The specific, material way this differs from the canonical definition."
+    #   - "The specific, material way this differs from the registered definition."
 
 posture_and_coverage:
   containment_posture:

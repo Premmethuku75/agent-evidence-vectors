@@ -49,9 +49,8 @@ maintenance is direct-pushed and this paragraph is the disclosure.
 
 **The third rule is not suspended and does not depend on maintainer count.** No crosswalk merges
 without an independent evidence check by someone with no declared interest in the system it
-describes. No such reviewer exists here yet, so no crosswalk can merge, and none has. This registry's
-credibility rests on that rule. Suspending it for convenience would retire the reason the repository
-exists.
+describes. No such reviewer exists here yet, so none has merged. This registry's credibility rests on
+that rule, and suspending it for convenience would retire the reason the repository exists.
 
 Those three rules all guard one failure, and it is not fraud. A registry usually starts as one
 person's careful work, and that person is normally the most rigorous participant in it. The gap
@@ -63,9 +62,13 @@ declared interest in the system it describes, and if this project has no such re
 filing, that filing waits. Promotion needs an emitter that is not us. Every cited source path is
 fetched and confirmed by hand before a merge, including ours.
 
-The measurable consequence at every version so far is that no term here is canonical, because our own
-issuer does not count toward a promotion and nobody else has filed yet. That is the rule working
-against the person who wrote it, which is the only evidence that it is a rule at all.
+The measurable consequence at 0.1.1 is that no term here is canonical, because our own issuer does
+not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
+carried canonical status on our own issuer alone. The v0.1.0 tag is still reachable, so both halves
+of this paragraph can be checked against the repository.
+
+Demoting those six is the evidence here, and the current state is not. A rule that has never had to
+move against the person who wrote it has not yet been tested.
 
 ## Promotion and demotion
 
@@ -81,16 +84,14 @@ history, in the reserved block at the foot of `vocabulary.yaml`, not silently de
 
 ## Conflict of interest
 
-Any maintainer with a commercial or research interest in a system that has filed, or is
-considering filing, a crosswalk must disclose that interest in MAINTAINERS.md before reviewing any
-crosswalk for that system. A maintainer with a disclosed interest may not be the sole reviewer of
-that system's crosswalk.
+Any maintainer with a commercial or research interest in a system that has filed, or is considering
+filing, must disclose that interest in MAINTAINERS.md before reviewing anything from that system,
+and may never be its sole reviewer.
 
 ## Committer access
 
 Committer access is granted on a sustained maintenance record, meaning reviewing other people's
-crosswalks accurately over time. Filing a crosswalk earns none, and running the validator once
-earns none.
+crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
 
 ## Amending this document
 
@@ -100,5 +101,15 @@ exists in MAINTAINERS.md.
 
 One requirement does not move with the suspension. A change weakening any rule under Merge
 discipline needs a stated reason and a 14-day open comment window before it lands, whatever the
-maintainer count is at the time. The suspension itself was written under that requirement and its
-reason is the paragraph that states it.
+maintainer count is at the time.
+
+The suspension above is such a weakening and it did not get its window. It was written and amended
+inside twenty minutes on 2026-08-30, on a private repository carrying no open pull request and no
+open issue, so no venue for a comment window existed and nobody was there to comment. Of the two
+requirements the paragraph above satisfies one: it states its reason. It does not satisfy the
+window. Describing a half-met requirement as met is the same defect this section was written to
+disclose, one level up.
+
+So the suspension is provisional. Its window runs for 14 days from the day this repository becomes
+readable, in whatever venue readers then have, and it stands or is withdrawn on what that produces.
+This paragraph is the disclosure that it has not yet been earned.

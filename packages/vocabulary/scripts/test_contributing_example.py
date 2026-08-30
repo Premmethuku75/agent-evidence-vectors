@@ -5,9 +5,14 @@ WHY THIS EXISTS. The "Required shape" section of CONTRIBUTING.md shows a filer a
 complete crosswalk and tells them to build one like it. On 2026-08-30 that
 example was checked against the validator for the first time and failed with
 three errors: `system_url`, `crosswalk_version` and `vocabulary_version_targeted`
-were all missing, and `system` was a block where the validator wants a string.
-The template beside it validated cleanly, so the defect was confined to the
-guide's own prose.
+were all missing. The template beside it validated cleanly, so the defect was
+confined to the guide's own prose.
+
+The example also wrote `system` as a block. That was reported at the time as a
+fourth thing the validator rejects, and it was not: the validator accepted a
+block at zero errors until the scalar check was added later the same day. A
+correct repair carried an invented cause, which is why the account here now
+separates what the validator refused from what the guide had wrong.
 
 Four frontier models read that file across two adversarial rounds and none of
 them found it, which is the useful part. They were reading the document. The
