@@ -1,4 +1,12 @@
-# aee-vocabulary: canonical term registry
+# aee-vocabulary: a closed term registry
+#
+# `canonical` is reserved here for one thing: a term's lifecycle status, reached
+# only by the promotion rule in meta. It is deliberately NOT used to mean
+# authoritative or single-source, which is what a registry title usually means by
+# it. This file said both until 2026-08-30, so a reader met "canonical term
+# registry" in the title and "no term in this file is canonical" forty lines
+# down. A registry whose stated purpose is one word for one meaning cannot spend
+# its own headline word three ways.
 #
 # This file is CC0-1.0 (public domain). Reuse, fork, or cite it freely; no
 # attribution required. The full grant is in `LICENSE-CC0`, which is the
@@ -205,7 +213,7 @@ posture_and_coverage:
     definition: >
       A machine-readable list of short strings, carried inside the signed
       statement itself, stating what this evidence explicitly cannot claim.
-      Single canonical spelling per claim, no accepted alias, never buried in
+      One agreed spelling per claim, no accepted alias, never buried in
       free-text documentation where a consumer has to go looking for it.
     source_path: "predicate.doesNotAssert"
     issuers_in_production: []

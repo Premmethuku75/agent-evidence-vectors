@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: >-
-  aee-vocabulary: a canonical term registry for adversarial-execution
+  aee-vocabulary: a closed term registry for adversarial-execution
   evidence claims
 message: >-
   If a term or crosswalk-match verdict from this registry is cited, cite a

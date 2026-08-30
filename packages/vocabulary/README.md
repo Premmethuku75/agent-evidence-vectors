@@ -1,6 +1,6 @@
 # aee-vocabulary
 
-A canonical, closed vocabulary for terms that describe **adversarial-execution evidence claims**:
+A closed, versioned vocabulary for terms that describe **adversarial-execution evidence claims**:
 what an executed artifact attempted, what a substrate beneath it observed or refused, how directly
 and from what vantage a claim was obtained, and how much of a declared population a claim actually
 covers.
