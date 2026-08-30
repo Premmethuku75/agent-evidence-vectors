@@ -54,9 +54,10 @@ posture_and_coverage:
 ```
 
 **A crosswalk in any other shape, a flat mapping list, a top-level array, anything the validator
-does not recognize, will not render in the published matrix and will not be merged.** A
-comparable registry's own corpus turned out to have thirteen of its thirty-four filed crosswalks
-invisible to its own validator, each of them in a shape the validator had never been taught.
+does not recognize, will not render in the published matrix and will not be merged.** The validator
+refuses such a file by name and CI goes red, so you find out on your first push. The alternative,
+which is common, is a validator that skips a shape it was never taught: the run stays green, the
+matrix shows your rows as blank, and you learn nothing until somebody notices the gap months later.
 
 On every term you claim exact, structural, or partial on, three fields do the work. The
 evidence field takes one of emitted, inferred, or asserted, per crosswalk_evidence_states in the

@@ -28,14 +28,15 @@ meta:
     and files a crosswalk declaring evidence: emitted with a resolvable
     source_path. A term with zero production issuers after its
     review_by date is demoted to reserved and removed at the following review,
-    unless a production issuer surfaces in the interim. This mirrors the one
-    genuinely well-run mechanism found in the nearest comparable registry
-    (agent-governance-vocabulary, aeoess/agent-governance-vocabulary), whose
-    review-and-strip cycle is real discipline and worth matching, while fixing
-    the defect found there, where a listed issuer name was enough to promote a
-    term: here promotion requires an evidence: emitted declaration with a
-    resolvable source_path. The bar for running is deliberately narrow. A plan
-    sits outside it, and so does a mock.
+    unless a production issuer surfaces in the interim. A review-and-strip cycle
+    is the mechanism that keeps a registry from filling with terms nobody emits,
+    and it only works if the strip half actually happens, so the dates are in
+    the file where anyone can hold us to them. What this adds to the usual shape
+    is the evidence requirement: a listed issuer name is a claim, and a name in
+    a list has never demonstrated that a field reaches the wire. Promotion needs
+    an evidence: emitted declaration with a source_path a reviewer fetches. The
+    bar for running is deliberately narrow. A plan sits outside it, and so does
+    a mock.
   status_at_this_version: >
     No term in this file is canonical, and the reason is the rule directly
     above. Zero crosswalks have been filed here by anyone, including us, so no
@@ -72,9 +73,12 @@ evidence_dimensions:
     source_path: "predicate.attackResults[].basis"
     issuers_in_production: ["aee-conformance reference verifier"]
     why_this_registry: >
-      No comparable registry names the relation between the observer and the
-      observed at all. Contributors to adjacent registries reach for the
-      concept in free-text prose repeatedly and have no field to put it in.
+      This is the field for a question people already ask and have nowhere to
+      answer. Read the free-text notes attached to crosswalks in registries of
+      this kind and the relation between observer and observed keeps surfacing
+      in prose, phrased differently every time, because there is no key for it.
+      Prose does not compose, and two systems describing the same relation in
+      their own words produce claims a consumer cannot compare.
 
   observation_directness:
     status: proposed
@@ -89,10 +93,11 @@ evidence_dimensions:
     source_path: "predicate.attackResults[].method"
     issuers_in_production: ["aee-conformance reference verifier"]
     why_this_registry: >
-      This is the axis that separates a live capture from a periodic re-scan.
-      Nothing else names it, and it is the exact distinction that separated a
-      genuine live-capture system from a weekly static scanner making an
-      equivalent-sounding claim in a 2026-08-11 competitive teardown.
+      A live capture and a weekly re-scan can produce claims that read
+      identically. One watched the execution happen; the other inferred it
+      afterwards from what was left behind. Without this field a consumer has no
+      way to tell which they are holding, and the two carry very different
+      weight when the executed party had an interest in the answer.
 
   field_evidence_partition:
     status: proposed
@@ -144,13 +149,12 @@ posture_and_coverage:
     source_path: "predicate.observationEnvironment.networkPosture.posture"
     issuers_in_production: ["aee-conformance reference verifier"]
     why_this_registry: >
-      This is the runtime half of a claim class ("what environment did the
-      execution run in") that every comparable claimant surveyed in a
-      2026-08-11 audit disclaimed for one of three reasons: the subject was a
-      static artifact in every case examined, with no running environment behind
-      it; there was no signed environment artifact at all; or the claimant
-      self-disqualified for lacking exactly this, a digest-committed and
-      substrate-authoritative posture value.
+      Most evidence about software describes an artifact. This term describes
+      the environment the artifact was actually running in, which is a different
+      claim and a harder one, because it needs a value the running code could
+      not have chosen for itself. Hence the two conditions: the posture is
+      committed by digest, and it comes from the substrate rather than from the
+      process being observed. A posture the subject could set is decoration.
 
   coverage_denominator:
     status: proposed
@@ -166,10 +170,11 @@ posture_and_coverage:
     source_path: "predicate.coverage.{assessedClasses,outOfScope,routedElsewhere}"
     issuers_in_production: ["aee-conformance reference verifier"]
     why_this_registry: >
-      No comparable registry has a term for a producer committing to its own
-      coverage population. The nearest analog found elsewhere is a bare
-      withheld-if-sample-too-small rule, which is a refusal condition. A refusal
-      condition leaves the population itself uncommitted.
+      A producer that commits to its denominator can be caught understating it
+      later. That is the point, and it is why the field is here rather than in a
+      methodology note. The usual substitute is a rule about withholding a
+      result when the sample is too small, which decides whether to publish and
+      says nothing about what the population was.
 
   does_not_assert:
     status: proposed
@@ -219,7 +224,8 @@ system_attributes:
     domain_separation_profile: [declared, undeclared]
   definition: >
     Four attributes every crosswalk-in system should declare together.
-    domain_separation_profile is the one comparable registries omit entirely:
+    domain_separation_profile is the one most easily forgotten, and the one
+    whose absence is silent:
     whether signed pre-images across an implementation's different artifact
     types are tagged with distinct, per-format identifiers (so one signing key
     cannot be confused across formats), or whether all formats share one

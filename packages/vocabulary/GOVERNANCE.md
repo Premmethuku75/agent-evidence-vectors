@@ -29,14 +29,19 @@ meaning the AEE predicate and its reference verifier.
   fetches the cited `source_path` directly and confirms it resolves to the declared value. A
   crosswalk citing a path that does not resolve is not merged, regardless of who filed it.
 
-Those three rules exist because a 2026-08-11 audit of the nearest comparable registry found the
-opposite of every one of them. Ninety-one of ninety-one merged pull requests were merged by the
-sole maintainer, twenty-five of those their own, eight self-merged in under five minutes with zero
-review. Eighty-seven of the hundred and ninety-three commits on the main branch were direct pushes
-by that maintainer. And the maintainer's own product was entered favorably into the one term
-section their own validator script did not check. None of it was fraud. The maintainer's tooling
-was rigorous everywhere it was enforced, and unenforced in the one place it mattered most, which
-was the maintainer grading their own product. This registry is built without that gap from day one.
+Those three rules all guard one failure, and it is not fraud. A registry usually starts as one
+person's careful work, and that person is normally the most rigorous participant in it. The gap
+opens where the rigor is not mechanically enforced, and the place that reliably escapes enforcement
+is the maintainer's own entry, because reviewing it is the one review nobody is available for.
+
+So the rules are written to bind here first. A maintainer's crosswalk is reviewed by someone with no
+declared interest in the system it describes, and if this project has no such reviewer for a given
+filing, that filing waits. Promotion needs an emitter that is not us. Every cited source path is
+fetched and confirmed by hand before a merge, including ours.
+
+The measurable consequence at version 0.1.0 is that no term here is canonical, because our own
+issuer does not count toward a promotion and nobody else has filed yet. That is the rule working
+against the person who wrote it, which is the only evidence that it is a rule at all.
 
 ## Promotion and demotion
 
