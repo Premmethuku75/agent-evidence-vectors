@@ -174,7 +174,7 @@ def validate_crosswalk_file(path, known_terms, errors, warnings):
             "posture_and_coverage / outcome_lattice) -- this file will not "
             "render in the published matrix. If this is intentional (a "
             "system_attributes-only filing), that is currently unsupported; "
-            "open an issue rather than filing an invisible crosswalk.",
+            "open an issue; do not file an invisible crosswalk.",
             errors,
         )
 

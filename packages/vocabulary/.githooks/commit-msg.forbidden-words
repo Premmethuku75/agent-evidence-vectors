@@ -12,7 +12,7 @@
 # longer identifier is still caught. The lengths must be declared for
 # the window to exist; leaking a word length is far less than the word.
 #
-# This is obscurity rather than secrecy -- the candidate space is small
+# This is obscurity, not secrecy: the candidate space is small
 # enough to brute-force -- and it is sized to the actual threat: a
 # careless paste, a search engine, and a casual reader.
 # salt: ee361784f5cb073a63f48d6669d05804

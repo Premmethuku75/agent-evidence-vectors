@@ -11,7 +11,7 @@
 #     over-permissioned token patterns.
 # No other language is configured, because no other language is here. If a
 # crosswalk-rendering or publishing tool is added later in another language, add
-# it to the matrix then rather than pre-declaring it now.
+# it to the matrix then. Nothing is pre-declared here.
 #
 # While this repository is private, code scanning is unavailable, so this
 # analysis cannot complete: the run fails with "Code scanning is not enabled for
@@ -23,7 +23,7 @@
 # The analysis is therefore gated on visibility, and the gate is built so that it
 # expires by itself. Nobody has to remember to re-enable anything: the moment the
 # repository goes public the scan starts running, and the suspension notice stops
-# being printed. Visibility is read from the API rather than from the event
+# being printed. Visibility is read from the API, not from the event
 # payload, because the payload's shape differs across push, schedule and
 # branch_protection_rule, and a read that silently yields nothing on one event
 # type would suspend the scan on that event forever. An unreadable answer FAILS:
@@ -44,7 +44,7 @@ permissions:
 
 jobs:
   # One place decides whether the scans below can run, and it prints what it
-  # decided. Every other job branches on this output rather than re-deriving the
+  # decided. Every other job branches on this output and never re-derives the
   # answer, so there is one reading and it is visible in the log.
   visibility:
     name: Can code scanning run here

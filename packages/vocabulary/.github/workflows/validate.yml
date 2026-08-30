@@ -1,7 +1,6 @@
 # Two gates, both hermetic: the crosswalk validator, and the forbidden-string
 # scan that keeps this repository publishable. Neither depends on a credential
-# or on anyone else's uptime, so both belong on every push rather than on a
-# schedule.
+# or on anyone else's uptime, so both belong on every push, not on a schedule.
 
 name: validate
 
@@ -31,7 +30,7 @@ jobs:
           # match is found: printing it would reproduce the string into this log.
           #
           # This repository is private today and product-neutral by design. The
-          # guard is installed BEFORE publication rather than after, because the
+          # guard is installed BEFORE publication, never after, because the
           # cost of arriving late is a name in a history that is already public.
           #
           # Exit 2 means the rule list did not load, which is a failure: a guard

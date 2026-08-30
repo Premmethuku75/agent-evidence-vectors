@@ -19,7 +19,7 @@
 #
 # The analysis is gated on visibility by the same self-expiring mechanism the
 # CodeQL workflow uses: read the answer once from the API, print it, run when
-# public, say plainly what is suspended when private, and FAIL rather than guess
+# public, say plainly what is suspended when private, and FAIL without guessing
 # if the answer cannot be read. When visibility flips, this starts running on its
 # own and `publish_results` is the only line left to change by hand.
 #
@@ -40,7 +40,7 @@ on:
 permissions: read-all
 
 jobs:
-  # Deliberately duplicated from codeql.yml rather than factored into a reusable
+  # Deliberately duplicated from codeql.yml, not factored into a reusable
   # workflow. This is a read of one API field, not a rule: there is nothing here
   # for the two copies to disagree about, and an indirection would cost more to
   # follow than the six lines it saved.

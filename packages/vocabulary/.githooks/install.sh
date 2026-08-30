@@ -17,7 +17,7 @@
 #    visibility guard, ruff and whole-tree strict mypy; it was recovered from
 #    the index. This script only sets one config key, so there is nothing it
 #    can overwrite.
-# 2. It DERIVES the directory from its own location instead of hardcoding
+# 2. It DERIVES the directory from its own location, with no hardcoded
 #    one. Repositories keep their tracked hooks in different places
 #    (`.githooks`, `tools/git-hooks`), and a hardcoded path is how a shared
 #    installer starts lying about one of them.
