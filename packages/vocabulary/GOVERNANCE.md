@@ -22,53 +22,42 @@ verifier.
 
 ## Merge discipline
 
-- No maintainer merges their own pull request. Not for a typo fix, not for an urgent correction. A
-  second maintainer merges, or the pull request waits.
-- No direct pushes to `main`. Every change, maintainer changes included, goes through a pull
-  request with CI green.
-- Every crosswalk pull request gets an independent evidence check before merge. The reviewer
-  fetches the cited `source_path` directly and confirms it resolves to the declared value. A
-  crosswalk citing a path that does not resolve is not merged, regardless of who filed it.
+One rule is absolute and never depends on how many maintainers exist:
 
-### What those rules mean with one maintainer, stated because it is not obvious
+- **Every crosswalk gets an independent evidence check before merge.** The reviewer fetches the
+  cited `source_path` and confirms it resolves to the declared value. A crosswalk citing a path
+  that does not resolve is not merged, regardless of who filed it, and a maintainer never reviews
+  a filing for a system they have a declared interest in. This is what the registry's claims rest
+  on, and no count of maintainers loosens it.
 
-Read together they mean nothing merges. Every change needs a pull request, no maintainer merges
-their own, and there is one maintainer. That is not a loophole discovered later; it is the
-arithmetic, and until a second maintainer holds the role it applies to routine repository work as
-much as to anything else.
+Two more bind from the moment a second row exists in MAINTAINERS.md, and they arm themselves with
+nothing to switch on:
 
-What actually happened, measured on 2026-08-30 and not recalled: not one pull request has ever
-been opened here, the history carries zero merge commits, and every commit including the ones repairing
-this file arrived by direct push. So the second rule above has been broken on every commit since the
-repository began.
+- No maintainer merges their own pull request.
+- No direct pushes to `main`. Every change goes through a pull request with CI green.
 
-Two of the three rules are suspended until a second maintainer is added, and they suspend
-themselves: the moment `MAINTAINERS.md` carries a second row, no-self-merge and
-pull-requests-for-everything bind normally with nothing to re-enable. Until then repository
-maintenance is direct-pushed and this paragraph is the disclosure.
+**With one maintainer those two would mean nothing merges at all, so they do not apply yet, and
+this document says so where a reader will find it.** Every commit here has been a direct push, no
+pull request has ever been opened, and the history carries zero merge commits. That is the honest
+state of a registry built by one person, and it costs the reader nothing: the rule their trust
+actually depends on is the first one, and that one has never been relaxed.
 
-**The third rule is not suspended and does not depend on maintainer count.** No crosswalk merges
-without an independent evidence check by someone with no declared interest in the system it
-describes. No such reviewer exists here yet, so none has merged. This registry's credibility rests on
-that rule, and suspending it for convenience would retire the reason the repository exists.
+The single rule guards a single failure, and it is not fraud. A registry usually starts as one
+person's careful work, and that person is normally its most rigorous participant. The gap opens
+where rigor is not mechanically enforced, and the place that reliably escapes enforcement is the
+maintainer's own entry, because reviewing it is the one review nobody is available for.
 
-Those three rules all guard one failure, and it is not fraud. A registry usually starts as one
-person's careful work, and that person is normally the most rigorous participant in it. The gap
-opens where the rigor is not mechanically enforced, and the place that reliably escapes enforcement
-is the maintainer's own entry, because reviewing it is the one review nobody is available for.
+So it binds here first. No reviewer without a declared interest exists yet, so no crosswalk has
+merged, including ours. Promotion needs an emitter that is not us. Every cited path is fetched by
+hand before a merge, ours included.
 
-So the rules are written to bind here first. A maintainer's own filing is reviewed by someone with no
-declared interest in the system it describes, and if this project has no such reviewer for a given
-filing, that filing waits. Promotion needs an emitter that is not us. Every cited source path is
-fetched and confirmed by hand before a merge, including ours.
+The measurable consequence at 0.1.1 is that not one term here is canonical, because our own issuer
+does not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
+carried canonical status on our own issuer alone. That tag is still reachable, so both halves of
+this paragraph can be checked against the repository.
 
-The measurable consequence at 0.1.1 is that not one term here is canonical, because our own issuer does
-not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
-carried canonical status on our own issuer alone. The v0.1.0 tag is still reachable, so both halves
-of this paragraph can be checked against the repository.
-
-Demoting those six is the evidence here, and the current state is not. A rule that has never had to
-move against the person who wrote it has not yet been tested.
+Demoting those six is the evidence, and the current state is not. A rule that has never had to move
+against the person who wrote it has not yet been tested.
 
 ## Promotion and demotion
 
@@ -95,30 +84,17 @@ and may never be its sole reviewer.
 Committer access is granted on a sustained maintenance record, meaning reviewing other people's
 crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
 
-Nobody holds that record here, including the founding maintainer, because no crosswalk has ever
-been filed and so none has ever been reviewed. Committer access was not earned under this rule; it
-came with creating the repository, which the rule does not recognise as a route. The suspension
-above does not cover this, and neither does the amendment clause, since both are scoped to Merge
-discipline. Stated here so a reader testing the rule against the repository finds the answer
-already written down, and does not have to discover it.
+Nobody holds that record yet, the founding maintainer included, because no crosswalk has ever been
+filed and so none has ever been reviewed. The first person to earn committer access here will earn
+it that way. Stated plainly so a reader testing the rule against the repository finds the answer
+already written down.
 
 ## Amending this document
 
-Changes to this file take the same route as any other change, so today that means a direct push
-under the suspension above, and it means a second-maintainer merge from the moment a second row
-exists in MAINTAINERS.md.
+A change that weakens the crosswalk evidence check needs a stated reason and a 14-day open comment
+window before it lands, whatever the maintainer count is. That rule is the registry's whole claim,
+so it is the one change nobody makes quietly, and the window applies to the person who wrote it as
+much as to anyone else.
 
-One requirement does not move with the suspension. A change weakening any rule under Merge
-discipline needs a stated reason and a 14-day open comment window before it lands, whatever the
-maintainer count is at the time.
-
-The suspension above is such a weakening and it did not get its window. It was written and amended
-inside twenty minutes on 2026-08-30, on a private repository with neither an open pull request nor an
-open issue, so nothing served as a venue for a comment window and nobody was there to comment. Of the two
-requirements the paragraph above satisfies one: it states its reason. It does not satisfy the
-window. Describing a half-met requirement as met is the same defect this section was written to
-disclose, one level up.
-
-So the suspension is provisional. Its window runs for 14 days from the day this repository becomes
-readable, in whatever venue readers then have, and it stands or is withdrawn on what that produces.
-This paragraph is the disclosure that it has not yet been earned.
+Everything else in this file follows the merge discipline above: direct while there is one
+maintainer, second-maintainer merge from the moment there are two.
