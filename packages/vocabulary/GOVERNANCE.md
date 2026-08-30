@@ -79,8 +79,10 @@ term.
 
 Every proposed term carries a review-by date. If no second independent issuer emitting the term
 has surfaced by that date, the term is demoted to reserved, and removed at the following review
-unless a production issuer surfaces before then. A demotion is recorded in the term's own
-history, in the reserved block at the foot of `vocabulary.yaml`, not silently deleted.
+unless a production issuer surfaces before then. A demoted term moves into the reserved block at
+the foot of `vocabulary.yaml` and is not silently deleted. That block holds two kinds of row and
+each says which it is: a term explicitly declined before it was ever proposed, and a term that was
+proposed and found no emitter.
 
 ## Conflict of interest
 
@@ -92,6 +94,13 @@ and may never be its sole reviewer.
 
 Committer access is granted on a sustained maintenance record, meaning reviewing other people's
 crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
+
+Nobody holds that record here, including the founding maintainer, because no crosswalk has ever
+been filed and so none has ever been reviewed. Committer access was not earned under this rule; it
+came with creating the repository, which the rule does not recognise as a route. The suspension
+above does not cover this, and neither does the amendment clause, since both are scoped to Merge
+discipline. Stated here so a reader testing the rule against the repository finds the answer
+already written down, and does not have to discover it.
 
 ## Amending this document
 
