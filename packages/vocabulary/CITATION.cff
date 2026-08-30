@@ -4,7 +4,7 @@ title: >-
   evidence claims
 message: >-
   If a term or crosswalk-match verdict from this registry is cited, cite the
-  released version rather than the branch. A registry is a moving target
+  released version, not the branch. A registry is a moving target
   until it is tagged.
 type: software
 authors:
@@ -15,7 +15,7 @@ authors:
 repository-code: https://github.com/astrogilda/aee-vocabulary
 abstract: >-
   A closed, versioned vocabulary for terms that describe adversarial-execution
-  evidence claims -- observation vantage, observation directness, containment
+  evidence claims: observation vantage, observation directness, containment
   posture, coverage denominators, and related evidence-quality dimensions.
   Independent implementations file crosswalks declaring how their own emitted
   claims map onto these terms. Companion project to aee-conformance
@@ -25,8 +25,6 @@ abstract: >-
 # CC0-1.0, so a term can be reused, forked, or quoted with no attribution owed
 # to anyone. The surrounding repository (documents, validator, CI) is
 # Apache-2.0. See LICENSE and vocabulary.yaml's header.
-license:
-  - Apache-2.0
-  - CC0-1.0
+license: [Apache-2.0, CC0-1.0]
 version: 0.1.0
 date-released: "2026-08-12"

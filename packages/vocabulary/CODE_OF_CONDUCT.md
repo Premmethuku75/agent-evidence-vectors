@@ -77,7 +77,7 @@ themselves. This repository currently lists one maintainer, so there is no
 second person here to route such a report to. Until `MAINTAINERS.md` lists a
 second name, a report about the founding maintainer goes to GitHub directly,
 via [Report abuse][report-abuse], which does not pass through any maintainer of
-this repository. This is written down rather than left implicit, for the same
+this repository. This is written down, not left implicit, for the same
 reason the maintainers file writes down the review gap it currently has.
 
 ## Enforcement Guidelines
