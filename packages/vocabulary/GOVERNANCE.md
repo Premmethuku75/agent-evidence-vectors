@@ -52,9 +52,10 @@ conflict-free reviewer today; a filing from that system does not, and waits. Pro
 emitter that is not us. Every cited path is fetched by hand before a merge, ours included.
 
 The measurable consequence at 0.1.1 is that not one term here is canonical, because our own issuer
-does not count toward a promotion and nobody else has filed. Version 0.1.0 was different: six terms
+does not count toward a promotion and nobody has filed at all. Version 0.1.0 was different: six terms
 carried canonical status on our own issuer alone. That tag is still reachable, so both halves of
-this paragraph can be checked against the repository.
+this paragraph can be checked against the repository. Those six carried no crosswalk behind them,
+the exact defect a listing must not carry under the rule above. Nobody had filed one then either.
 
 Demoting those six is the evidence, and the current state is not. A rule that has never had to move
 against the person who wrote it has not yet been tested.
