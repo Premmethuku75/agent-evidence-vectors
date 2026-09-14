@@ -45,7 +45,7 @@ wrong is told nothing at all. The unrecognized-shape branch is a dozen lines. Re
 
 The `spec_anchor` field points at the adversarial-execution-evidence predicate specification,
 vendored and versioned in
-[astrogilda/aee-conformance](https://github.com/astrogilda/aee-conformance), the reference verifier
+[astrogilda/agent-evidence-vectors](https://github.com/astrogilda/agent-evidence-vectors), the reference verifier
 and conformance vector suite for that predicate, which is where the vocabulary defined here is
 actually spoken.
 
