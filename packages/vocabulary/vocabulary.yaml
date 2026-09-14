@@ -32,9 +32,9 @@ meta:
     evidence: what an executed artifact attempted, what a substrate beneath it
     observed or refused, how directly and from what vantage a claim was obtained,
     and how much of a declared population a claim actually covers. This registry
-    does not define identity, reputation, wallet, or reasoning-integrity terms.
-    Those are out of scope by design (see out_of_scope below); other registries
-    already cover that ground and this one does not compete with them.
+    is the vocabulary for that axis: who observed an execution, and how directly.
+    It does not define identity, reputation, wallet, or reasoning-integrity
+    terms; those are out of scope by design (see out_of_scope below).
   promotion_lifecycle: >
     Every live term starts proposed. A term is promoted to canonical only once an
     independently-maintained system that is not us emits it in a real, running
