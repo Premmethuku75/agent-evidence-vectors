@@ -1,0 +1,44 @@
+# aee-vocabulary
+
+> A closed, versioned vocabulary for the terms that describe an
+> adversarial-execution evidence claim: what an executed artifact attempted,
+> what a substrate beneath it observed or refused, from what vantage and how
+> directly a claim was obtained, and how much of a declared population it
+> covers. Independent systems crosswalk their own claim fields onto these
+> terms so that a term means one thing across vendors.
+
+The registry is a single YAML file, and every term in it is meant to land as a
+field inside a signed statement. Four terms carry the axis the rest depend on:
+`observation_vantage` and `observation_directness` say where a claim was
+obtained and how directly; `coverage_denominator` and `does_not_assert` say what
+it leaves out, inside the signed bytes. The `spec_anchor` field points at the
+adversarial-execution-evidence predicate specification, which is vendored and
+versioned in the companion conformance suite.
+
+## Entry points
+
+- [README](https://github.com/astrogilda/aee-vocabulary/blob/main/README.md): Scope, why the registry exists, and the file map.
+- [vocabulary.yaml](https://github.com/astrogilda/aee-vocabulary/blob/main/vocabulary.yaml): The registry itself, CC0-1.0. Each term carries its definition, its grounding mechanism, and where it applies a `why_this_registry` note.
+- [Governance](https://github.com/astrogilda/aee-vocabulary/blob/main/GOVERNANCE.md): Promotion and demotion rules, merge discipline, and the no-self-grounding-exemption rule that binds the founding maintainer's own systems identically to anyone else's.
+- [Contributing](https://github.com/astrogilda/aee-vocabulary/blob/main/CONTRIBUTING.md): How to file a crosswalk, with a worked example that CI runs through the validator.
+- [Maintainers](https://github.com/astrogilda/aee-vocabulary/blob/main/MAINTAINERS.md): Who maintains the registry and the recusal bar.
+
+## Crosswalks
+
+- [crosswalk/](https://github.com/astrogilda/aee-vocabulary/tree/main/crosswalk): Filed crosswalks, one file per system, starting from `TEMPLATE.yaml` there.
+- [Validator](https://github.com/astrogilda/aee-vocabulary/blob/main/scripts/validate_crosswalks.py): Runs on every change. A file whose shape it does not recognize fails loudly, naming the file, rather than being skipped.
+
+## Companion corpus
+
+- [astrogilda/agent-evidence-vectors](https://github.com/astrogilda/agent-evidence-vectors): The reference verifier and conformance vector suite for the predicate this vocabulary describes, which is where the terms defined here are actually spoken.
+
+## Identifiers
+
+- Release tag: `v0.1.1`, the version `CITATION.cff` carries.
+- Archival DOI: not yet minted. This line is replaced with the DOI when one exists.
+- [Citation](https://github.com/astrogilda/aee-vocabulary/blob/main/CITATION.cff): The machine-readable citation GitHub renders.
+
+## Optional
+
+- [License](https://github.com/astrogilda/aee-vocabulary/blob/main/LICENSE): The repository license; the registry file itself is under [LICENSE-CC0](https://github.com/astrogilda/aee-vocabulary/blob/main/LICENSE-CC0).
+- [Code of conduct](https://github.com/astrogilda/aee-vocabulary/blob/main/CODE_OF_CONDUCT.md)
