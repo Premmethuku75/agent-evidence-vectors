@@ -19,11 +19,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.1.1"
+# version: "0.2.0"
 # status: "draft - open for review"
 
 meta:
-  version: "0.1.1"
+  version: "0.2.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/astrogilda/agent-evidence-vectors"

@@ -51,7 +51,7 @@ actually spoken.
 
 ## Status
 
-Version 0.1.1.
+Version 0.2.0, tagged September 14, 2026.
 
 The initial term set came from reading the nearest comparable registry term by term and recording,
 for each of ours, whether it names ground nobody has named yet or overlaps something already in

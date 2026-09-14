@@ -8,7 +8,7 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full, and read every status key while you are in there. At version 0.1.1
+Read the registry file in full, and read every status key while you are in there. At version 0.2.0
 each one says proposed, which means the term carries a review_by date and still needs a second
 independent issuer before promotion. Nothing here is canonical yet, and the reason is that nobody
 has filed a crosswalk at all, us included. Your filing is what moves a term, and the maintainer's
@@ -49,7 +49,7 @@ instructions.
 system: your-system-name
 system_url: https://example.invalid/your/system
 crosswalk_version: "0.1.0"
-vocabulary_version_targeted: "0.1.1"
+vocabulary_version_targeted: "0.2.0"
 
 maintainer:
   github: your-github-handle
