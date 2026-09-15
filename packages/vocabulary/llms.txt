@@ -26,7 +26,7 @@ versioned in the companion conformance suite.
 ## Crosswalks
 
 - [crosswalk/](https://github.com/astrogilda/aee-vocabulary/tree/main/crosswalk): Filed crosswalks, one file per system, starting from `TEMPLATE.yaml` there.
-- [Validator](https://github.com/astrogilda/aee-vocabulary/blob/main/scripts/validate_crosswalks.py): Runs on every change. A file whose shape it does not recognize fails loudly, naming the file, rather than being skipped.
+- [Validator](https://github.com/astrogilda/aee-vocabulary/blob/main/scripts/validate_crosswalks.py): Runs on every change. A file whose shape it does not recognize fails loudly and names the file; nothing is skipped.
 
 ## Companion corpus
 
