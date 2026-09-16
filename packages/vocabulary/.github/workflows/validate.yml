@@ -23,6 +23,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate-crosswalks:
     runs-on: ubuntu-latest
@@ -31,7 +34,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml
+      - run: pip install -r requirements.txt
+
+      - name: Vulnerability scan (requirements.txt against OSV)
+        # A green pipeline with no dependency scan says nothing about the
+        # dependency. This resolves the pinned requirement against the OSV
+        # database on every push and pull request and fails the job on any
+        # advisory -- the same policy the scan uses in the author's other
+        # repositories, so all of them agree. osv-scanner is a Go binary (not
+        # on PyPI), so fetch the pinned release asset for the linux-amd64
+        # runner. There is nothing to install it from.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download v2.3.8 --repo google/osv-scanner \
+            --pattern osv-scanner_linux_amd64 --output ./osv-scanner --clobber
+          chmod +x ./osv-scanner
+          ./osv-scanner scan source --lockfile=requirements.txt
+
       - run: python3 scripts/validate_crosswalks.py
 
       - name: Run the contribution guide's own worked example through the validator
