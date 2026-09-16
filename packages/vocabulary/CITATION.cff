@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: >-
-  aee-vocabulary: a closed term registry for adversarial-execution
+  agent-evidence-vocabulary: a closed term registry for adversarial-execution
   evidence claims
 message: >-
   If a term or crosswalk-match verdict from this registry is cited, cite a
@@ -12,7 +12,7 @@ authors:
     given-names: Sankalp
     email: sankalp.gilda@gmail.com
     orcid: 'https://orcid.org/0000-0002-3645-4501'
-repository-code: https://github.com/astrogilda/aee-vocabulary
+repository-code: https://github.com/astrogilda/agent-evidence-vocabulary
 abstract: >-
   A closed, versioned vocabulary for terms that describe adversarial-execution
   evidence claims: observation vantage, observation directness, containment

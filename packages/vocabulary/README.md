@@ -1,4 +1,4 @@
-# aee-vocabulary
+# agent-evidence-vocabulary
 
 A closed, versioned vocabulary for terms that describe **adversarial-execution evidence claims**:
 what an executed artifact attempted, what a substrate beneath it observed or refused, how directly

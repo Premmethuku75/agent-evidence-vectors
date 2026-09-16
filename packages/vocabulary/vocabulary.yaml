@@ -1,4 +1,4 @@
-# aee-vocabulary: a closed term registry
+# agent-evidence-vocabulary: a closed term registry
 #
 # `canonical` is reserved here for one thing: a term's lifecycle status, reached
 # only by the promotion rule in meta. It is deliberately NOT used to mean

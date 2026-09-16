@@ -1,4 +1,4 @@
-# aee-vocabulary
+# agent-evidence-vocabulary
 
 > A closed, versioned vocabulary for the terms that describe an
 > adversarial-execution evidence claim: what an executed artifact attempted,
@@ -17,16 +17,16 @@ versioned in the companion conformance suite.
 
 ## Entry points
 
-- [README](https://github.com/astrogilda/aee-vocabulary/blob/main/README.md): Scope, why the registry exists, and the file map.
-- [vocabulary.yaml](https://github.com/astrogilda/aee-vocabulary/blob/main/vocabulary.yaml): The registry itself, CC0-1.0. Each term carries its definition, its grounding mechanism, and where it applies a `why_this_registry` note.
-- [Governance](https://github.com/astrogilda/aee-vocabulary/blob/main/GOVERNANCE.md): Promotion and demotion rules, merge discipline, and the no-self-grounding-exemption rule that binds the founding maintainer's own systems identically to anyone else's.
-- [Contributing](https://github.com/astrogilda/aee-vocabulary/blob/main/CONTRIBUTING.md): How to file a crosswalk, with a worked example that CI runs through the validator.
-- [Maintainers](https://github.com/astrogilda/aee-vocabulary/blob/main/MAINTAINERS.md): Who maintains the registry and the recusal bar.
+- [README](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/README.md): Scope, why the registry exists, and the file map.
+- [vocabulary.yaml](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/vocabulary.yaml): The registry itself, CC0-1.0. Each term carries its definition, its grounding mechanism, and where it applies a `why_this_registry` note.
+- [Governance](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/GOVERNANCE.md): Promotion and demotion rules, merge discipline, and the no-self-grounding-exemption rule that binds the founding maintainer's own systems identically to anyone else's.
+- [Contributing](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/CONTRIBUTING.md): How to file a crosswalk, with a worked example that CI runs through the validator.
+- [Maintainers](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/MAINTAINERS.md): Who maintains the registry and the recusal bar.
 
 ## Crosswalks
 
-- [crosswalk/](https://github.com/astrogilda/aee-vocabulary/tree/main/crosswalk): Filed crosswalks, one file per system, starting from `TEMPLATE.yaml` there.
-- [Validator](https://github.com/astrogilda/aee-vocabulary/blob/main/scripts/validate_crosswalks.py): Runs on every change. A file whose shape it does not recognize fails loudly and names the file; nothing is skipped.
+- [crosswalk/](https://github.com/astrogilda/agent-evidence-vocabulary/tree/main/crosswalk): Filed crosswalks, one file per system, starting from `TEMPLATE.yaml` there.
+- [Validator](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/scripts/validate_crosswalks.py): Runs on every change. A file whose shape it does not recognize fails loudly and names the file; nothing is skipped.
 
 ## Companion corpus
 
@@ -36,9 +36,9 @@ versioned in the companion conformance suite.
 
 - Release tag: `v0.2.0`, the version `CITATION.cff` carries.
 - Archival DOI: not yet minted. This line is replaced with the DOI when one exists.
-- [Citation](https://github.com/astrogilda/aee-vocabulary/blob/main/CITATION.cff): The machine-readable citation GitHub renders.
+- [Citation](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/CITATION.cff): The machine-readable citation GitHub renders.
 
 ## Optional
 
-- [License](https://github.com/astrogilda/aee-vocabulary/blob/main/LICENSE): The repository license; the registry file itself is under [LICENSE-CC0](https://github.com/astrogilda/aee-vocabulary/blob/main/LICENSE-CC0).
-- [Code of conduct](https://github.com/astrogilda/aee-vocabulary/blob/main/CODE_OF_CONDUCT.md)
+- [License](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/LICENSE): The repository license; the registry file itself is under [LICENSE-CC0](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/LICENSE-CC0).
+- [Code of conduct](https://github.com/astrogilda/agent-evidence-vocabulary/blob/main/CODE_OF_CONDUCT.md)
