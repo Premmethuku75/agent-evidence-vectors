@@ -41,7 +41,7 @@ What is matched, and where each rule comes from:
   * DOSSIER -- the private research tree's numbered dossier directories.
   * The salted-digest sidecar `.githooks/commit-msg.forbidden-words`, loaded
     exactly as `scripts/forbidden-word-scan.py` loads it (that function is
-    copied here verbatim rather than imported, so this hook has no import path
+    copied here verbatim, not imported, so this hook has no import path
     to break when it runs from a detached worktree).
 
 Nothing matched is ever echoed. Printing it would reproduce the string into a
@@ -93,8 +93,8 @@ RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
 
 
 # The organisation that owns these repositories is named in their own URLs, and a
-# URL cannot avoid naming its owner. The permit is therefore a PATH permit rather
-# than a word permit: the handle passes only where a slash and one of these three
+# URL cannot avoid naming its owner. The permit is therefore a PATH permit, not a
+# word permit: the handle passes only where a slash and one of these three
 # repository names follow it, which is exactly the shape a clone URL, a badge
 # target, a citation and a package's metadata take. The handle standing alone is
 # still refused, every other form of the name is still refused, and a sentence
@@ -313,7 +313,7 @@ def ranges_from_stdin(lines: list[str]) -> list[list[str]]:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--range", action="append", default=[], metavar="OLD..NEW",
-                        help="a revision range to scan instead of reading stdin")
+                        help="a revision range to scan; stdin is not read")
     parser.add_argument("--recent", type=int, metavar="N",
                         help="scan the last N commits reachable from HEAD")
     args = parser.parse_args(argv[1:])
