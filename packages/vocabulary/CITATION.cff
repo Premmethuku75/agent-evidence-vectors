@@ -12,14 +12,14 @@ authors:
     given-names: Sankalp
     email: sankalp.gilda@gmail.com
     orcid: 'https://orcid.org/0000-0002-3645-4501'
-repository-code: https://github.com/astrogilda/agent-evidence-vocabulary
+repository-code: https://github.com/probityai/agent-evidence-vocabulary
 abstract: >-
   A closed, versioned vocabulary for terms that describe adversarial-execution
   evidence claims: observation vantage, observation directness, containment
   posture, coverage denominators, and related evidence-quality dimensions.
   Independent implementations file crosswalks declaring how their own emitted
   claims map onto these terms. Companion project to agent-evidence-vectors
-  (https://github.com/astrogilda/agent-evidence-vectors), which hosts the predicate
+  (https://github.com/probityai/agent-evidence-vectors), which hosts the predicate
   spec this vocabulary describes and its conformance vector suite.
 # Two licenses, deliberately. vocabulary.yaml (the registry data itself) is
 # CC0-1.0, so a term can be reused, forked, or quoted with no attribution owed

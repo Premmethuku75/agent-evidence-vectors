@@ -26,7 +26,7 @@ meta:
   version: "0.2.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
-  spec_anchor_repo: "https://github.com/astrogilda/agent-evidence-vectors"
+  spec_anchor_repo: "https://github.com/probityai/agent-evidence-vectors"
   purpose: >
     A closed, versioned vocabulary for terms that describe adversarial-execution
     evidence: what an executed artifact attempted, what a substrate beneath it
