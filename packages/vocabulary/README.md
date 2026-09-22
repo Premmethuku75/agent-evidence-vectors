@@ -21,6 +21,8 @@ observed the execution and through how many hands the account of it passed:
 
 - `observation_vantage` and `observation_directness` say where a claim was obtained and how
   directly.
+- `witness_scope` says whose account it is: the observed party's own (`SELF`), another
+  participant's (`PEER`), or one from a party the observed cannot reach (`EXTERNAL`).
 - `coverage_denominator` and `does_not_assert` say what it leaves out, and say so inside the
   signed bytes.
 
