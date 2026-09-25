@@ -37,9 +37,10 @@ nothing to switch on:
 - No direct pushes to `main`. Every change goes through a pull request with CI green.
 
 **With one maintainer those two would mean nothing merges at all, so they do not apply yet, and
-this document says so where a reader will find it.** Every commit here has been a direct push, no
-pull request has ever been opened, and the history carries zero merge commits. That is the honest
-state of a registry built by one person, and it costs the reader nothing: the rule their trust
+this document says so where a reader will find it.** Changes reach `main` both ways today: as direct
+pushes, and through pull requests the founding maintainer opens and merges himself. Those two rules
+forbid both routes the day a second maintainer is listed. That is the honest state of a
+registry built by one person, and it costs the reader nothing: the rule their trust
 actually depends on is the first one, and that one has never been relaxed.
 
 The single rule guards a single failure, and it is not fraud. A registry usually starts as one
@@ -51,8 +52,9 @@ So it binds here first. The declared interest covers one system, so a filing fro
 conflict-free reviewer today; a filing from that system does not, and waits. Promotion needs an
 emitter that is not us. Every cited path is fetched by hand before a merge, ours included.
 
-The measurable consequence at 0.2.0 is that not one term here is canonical, because our own issuer
-does not count toward a promotion and nobody has filed at all. Version 0.1.0 was different: six terms
+The measurable consequence at 0.3.0 is that not one term here is canonical, because our own issuer
+does not count toward a promotion and the one crosswalk filed so far, aee-e2's, is a verifier's,
+which emits no value. Version 0.1.0 was different: six terms
 carried canonical status on our own issuer alone. That tag is still reachable, so both halves of
 this paragraph can be checked against the repository. Those six carried no crosswalk behind them,
 the exact defect a listing must not carry under the rule above. Nobody had filed one then either.
@@ -73,7 +75,7 @@ by that date, the term is demoted to reserved. It is removed at the next review-
 set on it, unless a production issuer surfaces first. A demoted term moves into the reserved block at
 the foot of `vocabulary.yaml` and is not silently deleted. That block takes two kinds of row and
 each says which it is: a term explicitly declined before it was ever proposed, and a term that was
-proposed and found none. It is empty at 0.2.0, because no review-by date has come round yet.
+proposed and found none. It is empty at 0.3.0, because no review-by date has come round yet.
 
 ## Conflict of interest
 
@@ -86,9 +88,9 @@ reviewer, not alongside another. This is the same bar CONTRIBUTING.md and MAINTA
 Committer access is granted on a sustained maintenance record, meaning reviewing other people's
 crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
 
-Nobody holds that record yet, the founding maintainer included, because no crosswalk has ever been
-filed and so none has ever been reviewed. The first person to earn committer access here will earn
-it that way. Stated plainly so a reader testing the rule against the repository finds the answer
+Nobody holds that record yet, the founding maintainer included. One crosswalk has been filed and
+reviewed, aee-e2's, and one review is not a sustained record. The first person to earn committer
+access here will earn it that way. Stated plainly so a reader testing the rule against the repository finds the answer
 already written down.
 
 ## Amending this document

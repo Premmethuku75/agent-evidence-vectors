@@ -38,6 +38,16 @@ TERM_SECTIONS = (
 )
 REQUIRED_TOP_LEVEL = ("system", "system_url", "crosswalk_version", "vocabulary_version_targeted")
 
+#: The fields a `recomputed` claim carries on top of evidence and source_path.
+#:
+#: The registry defines recomputed as agreement on EVERY accepted member of one
+#: pinned corpus revision. A state whose definition is a count has to carry the
+#: count, and the corpus it was taken over, or it is `inferred` spelled with more
+#: authority: a reader could not tell 61 of 61 from 3 of 61, or which corpus
+#: either was measured on. So the validator refuses the claim without them.
+RECOMPUTED_FIELDS = ("corpus_digest", "accepted_agreed", "accepted_total")
+_HEX64 = frozenset("0123456789abcdef")
+
 #: Required keys whose VALUE must be a plain scalar, not a mapping or a list.
 #:
 #: CONTRIBUTING.md has told filers "`system` is a plain string, not a block" since
@@ -152,6 +162,59 @@ def check_source_path_url(source_path, filename, term_name, warnings):
         )
 
 
+def check_recomputed(entry, filename, term_name, errors):
+    """Refuse a `recomputed` claim whose count or corpus is missing or does not add up.
+
+    Every failure names the field, because a filer who reads "invalid" has to guess
+    which of three things was wrong, and the whole point of the state is that each
+    of the three is checkable by a stranger."""
+    for field in RECOMPUTED_FIELDS:
+        if field not in entry:
+            fail(
+                filename,
+                f"term '{term_name}' declares evidence: recomputed and therefore MUST "
+                f"declare {field} (all of: {', '.join(RECOMPUTED_FIELDS)})",
+                errors,
+            )
+    digest = entry.get("corpus_digest")
+    if digest is not None and not (
+        isinstance(digest, str) and len(digest) == 64 and set(digest) <= _HEX64
+    ):
+        fail(
+            filename,
+            f"term '{term_name}' has corpus_digest {digest!r}; it must be the corpus's "
+            f"sha256 as 64 lowercase hex characters, the form a corpus manifest "
+            f"publishes, so a reader can match it byte for byte",
+            errors,
+        )
+    agreed, total = entry.get("accepted_agreed"), entry.get("accepted_total")
+    counts = [c for c in (agreed, total) if c is not None]
+    # bool is an int subclass in Python, and `true` is not a count.
+    if any(isinstance(c, bool) or not isinstance(c, int) for c in counts):
+        fail(
+            filename,
+            f"term '{term_name}' has accepted_agreed={agreed!r} and "
+            f"accepted_total={total!r}; both must be whole numbers",
+            errors,
+        )
+        return
+    if total is not None and total < 1:
+        fail(
+            filename,
+            f"term '{term_name}' has accepted_total={total}; agreement over no "
+            f"accepted member is not agreement, so recomputed needs at least one",
+            errors,
+        )
+    elif agreed is not None and total is not None and agreed != total:
+        fail(
+            filename,
+            f"term '{term_name}' agrees on {agreed} of {total} accepted members; "
+            f"recomputed is earned only by agreeing on all of them, and a partial "
+            f"agreement is declared as evidence: inferred",
+            errors,
+        )
+
+
 def validate_crosswalk_file(path, known_terms, match_types, evidence_states, errors, warnings):
     filename = path.name
     try:
@@ -242,8 +305,10 @@ def validate_crosswalk_file(path, known_terms, match_types, evidence_states, err
                         f"declare a source_path",
                         errors,
                     )
-                elif evidence == "emitted":
+                elif evidence in ("emitted", "recomputed"):
                     check_source_path_url(source_path, filename, term_name, warnings)
+                if evidence == "recomputed":
+                    check_recomputed(entry, filename, term_name, errors)
                 if match == "partial" and not entry.get("divergences"):
                     fail(
                         filename,
