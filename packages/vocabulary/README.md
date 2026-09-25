@@ -61,4 +61,5 @@ make their case in the definition itself.
 
 Every term is meant to land as a field inside a signed statement. Nobody consuming one should have
 to go hunting through documentation to learn what a claim withholds. Each release is tagged so a
-crosswalk has a fixed version to file against; external filings are not being solicited yet.
+crosswalk has a fixed version to file against. Filings are open, and the first came from aee-e2, an
+independent second implementation of the predicate, in pull request 2.

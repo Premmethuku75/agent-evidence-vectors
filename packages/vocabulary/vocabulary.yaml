@@ -59,8 +59,10 @@ meta:
     field_evidence_partition listed none from the start, which is why the two
     counts differ and why neither is simply eight. A listing means, in this
     registry's own words, that a system emits the value in a real running
-    artifact AND that a crosswalk saying so has been filed. Zero crosswalks have
-    ever been filed here by anyone, us included; the directory holds a template.
+    artifact AND that a crosswalk saying so has been filed. At 0.2.0 nobody had
+    filed one, us included. The first filing, aee-e2 on 2026-09-17, comes from an
+    independent verifier, which declares no term emitted and so lists no issuer;
+    its result row is what the recomputed state added in 0.3.0 is for.
     The named system is also a verifier and a vector suite, so it reads these
     fields and does not emit them from a live execution, and the paragraph above
     puts a mock outside the bar. One condition of two, on the generous reading.
