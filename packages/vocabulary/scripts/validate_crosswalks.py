@@ -329,6 +329,86 @@ def validate_crosswalk_file(path, known_terms, match_types, evidence_states, err
         )
 
 
+#: Extensions a sidecar may carry. A sidecar is a file that travels with one filed
+#: crosswalk, named `<system>-<anything>.<ext>` beside `<system>.yaml`, so a reader of
+#: the directory can tell which filing it belongs to without opening it.
+SIDECAR_EXTENSIONS = {".json", ".md"}
+
+
+def classify_directory(directory, errors):
+    """Every file in crosswalk/, sorted into crosswalks and sidecars, or an error.
+
+    The docstring at the top of this file promises that every file here passes or
+    fails loudly. Until 0.3.0 the loop read `*.yaml` only, so the first filing's two
+    sidecars, a JSON mapping and its rendering, sat in the directory unread. A file
+    this function cannot place is an error naming the file: an unread file is the
+    silent outcome this validator exists to refuse."""
+    crosswalks, sidecars = [], []
+    entries = sorted(p for p in directory.iterdir() if not p.name.startswith("."))
+    stems = {p.stem for p in entries if p.suffix == ".yaml" and p.name != "TEMPLATE.yaml"}
+    for path in entries:
+        if path.is_dir():
+            fail(path.name, "is a directory; crosswalk/ holds one flat file per filing and its sidecars", errors)
+        elif path.name == "TEMPLATE.yaml":
+            continue
+        elif path.suffix == ".yaml":
+            crosswalks.append(path)
+        elif path.suffix in SIDECAR_EXTENSIONS and any(
+            path.stem.startswith(stem + "-") for stem in stems
+        ):
+            sidecars.append(path)
+        else:
+            fail(
+                path.name,
+                f"is neither a crosswalk (<system>.yaml) nor a sidecar of one "
+                f"(<system>-<name> with extension {sorted(SIDECAR_EXTENSIONS)} beside "
+                f"<system>.yaml), so nothing here would read it",
+                errors,
+            )
+    return crosswalks, sidecars
+
+
+def check_sidecar(path, errors):
+    """A JSON sidecar must parse; a Markdown sidecar must be non-empty UTF-8."""
+    import json
+
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        fail(path.name, f"sidecar could not be read as UTF-8: {exc}", errors)
+        return
+    if not text.strip():
+        fail(path.name, "sidecar is empty", errors)
+    elif path.suffix == ".json":
+        try:
+            json.loads(text)
+        except json.JSONDecodeError as exc:
+            fail(path.name, f"sidecar is not valid JSON: {exc}", errors)
+
+
+def check_template_version(template, errors):
+    """TEMPLATE.yaml must target the registry version it ships beside.
+
+    A filer copies the template, so a template naming an older version starts every
+    new filing against a registry that no longer exists. It said 0.1.1 through the
+    0.2.0 and 0.3.0 releases. The version is read from the registry, never restated."""
+    with open(VOCAB_PATH) as f:
+        current = str(yaml.safe_load(f)["meta"]["version"])
+    try:
+        with open(template) as f:
+            targeted = str(yaml.safe_load(f).get("vocabulary_version_targeted"))
+    except (OSError, yaml.YAMLError, AttributeError) as exc:
+        fail(template.name, f"could not be read as YAML: {exc}", errors)
+        return
+    if targeted != current:
+        fail(
+            template.name,
+            f"targets vocabulary version {targeted}, and vocabulary.yaml is {current}; "
+            f"a filer copying it would start against a release that is not current",
+            errors,
+        )
+
+
 def main():
     if not VOCAB_PATH.exists():
         print(f"FATAL: {VOCAB_PATH} not found", file=sys.stderr)
@@ -338,12 +418,15 @@ def main():
 
     errors = []
     warnings = []
-    files = sorted(p for p in CROSSWALK_DIR.glob("*.yaml") if p.name != "TEMPLATE.yaml")
+    files, sidecars = classify_directory(CROSSWALK_DIR, errors)
+    check_template_version(CROSSWALK_DIR / "TEMPLATE.yaml", errors)
 
-    if not files:
+    if not files and not errors:
         print("No crosswalk files to validate (crosswalk/ is empty besides TEMPLATE.yaml).")
         return 0
 
+    for path in sidecars:
+        check_sidecar(path, errors)
     for path in files:
         validate_crosswalk_file(
             path, known_terms, match_types, evidence_states, errors, warnings
@@ -354,7 +437,8 @@ def main():
     for e in errors:
         print(f"ERROR: {e}", file=sys.stderr)
 
-    print(f"\nValidated {len(files)} crosswalk file(s): {len(errors)} error(s), {len(warnings)} warning(s).")
+    print(f"\nValidated {len(files)} crosswalk file(s) and {len(sidecars)} sidecar(s): "
+          f"{len(errors)} error(s), {len(warnings)} warning(s).")
 
     return 1 if errors else 0
 

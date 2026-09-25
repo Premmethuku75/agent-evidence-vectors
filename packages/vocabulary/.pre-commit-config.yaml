@@ -44,6 +44,13 @@ repos:
         additional_dependencies: ["PyYAML==6.0.3"]
         pass_filenames: false
         always_run: true
+      - id: crosswalk-directory
+        name: hold the validator to reading every file in crosswalk/
+        entry: python3 scripts/test_crosswalk_directory.py
+        language: python
+        additional_dependencies: ["PyYAML==6.0.3"]
+        pass_filenames: false
+        always_run: true
       - id: ruled-out-phrases
         name: reject ruled-out constructions in tracked prose
         entry: python3 scripts/lint_ruled_out_phrases.py
