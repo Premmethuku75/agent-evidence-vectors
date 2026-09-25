@@ -19,11 +19,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.2.0"
+# version: "0.3.0"
 # status: "draft - open for review"
 
 meta:
-  version: "0.2.0"
+  version: "0.3.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/probityai/agent-evidence-vectors"
@@ -59,8 +59,10 @@ meta:
     field_evidence_partition listed none from the start, which is why the two
     counts differ and why neither is simply eight. A listing means, in this
     registry's own words, that a system emits the value in a real running
-    artifact AND that a crosswalk saying so has been filed. Zero crosswalks have
-    ever been filed here by anyone, us included; the directory holds a template.
+    artifact AND that a crosswalk saying so has been filed. At 0.2.0 nobody had
+    filed one, us included. The first filing, aee-e2 on 2026-09-17, comes from an
+    independent verifier, which declares no term emitted and so lists no issuer;
+    its result row is what the recomputed state added in 0.3.0 is for.
     The named system is also a verifier and a vector suite, so it reads these
     fields and does not emit them from a live execution, and the paragraph above
     puts a mock outside the bar. One condition of two, on the generous reading.
@@ -284,10 +286,20 @@ crosswalk_match_types:
   non_equivalent_similar_label: "Same or similar term name, materially different definition, a false friend. Declared explicitly so neither side is misread as claiming the other's ground."
   no_mapping: "Honest gap. The filing system does not do this; the crosswalk says so and stops."
 
-# crosswalk_evidence_states carries exactly three members, and every key below is
+# crosswalk_evidence_states carries exactly four members, and every key below is
 # one of them. The axis exists so a filer's declaration is not read on trust: the
 # promotion trigger is keyed to evidence: emitted with a resolvable source_path,
 # checked by running validate_crosswalks.py against the cited URL.
+#
+# recomputed was added in 0.3.0 for the filer that only a verifier can be. A
+# second implementation that reads other people's signed statements emits no
+# field of its own, so emitted is closed to it, and before 0.3.0 its strongest
+# honest filing was inferred -- the same state a filer computing a value once, on
+# nothing anybody can re-run, would declare. Agreement with the reference on
+# every accepted member of a pinned corpus is a stronger fact than that and it
+# is checkable, so it gets its own state. It still promotes nothing: two
+# verifiers agreeing shows the recompute rule reproduces, and says nothing about
+# whether any issuer puts the value on the wire.
 #
 # This prose sits in a comment on purpose. It was a `definition:` key here until
 # 2026-08-30, which made a fourth sibling that any consumer enumerating this
@@ -297,6 +309,7 @@ crosswalk_evidence_states:
   emitted: "The declared value is a field in a real, signed statement a third party can fetch and read without computing or inferring anything. The ONLY state that counts toward promotion."
   inferred: "The declared value is computed by the filer from other fields, and is distinct from a value the artifact carries directly."
   asserted: "The declared value is claimed in prose (a README, a spec) with no machine-checkable artifact behind it."
+  recomputed: "The filer's own independent verifier recomputes the value from statements somebody else signed, and its value equals the reference verdict on EVERY accepted member of one pinned corpus revision. The claim names that revision in corpus_digest and states the count as accepted_agreed of accepted_total, and the two numbers must be equal; agreement on fewer than all is inferred. It records that the term's recompute rule reproduces across independent implementations. It counts toward no promotion, because two verifiers agreeing is not an issuer emitting the value."
 
 # out_of_scope: explicit non-goals, stated so a filer knows this registry
 # does not contest ground it does not claim.

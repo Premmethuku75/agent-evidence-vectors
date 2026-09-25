@@ -34,7 +34,7 @@ versioned in the companion conformance suite.
 
 ## Identifiers
 
-- Release tag: `v0.2.0`, the version `CITATION.cff` carries.
+- Release tag: `v0.3.0`, the version `CITATION.cff` carries.
 - Archival DOI: not yet minted. This line is replaced with the DOI when one exists.
 - [Citation](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CITATION.cff): The machine-readable citation GitHub renders.
 
