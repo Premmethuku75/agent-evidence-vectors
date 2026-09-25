@@ -8,7 +8,7 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full, and read every status key while you are in there. At version 0.2.0
+Read the registry file in full, and read every status key while you are in there. At version 0.3.0
 each one says proposed, which means the term carries a review_by date and still needs one
 independently-maintained issuer that is not us before promotion. Nothing here is canonical yet: the
 one crosswalk filed so far, aee-e2, is a verifier's, and a verifier emits no value, so it promotes
@@ -50,7 +50,7 @@ instructions.
 system: your-system-name
 system_url: https://example.invalid/your/system
 crosswalk_version: "0.1.0"
-vocabulary_version_targeted: "0.2.0"
+vocabulary_version_targeted: "0.3.0"
 
 maintainer:
   github: your-github-handle

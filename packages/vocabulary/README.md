@@ -51,7 +51,7 @@ actually spoken.
 
 ## Status
 
-Version 0.2.0, tagged September 14, 2026.
+Version 0.3.0, tagged September 25, 2026. It adds `recomputed` to the evidence states a crosswalk can declare, for a filer whose verifier agrees with the reference on every accepted member of a pinned corpus.
 
 The initial term set came from reading the nearest comparable registry term by term and recording,
 for each of ours, whether it names ground nobody has named yet or overlaps something already in
