@@ -69,6 +69,15 @@ jobs:
           # none found it. Reading a guide and running it are different checks.
           python3 scripts/test_contributing_example.py
 
+      - name: Hold the validator to the registry's definition of recomputed
+        run: |
+          # The registry defines evidence: recomputed as agreement on every
+          # accepted member of a pinned corpus, stated as a count. This runs one
+          # valid claim and one claim per way the count or the corpus can be
+          # wrong through the real validator, and fails unless each refusal
+          # names the field that is wrong. Offline by construction.
+          python3 scripts/test_recomputed_state.py
+
       - name: Reject ruled-out constructions in tracked prose
         run: |
           # Three phrasings this project does not publish. Separate from the

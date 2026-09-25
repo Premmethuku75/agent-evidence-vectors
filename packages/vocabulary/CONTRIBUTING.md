@@ -80,15 +80,20 @@ a validator that skips a shape it was never taught: the run stays green, your fi
 directory mapping nothing, and you learn nothing until somebody notices the gap months later.
 
 On every term you claim exact, structural, or partial on, three fields do the work. The
-evidence field takes one of emitted, inferred, or asserted, per crosswalk_evidence_states in the
-registry; claiming emitted when the reviewer cannot independently fetch and confirm the value is
-the fastest way to get a crosswalk rejected. The source path says where in your own running
+evidence field takes one of emitted, inferred, asserted, or recomputed, per crosswalk_evidence_states
+in the registry; claiming emitted when the reviewer cannot independently fetch and confirm the value
+is the fastest way to get a crosswalk rejected. A verifier, which reads statements other people
+signed and emits none, declares recomputed on a term whose value it recomputes and agrees with the
+reference on every accepted member of a pinned corpus. That claim carries three more fields, and
+the validator refuses it without them: `corpus_digest`, the corpus's sha256 as 64 lowercase hex
+characters, and `accepted_agreed` and `accepted_total`, which must be equal. Agreement on fewer than
+all is inferred. Recomputed promotes nothing, since two verifiers agreeing is not an issuer. The source path says where in your own running
 artifact the value lives, as a file path, a JSON pointer into a real example output, or a URL to a
 real endpoint. A path resolves against something that runs, where a plan, a roadmap item, or a
 schema field with no producer behind it resolves against nothing.
 
 Two things check that path and only one of them can stop you. The validator reaches it on an emitted
-claim, and what it reports is a warning, so no source path turns CI red by itself. The check that
+or recomputed claim, and what it reports is a warning, so no source path turns CI red by itself. The check that
 decides is the human one in GOVERNANCE: a reviewer fetches the path, confirms it resolves to the
 declared value, and does not merge a crosswalk whose path does not resolve. The divergences field, which a
 partial claim needs and no other claim uses, names the material way your claim differs from the
@@ -103,7 +108,7 @@ justification for ground you don't claim.
 - A reviewer without a declared interest in your system checks that every cited source path
   resolves and actually carries the declared value.
 - The validator under scripts/ runs in CI on every pull request and checks shape, enum membership,
-  and, on an emitted claim whose path is a public URL, whether that URL answers a HEAD request. It
+  and, on an emitted or recomputed claim whose path is a public URL, whether that URL answers a HEAD request. It
   reports that last one as a warning and never a failure, so it cannot refuse a merge on its own and
   does not replace the human
   fetch-and-confirm step for anything non-public.

@@ -25,7 +25,10 @@ evidence_dimensions:
     match: no_mapping   # exact | structural | partial | non_equivalent_similar_label | no_mapping
     notes: "One line."
     # For exact/structural/partial, add:
-    # evidence: emitted   # emitted | inferred | asserted
+    # evidence: emitted   # emitted | inferred | asserted | recomputed
+    # corpus_digest: "<64 lowercase hex>"   # recomputed only, with the two counts below
+    # accepted_agreed: 61                  # recomputed only; must equal accepted_total
+    # accepted_total: 61
     # source_path: "where this actually lives in a real running artifact"
     # divergences:        # partial only
     #   - "The specific, material way this differs from the registered definition."
