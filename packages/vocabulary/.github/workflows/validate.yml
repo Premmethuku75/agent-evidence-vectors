@@ -78,6 +78,14 @@ jobs:
           # names the field that is wrong. Offline by construction.
           python3 scripts/test_recomputed_state.py
 
+      - name: Hold the validator to reading every file in crosswalk/
+        run: |
+          # Every file in crosswalk/ is a crosswalk, a sidecar of one, or the
+          # template, and the template targets the current registry version. This
+          # builds a wrong directory per case and requires each to be refused by
+          # name. Offline by construction.
+          python3 scripts/test_crosswalk_directory.py
+
       - name: Reject ruled-out constructions in tracked prose
         run: |
           # Three phrasings this project does not publish. Separate from the
