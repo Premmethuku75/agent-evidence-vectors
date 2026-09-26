@@ -128,6 +128,39 @@ evidence_dimensions:
       way to tell which they are holding, and the two carry very different
       weight when the executed party had an interest in the answer.
 
+  witness_scope:
+    status: proposed
+    review_by: "2027-02-11"
+    values: [SELF, PEER, EXTERNAL]
+    definition: >
+      Who the witness is relative to the party whose execution is described:
+      the observed party itself (SELF), another participant in the same
+      interaction (PEER), or a party outside it that the observed party cannot
+      reach (EXTERNAL). Orthogonal to observation_vantage, which says what was
+      observed, and to observation_directness, which says how; this says whose
+      account a consumer is reading. Values are recorded in the casing the wire
+      carries, upper case. A consumer matches the emitted string, not a
+      normalised form.
+    source_path: "vectors[].witnessScope"
+    issuers_in_production: []
+    why_this_registry: >
+      This term was missing while a corpus of ours already emitted it, which is
+      the one failure a registry exists to prevent. Measured 2026-09-22 across
+      vectors-acs-core: 32 vectors carry witnessScope, nineteen SELF, twelve
+      PEER and one EXTERNAL, and nothing in this file defined any of the three,
+      so a consumer holding one of those vectors could not resolve its value
+      against anything. A counterparty found it by checking our own citation of
+      this registry against the registry, on
+      GenAI-Security-Project/agent-control-standard#18, and he was right. The
+      axis it names is the one the whole thesis turns on: a record written by
+      the party being described carries different weight from one written by a
+      party that party cannot reach, and a consumer cannot apply that judgement
+      unless the distinction is on the wire and defined somewhere.
+      issuers_in_production stays empty deliberately. Our own corpus emits this
+      field, and by the promotion rule in meta our own issuer does not count, so
+      the term is proposed until an independently-maintained system files a
+      crosswalk declaring it emitted with a resolvable source path.
+
   field_evidence_partition:
     status: proposed
     review_by: "2027-02-11"
