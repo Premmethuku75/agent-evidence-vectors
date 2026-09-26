@@ -135,3 +135,39 @@ This is welcome: it is how the registry covers systems whose own maintainers hav
 yet. The `third_party_authored: true` marker is what a described system's own maintainer looks for:
 it says the mapping was made from outside, so correcting or reclaiming it needs no argument about
 who filed first.
+
+## License
+
+Contributions to `vocabulary.yaml`, the registry itself, are dedicated to the
+public domain under [CC0-1.0](LICENSE-CC0), the registry's own terms, so anyone
+can reuse a term without asking. Everything else in this repository is accepted
+under [Apache-2.0](LICENSE), per section 5 of that license. There is no
+contributor license agreement to sign; the one thing asked beyond the license is
+the sign-off below.
+
+## Signing off your commits
+
+Every commit in a pull request carries a sign-off: a line at the end of the
+commit message, in the name and email of the commit's author.
+
+    Signed-off-by: Your Name <you@example.org>
+
+The line certifies the [Developer Certificate of Origin](DCO): that you wrote the
+change or otherwise have the right to submit it under this repository's license,
+and that the record of your contribution is public. The text in [`DCO`](DCO) is
+the Linux Foundation's Developer Certificate of Origin, version 1.1, unmodified.
+It is the sign-off that in-toto and the Linux Foundation's projects ask for,
+written the same way, so a commit you have signed off for one of them needs
+nothing extra here.
+
+`git commit --signoff` (or `-s`) adds the line. To add it to commits already on
+your branch, run `git rebase --signoff main` and force-push the branch.
+
+The `dco/sign-off` check verifies the line on every pull request and names each
+commit that lacks one. It does not ask for a sign-off on a merge commit, on a
+commit by a bot account, or on a maintainer's own commits, which the maintainers
+license by publishing them.
+
+A sign-off is a statement a person makes. If a coding assistant or another tool
+wrote part of a change, you review the change, you are the commit's author, and
+the sign-off is yours; a tool does not add one on your behalf.
