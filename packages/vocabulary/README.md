@@ -1,67 +1,50 @@
 # agent-evidence-vocabulary
 
-A closed, versioned vocabulary for terms that describe **adversarial-execution evidence claims**:
-what an executed artifact attempted, what a substrate beneath it observed or refused, how directly
-and from what vantage a claim was obtained, and how much of a declared population a claim actually
-covers.
+A closed, versioned vocabulary for claims about an agent's execution: what it attempted, what the
+system beneath it observed or refused, how directly and from what vantage the claim was obtained,
+and how much of a population the claim covers.
 
-One question sets the scope. When a system emits a claim about an execution, what does that claim
-actually say, and how would a reader who trusts nobody check it? Identity, reputation and wallets
-belong to other registries, and the out-of-scope block says so in the registry file itself, where a
-parser can reach it.
+It's for anyone who writes a predicate, a verifier or an evidence format for agents and needs each
+term to mean one thing across vendors, including teams who want to map their own fields onto it.
 
-## Why this exists
+## Quick start
 
-Naming the terms in an execution-evidence claim is a well-populated space. The registries in it
-share a purpose: a vocabulary that independent systems crosswalk their own claims onto, so that a
-term means one thing across vendors.
+Pin the registry at a release and check its digest:
 
-Four terms here carry the axis that decides whether any of the rest can be relied on, which is who
-observed the execution and through how many hands the account of it passed:
+```bash
+curl -fsSLO https://raw.githubusercontent.com/probityai/agent-evidence-vocabulary/v0.3.0/vocabulary.yaml
+echo "b21bbff810e86b59ceec9b9569a5cf44409affb8d61acd412f1af87474fd3f4c  vocabulary.yaml" | sha256sum -c
+```
 
-- `observation_vantage` and `observation_directness` say where a claim was obtained and how
-  directly.
-- `witness_scope` says whose account it is: the observed party's own (`SELF`), another
-  participant's (`PEER`), or one from a party the observed cannot reach (`EXTERNAL`).
-- `coverage_denominator` and `does_not_assert` say what it leaves out, and say so inside the
-  signed bytes.
+Then read a term:
 
-Full definitions and their grounding mechanisms are in vocabulary.yaml.
+```bash
+pip install PyYAML==6.0.3
+python3 -c 'import yaml; v = yaml.safe_load(open("vocabulary.yaml")); print(v["evidence_dimensions"]["observation_vantage"]["values"])'
+```
 
-## Files
+It prints `['substrate', 'artifact']`. Every term carries a definition, its allowed values and a
+lifecycle status.
 
-vocabulary.yaml is the registry itself, CC0-1.0 and public domain, so reuse it freely.
-GOVERNANCE.md carries the promotion and demotion rules, the merge discipline, and the
-no-self-grounding-exemption rule binding the founding maintainer's own systems identically to
-anyone else's. CONTRIBUTING.md says how to file one. Filed crosswalks live one file per system
-under crosswalk/, starting from TEMPLATE.yaml there.
-
-The validator is scripts/validate_crosswalks.py, and CI runs it on every change. Hand it a file
-whose shape it does not recognize and it fails, loudly, naming the file.
-
-The alternative is silence, and silence is the expensive one. A validator that skips what it cannot
-parse still reports a clean run, over crosswalks it never opened, and the filer who got the shape
-wrong is told nothing at all. The unrecognized-shape branch is a dozen lines. Read it and check.
-
-## Companion project
-
-The `spec_anchor` field points at the adversarial-execution-evidence predicate specification,
-vendored and versioned in
-[probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors), the reference verifier
-and conformance vector suite for that predicate, which is where the vocabulary defined here is
-actually spoken.
+To map your own system's fields onto the vocabulary, copy
+[`crosswalk/TEMPLATE.yaml`](https://github.com/probityai/agent-evidence-vocabulary/blob/main/crosswalk/TEMPLATE.yaml)
+and run `python3 scripts/validate_crosswalks.py` before opening a pull request.
 
 ## Status
 
-Version 0.3.0, tagged September 25, 2026. It adds `recomputed` to the evidence states a crosswalk can declare, for a filer whose verifier agrees with the reference on every accepted member of a pinned corpus.
+Release v0.3.0, tagged September 25, 2026. The registry file is CC0-1.0, and the rest of the
+repository is Apache-2.0. Every term starts as proposed and is promoted only when an independent
+system emits it; the rules are in
+[GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md).
+The first crosswalk came from aee-e2, an independent implementation of the Adversarial Execution
+Evidence predicate, in
+[pull request 2](https://github.com/probityai/agent-evidence-vocabulary/pull/2).
 
-The initial term set came from reading the nearest comparable registry term by term and recording,
-for each of ours, whether it names ground nobody has named yet or overlaps something already in
-use. Both answers occur. Five of the eight terms carry a why_this_registry note saying which, and
-that note is a field in the file, so a reader who disagrees can point at the line. The other three
-make their case in the definition itself.
+## Documentation
 
-Every term is meant to land as a field inside a signed statement. Nobody consuming one should have
-to go hunting through documentation to learn what a claim withholds. Each release is tagged so a
-crosswalk has a fixed version to file against. Filings are open, and the first came from aee-e2, an
-independent second implementation of the predicate, in pull request 2.
+| page | read it for |
+| --- | --- |
+| <a name="why-this-exists"></a><a name="files"></a><a name="companion-project"></a>[About the vocabulary](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/ABOUT.md) | why it exists, what each file is for, and how the term set was chosen |
+| [vocabulary.yaml](https://github.com/probityai/agent-evidence-vocabulary/blob/main/vocabulary.yaml) | the registry itself |
+| [GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md) and [CONTRIBUTING.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CONTRIBUTING.md) | the promotion rules, and how to file a crosswalk |
+| [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) | the predicate specification and conformance vectors this vocabulary describes |
