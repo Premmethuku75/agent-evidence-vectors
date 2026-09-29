@@ -10,10 +10,22 @@ name: dco
 # the script reads the pull request through the API. The verdict is posted as
 # the `dco/sign-off` commit status on the pull request's head commit, which is
 # the name to require in a branch ruleset.
+#
+# A pull request opened before this check existed never receives the status,
+# because none of its events fire again until the branch is pushed, and the
+# ruleset then holds it as waiting with nothing to say why. A maintainer runs
+# the check on such a pull request by dispatching this workflow with its
+# number; the status lands on the pull request's current head commit.
 
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "Number of an open pull request to check"
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -38,13 +50,22 @@ jobs:
           # Logins whose own commits need no sign-off, space separated.
           DCO_MAINTAINERS: astrogilda
           REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$PR" ]; then
             echo "This event carries no pull request, so no sign-off was checked."
             exit 0
+          fi
+          case "$PR" in
+            ''|*[!0-9]*) echo "Not a pull request number: $PR"; exit 2 ;;
+          esac
+          if [ -z "$HEAD_SHA" ]; then
+            if ! HEAD_SHA=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha); then
+              echo "Could not read pull request $PR, so no sign-off was checked."
+              exit 2
+            fi
           fi
           set +e
           bash .github/scripts/dco-check.sh "$REPO" "$PR"
