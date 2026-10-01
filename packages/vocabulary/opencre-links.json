@@ -1,0 +1,53 @@
+[
+  {
+    "id": "rp-recompute-verdict",
+    "name": "Relying party recomputes derived results from carried records",
+    "permalink": "https://github.com/probityai/agent-evidence-vocabulary/blob/v0.3.0/vocabulary.yaml#L234",
+    "term": "outcome_lattice.result",
+    "vector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/ve43b9ec3533e5ade.json",
+    "acceptVector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/v1c6fdd82db5229e4.json",
+    "opencre": [
+      {
+        "id": "307-507"
+      }
+    ],
+    "match": "structural",
+    "status": "proposed",
+    "basis": "The vocabulary result term requires recomputation. This observed-effect example tests derivation of agreement from carried values; it is not the AEE result-lattice algorithm.",
+    "spec": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/spec/predicates/observed-effect.md#parsing-rules"
+  },
+  {
+    "id": "rp-independent-vantage",
+    "name": "Relying party refuses an authoritative claim from the observed party's own vantage",
+    "permalink": "https://github.com/probityai/agent-evidence-vocabulary/blob/v0.3.0/vocabulary.yaml#L87",
+    "term": "evidence_dimensions.observation_vantage",
+    "vector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/vcdec1eae37009e6d.json",
+    "acceptVector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/v68921dec001a6df3.json",
+    "opencre": [
+      {
+        "id": "307-507"
+      }
+    ],
+    "match": "structural",
+    "status": "proposed",
+    "basis": "Vocabulary substrate/artifact and observed-effect below-observed/peer/self have different concrete enums. Consumer-pinned custody remains necessary; a carried vantage label does not prove independent operation.",
+    "spec": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/spec/predicates/observed-effect.md#fields"
+  },
+  {
+    "id": "rp-coverage-named",
+    "name": "Relying party requires incomplete coverage to identify its gaps",
+    "permalink": "https://github.com/probityai/agent-evidence-vocabulary/blob/v0.3.0/vocabulary.yaml#L193",
+    "term": "posture_and_coverage.coverage_denominator",
+    "vector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/v1cccb4774a282210.json",
+    "acceptVector": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/vectors-observed-effect/statements/v5b9ea5001ad5ce1a.json",
+    "opencre": [
+      {
+        "id": "307-507"
+      }
+    ],
+    "match": "partial",
+    "status": "proposed",
+    "basis": "The vocabulary partitions a committed population; observed-effect declares path scope and literal path gaps. They share the need to bound absence claims but are not equivalent coverage models. Named gaps do not establish complete capture.",
+    "spec": "https://github.com/probityai/agent-evidence-vectors/blob/8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d/spec/predicates/observed-effect.md#fields"
+  }
+]
