@@ -46,5 +46,6 @@ Evidence predicate, in
 | --- | --- |
 | <a name="why-this-exists"></a><a name="files"></a><a name="companion-project"></a>[About the vocabulary](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/ABOUT.md) | why it exists, what each file is for, and how the term set was chosen |
 | [vocabulary.yaml](https://github.com/probityai/agent-evidence-vocabulary/blob/main/vocabulary.yaml) | the registry itself |
+| [Proposed OpenCRE links](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/OPENCRE.md) | three relying-party checks with pinned accepting and rejecting examples |
 | [GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md) and [CONTRIBUTING.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CONTRIBUTING.md) | the promotion rules, and how to file a crosswalk |
 | [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) | the predicate specification and conformance vectors this vocabulary describes |
