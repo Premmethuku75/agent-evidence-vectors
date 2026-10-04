@@ -19,9 +19,10 @@ The files in the repository, the rule for releasing an artifact, and the command
 | `tools/discovery.py`, `tools/discoverability/` | Task navigation and machine indexes used by the site build. |
 | `src/pilot.md` | The proposed APS and PriorSeal pilot status, acceptance gates and open decisions; separate from measured Lab records. |
 | `tools/check_lab.py` | Checks register artifact hashes and measured-field bindings before the site builds. Review of claim meaning and operational independence remains explicit. |
-| `tools/build.py`, `tools/template.html`, `assets/site.css` | The site build: Markdown to HTML with pandoc, failing on any warning. |
+| `tools/build.py`, `tools/template.html`, `assets/site.css` | The site build: HTML and readable Markdown from the same expanded source, failing on any pandoc warning. |
 | `tools/gen_atlas.py`, `templates/atlas.md.in` | Renders the atlas page from `data/atlas.toml`. |
-| `tools/check_links.py` | Checks every internal link and anchor and, with `--external`, every external URL. |
+| `tools/markdown_mirrors.py` | Preserves visible page content, code and stable fragments in readable Markdown. |
+| `tools/check_links.py` | Checks HTML and generated Markdown links and anchors and, with `--external`, every external URL. |
 | `docs/` | The built site, for GitHub Pages to serve from this directory. |
 
 ## Release rule
@@ -43,6 +44,16 @@ python3 tools/check_links.py --external
 [Maintain the catalog](catalog.html) to add a project. The same build emits the
 task page, `catalog.json`, `llms.txt` and `sitemap.xml`; retained runs keep their
 own register.
+
+Each built page has a sibling `.md` URL. The HTML header advertises it with
+`rel="alternate"` and points to the agent guide with `rel="describedby"`.
+The guide links to Markdown pages. Links between built pages use their Markdown
+mirrors; pinned source URLs and retained downloads keep their original targets.
+The link checker renders each mirror before checking its destinations and anchors.
+
+Current component navigation uses the reviewed README pins in the catalog.
+Historical source rows, Lab records and retained experiment bytes keep their
+original pins and scopes.
 
 A read that fails is printed as `UNREAD` with its reason and is never counted as unchanged. GitHub's unauthenticated API allows 60 requests an hour, which covers one run; set `GITHUB_TOKEN` to raise the limit.
 
