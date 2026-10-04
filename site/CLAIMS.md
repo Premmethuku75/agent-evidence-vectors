@@ -1,7 +1,7 @@
 ---
 title: "Claim ledger"
 subtitle: "Every number, date, status and quotation on this site, with its source, when it was read, how to re-derive it, and what it does not mean"
-status: "Draft, version 0.8.8. Each row keeps its source and read time."
+status: "Draft, version 0.8.9. Each row keeps its source and read time."
 description: "The source, read time, re-derive command and limit for every claim on the site."
 ---
 
@@ -236,3 +236,4 @@ Each row's identifier starts with the letter of the page it covers: `A` for the 
 | C-09 | Home 1.7, project catalog, automation and maintenance guides 0.1, and claim ledger 0.8.4 are draft artifacts dated 2026-10-03 | `data/versions.toml`; [version ledger](versions.html) | 2026-10-03 | `python3 tools/build.py --check`; read `data/versions.toml` | Documentation revisions; retained Lab objects and evidence bytes are unchanged. |
 | C-10 | Project catalog and maintenance guide 0.2, and claim ledger 0.8.6 are draft artifacts dated 2026-10-04 | `data/versions.toml`; `data/catalog.json`; `data/catalog-sources.json`; [version ledger](versions.html) | 2026-10-04 | `python3 tools/build.py --check`; validate the catalog against its previous baseline and compare the generated public projection | Documentation revisions and refreshed README source pins; Lab records retain their separate revisions and executed scopes. |
 | C-11 | Project catalog and maintenance guide 0.3, and claim ledger 0.8.8 are draft artifacts dated 2026-10-04; current project quickstarts and summaries use reviewed public sources | `data/versions.toml`; `data/catalog.json`; `data/catalog-sources.json`; `tools/build.py`; [version ledger](versions.html) | 2026-10-04 | `python3 tools/build.py --check`; `python3 tools/check_links.py`; compare `docs/catalog.json` with the reviewed public projection | Current project navigation; retained Lab records, original source rows and experiment bytes keep their recorded claims and scopes. |
+| C-12 | Claim ledger 0.8.9 is a draft artifact dated 2026-10-04; built pages have readable Markdown mirrors with checked links and stable fragments | `data/versions.toml`; `tools/markdown_mirrors.py`; `tools/build.py`; `tools/check_links.py`; [version ledger](versions.html) | 2026-10-04 | `python3 tools/build.py --check`; `python3 tools/check_links.py`; `python3 -m pytest -q tests/test_markdown_mirrors.py` | Documentation retrieval from the same expanded public sources; original Lab claims and experiment bytes retain their scopes. |
