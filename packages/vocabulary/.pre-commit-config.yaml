@@ -51,6 +51,13 @@ repos:
         additional_dependencies: ["PyYAML==6.0.3"]
         pass_filenames: false
         always_run: true
+      - id: attribution
+        name: hold the registry to the attribution lines it carries
+        entry: python3 scripts/test_attribution.py
+        language: python
+        additional_dependencies: ["PyYAML==6.0.3"]
+        pass_filenames: false
+        always_run: true
       - id: ruled-out-phrases
         name: reject ruled-out constructions in tracked prose
         entry: python3 scripts/lint_ruled_out_phrases.py

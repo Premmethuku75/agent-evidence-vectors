@@ -141,6 +141,7 @@ evidence_dimensions:
       account a consumer is reading. Values are recorded in the casing the wire
       carries, upper case. A consumer matches the emitted string, not a
       normalised form.
+    attribution: "witness_scope (SELF, PEER, EXTERNAL): wording from Empire Labs, the bounded verdict envelope put to the commerce working group, https://github.com/aaif/wg-agentic-commerce/issues/5 (2026-08-26)"
     source_path: "vectors[].witnessScope"
     issuers_in_production: []
     why_this_registry: >

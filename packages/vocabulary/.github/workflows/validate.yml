@@ -86,6 +86,14 @@ jobs:
           # name. Offline by construction.
           python3 scripts/test_crosswalk_directory.py
 
+      - name: Hold the registry to the attribution lines it carries
+        run: |
+          # The registry is CC0 and owes nobody attribution, so the validator
+          # reads term names and never the keys under them. A credit we gave in
+          # public would vanish from a term with nothing turning red. This
+          # requires each recorded credit on its own term, by name. Offline.
+          python3 scripts/test_attribution.py
+
       - name: Reject ruled-out constructions in tracked prose
         run: |
           # Three phrasings this project does not publish. Separate from the
