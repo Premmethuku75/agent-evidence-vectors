@@ -261,6 +261,38 @@ posture_and_coverage:
       per-artifact field. A file-level list cannot say what one claim withholds,
       which is the whole question anyone relying on that claim is asking.
 
+  claim_subject:
+    status: proposed
+    review_by: "2027-04-07"
+    values: [tool, agent, organization]
+    value_definitions:
+      tool: >
+        A callable capability with a fixed definition, such as an MCP tool, a
+        function exposed to a model, or a server's tool manifest. A claim at
+        this class is about that definition and the code behind it.
+      agent: >
+        A running system that chooses which tools to call and with what
+        arguments. A claim at this class is about the decisions and effects of
+        that system during a stated run.
+      organization: >
+        The party that operates, deploys or answers for agents and tools. A
+        claim at this class is about its controls, keys or accountability.
+    definition: >
+      The class of subject a claim is about. A claim at one class is never
+      evidence at another: a result about a tool's definition says nothing
+      about an agent that called it, and a result about an agent's run says
+      nothing about the organization that operates it. A consumer MUST NOT
+      satisfy a requirement stated at one class with a claim carrying another,
+      and a claim with no declared class MUST be treated as not satisfying any
+      class-specific requirement.
+    source_path: "predicate.claimSubject"
+    issuers_in_production: []
+    why_this_registry: >
+      Indexes that grade tools, agents and organizations side by side invite a
+      consumer to read a passing tool grade as a statement about the agent or
+      the operator. The class has to travel with the claim, as a closed value,
+      or the collapse happens silently at the point of use.
+
 # outcome_lattice: the recomputable verdict a consumer derives, never a
 # policy threshold and not producer-asserted.
 outcome_lattice:
