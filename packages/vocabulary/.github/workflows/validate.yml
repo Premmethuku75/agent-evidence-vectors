@@ -78,6 +78,12 @@ jobs:
           # names the field that is wrong. Offline by construction.
           python3 scripts/test_recomputed_state.py
 
+      - name: Hold the registry and the validator to record_lifecycle
+        run: |
+          # Every revision_reason code carries a definition, and the validator
+          # accepts the term under its own section and refuses it elsewhere.
+          python3 scripts/test_record_lifecycle.py
+
       - name: Hold the validator to reading every file in crosswalk/
         run: |
           # Every file in crosswalk/ is a crosswalk, a sidecar of one, or the

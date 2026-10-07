@@ -35,6 +35,7 @@ TERM_SECTIONS = (
     "evidence_dimensions",
     "posture_and_coverage",
     "outcome_lattice",
+    "record_lifecycle",
 )
 REQUIRED_TOP_LEVEL = ("system", "system_url", "crosswalk_version", "vocabulary_version_targeted")
 
