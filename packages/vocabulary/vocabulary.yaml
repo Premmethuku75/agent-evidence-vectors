@@ -19,11 +19,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.3.0"
+# version: "0.4.0"
 # status: "draft - open for review"
 
 meta:
-  version: "0.3.0"
+  version: "0.4.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/probityai/agent-evidence-vectors"
@@ -278,6 +278,46 @@ outcome_lattice:
       its own policy threshold does so on top of this value, never inside it.
     source_path: "predicate.result"
     issuers_in_production: []
+
+# record_lifecycle: how a published record says that one of its own values
+# changed after publication. A derived value that automated consumers gate on is
+# not prose: revising it with only a last-updated date to signal the change breaks
+# the ability to reconcile the same record read at two different times. Added in
+# 0.4.0 for registries whose records carry derived fields, the first being AVE
+# (aveproject/ave issue 219), where stamping a missing vantage declaration flips
+# a derived verification basis on several records in one pass.
+record_lifecycle:
+
+  revision_reason:
+    status: proposed
+    review_by: "2027-04-07"
+    values:
+      - declaration_added
+      - declaration_corrected
+      - vocabulary_member_added
+      - derivation_rule_changed
+    value_definitions:
+      declaration_added: "A field the record omitted is now declared, and a value derived from it changed as a result (for example, a vantage declaration added where none existed)."
+      declaration_corrected: "A field the record already declared was wrong and now carries a different value."
+      vocabulary_member_added: "The schema the record is validated against gained a closed-vocabulary member, and re-deriving the record under it changed a derived value; the record's own declarations did not change."
+      derivation_rule_changed: "The rule that computes a derived value changed; the record's own declarations did not change."
+    definition: >
+      A closed code stating why one entry in a record's revision history exists,
+      carried beside a free-text reason so a consumer can count and filter
+      revisions by cause without parsing prose. One code per revision entry. The
+      entry it belongs to is an element of an optional, append-only revisions
+      array on the record, each element carrying date, field, from, to, reason and
+      reason_code. A record with no revisions array makes no claim about its own
+      history; a consumer MUST NOT read its absence as "never revised". Closed and
+      fail-closed: an unregistered reason_code makes the entry malformed.
+    entry_shape:
+      required: [date, field, from, to, reason_code]
+      optional: [reason]
+    issuers_in_production: []
+    promotion_trigger: >
+      An independently maintained registry, not us, whose published records carry
+      a revisions entry with one of these codes, filed as a crosswalk with
+      evidence: emitted and a source_path into a real record.
 
 # system_attributes: four things a FILER declares about their own system, all
 # four together. This block carries no status and no review-by date, and it is
