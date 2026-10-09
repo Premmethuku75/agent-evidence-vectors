@@ -100,6 +100,16 @@ jobs:
           # requires each recorded credit on its own term, by name. Offline.
           python3 scripts/test_attribution.py
 
+      - name: Hold the AIMM levels page to its pinned releases
+        run: |
+          # docs/aimm-levels.md names vector families, cases and admission
+          # policies at a pinned tag and commit. The offline test holds the
+          # parser; the check then reads both trees from the GitHub API, which
+          # is a network call made on purpose: the claim is about a published
+          # tree, and only that tree can settle it.
+          python3 scripts/test_check_aimm_levels.py
+          python3 scripts/check_aimm_levels.py
+
       - name: Reject ruled-out constructions in tracked prose
         run: |
           # Three phrasings this project does not publish. Separate from the
