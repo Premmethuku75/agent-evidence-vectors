@@ -109,6 +109,8 @@ jobs:
           # tree, and only that tree can settle it.
           python3 scripts/test_check_aimm_levels.py
           python3 scripts/check_aimm_levels.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Reject ruled-out constructions in tracked prose
         run: |

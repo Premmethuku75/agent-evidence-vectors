@@ -2,7 +2,8 @@
 """Check that every vector family, case and admission policy docs/aimm-levels.md names exists at its pin.
 
 The page pins agent-evidence-vectors to a tag and agent-evidence-admission to a
-commit in one HTML comment. This reads both trees from the GitHub API and fails
+commit in one HTML comment. This reads both trees from the GitHub API (with GITHUB_TOKEN when set, so a
+shared CI runner address does not hit the anonymous rate limit) and fails
 when a cited path is absent at the pin, so the table can never name a family the
 pinned release does not ship.
 
@@ -10,6 +11,7 @@ Exit 0: every cited path exists. Exit 1: at least one is missing, each named.
 Exit 2: the page or a tree could not be read, so nothing was checked.
 """
 import json
+import os
 import pathlib
 import re
 import sys
@@ -47,7 +49,11 @@ def missing(cited, tree_paths):
 
 def fetch_tree(repo, ref):
     """Return the set of every path in repo at ref."""
-    with urllib.request.urlopen(TREE_URL.format(repo=repo, ref=ref), timeout=30) as resp:
+    req = urllib.request.Request(TREE_URL.format(repo=repo, ref=ref))
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(req, timeout=30) as resp:
         body = json.load(resp)
     if body.get("truncated"):
         raise ValueError(f"{repo} tree at {ref} came back truncated")
