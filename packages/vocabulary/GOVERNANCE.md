@@ -62,6 +62,18 @@ the exact defect a listing must not carry under the rule above. Nobody had filed
 Demoting those six is the evidence, and the current state is not. A rule that has never had to move
 against the person who wrote it has not yet been tested.
 
+## Convergence and review
+
+A proposal that asks more than one party to agree names a date by which it
+should converge. If it has not converged by then, whoever opened it posts the
+options that emerged and asks a narrower yes-or-no question. A reply that never
+came is recorded as no reply, never as consent.
+
+A pull request that has waited a week with no reviewer goes on the next
+maintainer review as a standing line, with one question: who reviews it, by
+when. The line stays until a reviewer is named or the pull request is closed
+with a reason.
+
 ## Promotion and demotion
 
 A term starts as proposed. Promotion to canonical requires one independently-maintained system that
