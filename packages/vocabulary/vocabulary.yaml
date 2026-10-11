@@ -33,6 +33,10 @@ meta:
     observed or refused, how directly and from what vantage a claim was obtained,
     and how much of a declared population a claim actually covers. This registry
     is the vocabulary for that axis: who observed an execution, and how directly.
+    Since 0.4.0 it also names the decision that admits or rejects a change to
+    an agent's harness on that kind of evidence, in the change_admission
+    section, whose terms the agent-change-admission predicate under
+    docs/predicates/ carries.
     It does not define identity, reputation, wallet, or reasoning-integrity
     terms; those are out of scope by design (see out_of_scope below).
   promotion_lifecycle: >
@@ -350,6 +354,133 @@ record_lifecycle:
       An independently maintained registry, not us, whose published records carry
       a revisions entry with one of these codes, filed as a crosswalk with
       evidence: emitted and a source_path into a real record.
+
+# change_admission: the decision that admits or rejects one proposed change to
+# an AI agent's harness (its system prompt, procedures, tool-call guards and tool
+# allowlist), and the evidence that decision names. Added in 0.4.0 with the
+# agent-change-admission predicate, version 1, at
+# docs/predicates/agent-change-admission-v1.md, whose verification steps say how
+# a consumer checks each term on the wire.
+change_admission:
+
+  admission_decision:
+    status: proposed
+    review_by: "2027-04-11"
+    values: [admitted, rejected]
+    definition: >
+      The outcome of one decision on one proposed harness change, carried on the
+      wire as the boolean admitted (true is admitted, false is rejected). A
+      decision is consistent only when an admitted change passed every gate the
+      consumer requires and a rejected change failed at least one; a consumer
+      recomputes this from the decision's own checks and treats either
+      inconsistency as contradicted. A rejection is a record in its own right,
+      signed and verifiable like an admission, never a decision that was not
+      made.
+    source_path: "predicate.admitted"
+    issuers_in_production: []
+    why_this_registry: >
+      A harness change that was tried and refused is the evidence that the
+      process can say no. If only admissions are signed, a reader cannot tell a
+      process that rejects bad changes from one that never evaluated them.
+
+  admission_gate:
+    status: proposed
+    review_by: "2027-04-11"
+    values: [replay, heldout, no_regression, benign_twins, overfit_lint, authority]
+    value_definitions:
+      replay: "Every new guard, run over a declared, digest-frozen snapshot of recorded traces with each call's recorded pre-call state, fires on every target failure at or before the causing step and on no passing trace and no benign twin. Clearance needs every trace checked."
+      heldout: "On fresh held-out runs the candidate beats the better of two fresh parent runs by at least the larger of 2 and one more than the number of cases whose outcome differed between those parent runs, and a second fresh candidate run confirms it."
+      no_regression: "No must-succeed case that passed in either parent run fails in a candidate run."
+      benign_twins: "The candidate intervenes on no benign twin, a case built to resemble a failure that needs no intervention."
+      overfit_lint: "The candidate's new text carries no identifier, amount or name copied from the training traces."
+      authority: "The candidate grants no authority the parent lacked: its tool allowlist is a subset of the parent's, every parent guard and procedure is kept, and the parent's system prompt is a prefix of the candidate's, unless a human-signed approval names the exact candidate digest."
+    definition: >
+      The closed names of the checks an admission rests on, carried as
+      checks[].name with a boolean checks[].passed. The consumer pins which
+      gates it requires. A required gate absent from the record leaves the
+      decision not established. A check whose name the consumer does not
+      require, such as a cost report, is informational and never a gate.
+      Closed and fail-closed: a consumer requiring a name outside this set has
+      no definition to check it against.
+    source_path: "predicate.checks[].name"
+    issuers_in_production: []
+    why_this_registry: >
+      Two evaluators that both say "passed evaluation" can mean a single
+      re-run on the training cases or a fresh held-out comparison against a
+      measured noise floor. A gate name with one definition is what lets a
+      consumer require the second and refuse the first.
+
+  evaluation_mode:
+    status: proposed
+    review_by: "2027-04-11"
+    values: [FRESH, RECORDED, CACHED]
+    value_definitions:
+      FRESH: "Produced by a run made for this decision, every model call answered fresh."
+      RECORDED: "A stored FRESH result shown again, with the time it was produced."
+      CACHED: "A byte-identical replay of a recorded model request, for debugging."
+    definition: >
+      How an evaluation result attached to an admission was obtained. Only
+      FRESH counts toward a gate; a RECORDED or CACHED result is labelled as such
+      in the report and excluded from every count a gate uses. Values are
+      recorded in the casing the wire carries, upper case.
+    source_path: "report.results[].mode"
+    issuers_in_production: []
+    why_this_registry: >
+      A cached model response replays the past and cannot show that a changed
+      harness behaves better now. Without the label, a pass count built from
+      cached answers and one built from fresh runs read identically.
+
+  replay_coverage:
+    status: proposed
+    review_by: "2027-04-11"
+    values: [exhaustive, partial]
+    definition: >
+      Whether a guard's replay checked every trace in its declared snapshot
+      (exhaustive, stated as N of N traces checked) or stopped before the end
+      (partial, k of N). A replay may stop at its first counterexample to reject
+      a guard; only an exhaustive replay clears one. Replay shows what the guard
+      predicate does on recorded inputs, never that the counterfactual
+      continuation would have succeeded.
+    source_path: "report.coverage"
+    issuers_in_production: []
+    why_this_registry: >
+      "No false positives found" over a sample and over the whole recorded
+      history are different claims. The count travels with the verdict so a
+      consumer can require the second.
+
+  replay_snapshot:
+    status: proposed
+    review_by: "2027-04-11"
+    values: null
+    definition: >
+      The SHA-256 that freezes the set of recorded traces a guard was replayed
+      over, keyed by guard in the decision. A replay over a different set of
+      traces has a different digest, so a decision cannot be re-argued over a
+      more favourable history after the fact.
+    source_path: "predicate.corpus_digests"
+    issuers_in_production: []
+    why_this_registry: >
+      A replay result without the history it ran over cannot be repeated, and
+      a result that cannot be repeated cannot be checked.
+
+  authority_change:
+    status: proposed
+    review_by: "2027-04-11"
+    values: [none, human_approved]
+    definition: >
+      Whether a candidate harness grants authority its parent lacked, meaning a
+      tool outside the parent's allowlist, a removed or altered guard or
+      procedure, or a rewritten system prompt: none, or human_approved when a
+      human-signed approval names the exact candidate digest. A candidate that
+      grants authority without such an approval fails the authority gate. This
+      is an enforced policy about who may widen a harness, not a proof that the
+      harness is safe.
+    source_path: "predicate.checks[name=authority].evidence"
+    issuers_in_production: []
+    why_this_registry: >
+      A process that improves a harness automatically must not be able to grant
+      itself new tools. The term names the one exception, a human signature over
+      the exact candidate, so a consumer can count how often it was used.
 
 # system_attributes: four things a FILER declares about their own system, all
 # four together. This block carries no status and no review-by date, and it is
