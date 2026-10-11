@@ -47,6 +47,11 @@ In the in-toto carriage the statement's `_type` is
 decision object omits `predicateType`, and at least one entry of `subject`
 carries `digest.sha256` equal to the decision's `candidate_digest`.
 
+A statement attached to a container image names the image as its subject, so it
+cannot carry the harness digest there. A consumer that admits images binds
+`candidate_digest` to the digest of the harness it deploys, pinned in its own
+policy, and reads the subject check as satisfied only through that binding.
+
 ## Fields
 
 Every field below is required. A verifier checks them in this order and names
