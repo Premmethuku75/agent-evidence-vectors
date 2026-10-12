@@ -84,6 +84,13 @@ jobs:
           # accepts the term under its own section and refuses it elsewhere.
           python3 scripts/test_record_lifecycle.py
 
+      - name: Hold the registry, the validator and the predicate page to change_admission
+        run: |
+          # The agent-change-admission predicate page lives at the URL signed
+          # decisions carry as their predicate type, and its gate table and wire
+          # fields must agree with the change_admission terms. Offline.
+          python3 scripts/test_change_admission.py
+
       - name: Hold the validator to reading every file in crosswalk/
         run: |
           # Every file in crosswalk/ is a crosswalk, a sidecar of one, or the
