@@ -81,6 +81,16 @@ meta:
     grades other people's evidence is the first thing it has to grade.
     Verify by reading every status and issuers_in_production key in this file,
     and by listing crosswalk/.
+  opencre_links: >
+    A term whose definition states a requirement that one of OpenCRE's Common
+    Requirements organizes carries an opencre list. Each item names the CRE by
+    its full https://www.opencre.org/cre/ URL, declares the fit with one of the
+    crosswalk match types exact, structural or partial, and says in one line
+    what the term and the requirement share. OpenCRE's importer reads those URLs
+    from this file at a release tag, so the links move with the terms. A term
+    with no honest match carries no list, and docs/OPENCRE.md says why for each
+    one. scripts/check_opencre_links.py refuses any other shape, and any CRE URL
+    anywhere else in this file, comments included.
 
 # evidence_dimensions: properties of HOW a claim was obtained. They describe the
 # obtaining. What is claimed lives in posture_and_coverage and outcome_lattice
@@ -112,6 +122,10 @@ evidence_dimensions:
       in prose, phrased differently every time, because there is no key for it.
       Prose does not compose, and two systems describing the same relation in
       their own words produce claims a consumer cannot compare.
+    opencre:
+      - cre: https://www.opencre.org/cre/026-280
+        match: partial
+        basis: "Both keep the record of an execution where the executed party cannot alter it; the requirement moves logs off the host, while this term grades where each input was obtained."
 
   observation_directness:
     status: proposed
@@ -227,6 +241,10 @@ posture_and_coverage:
       not have chosen for itself. So the posture is committed by digest, and it
       is read from the substrate, never from the process being observed. A
       posture the subject could set for itself is decoration.
+    opencre:
+      - cre: https://www.opencre.org/cre/515-021
+        match: structural
+        basis: "The term records which network isolation the artifact actually ran inside, read from the substrate, so a consumer can require the isolation that requirement asks for."
 
   coverage_denominator:
     status: proposed
@@ -247,6 +265,10 @@ posture_and_coverage:
       methodology note. The usual substitute is a rule about withholding a
       result when the sample is too small, which decides whether to publish and
       says nothing about what the population was.
+    opencre:
+      - cre: https://www.opencre.org/cre/433-442
+        match: partial
+        basis: "Testing at a stated depth and coverage (SA-11) needs the assessed population named; the term commits that population so an empty result over nothing assessed cannot pass as a clean one."
 
   does_not_assert:
     status: proposed
@@ -354,6 +376,10 @@ record_lifecycle:
       An independently maintained registry, not us, whose published records carry
       a revisions entry with one of these codes, filed as a crosswalk with
       evidence: emitted and a source_path into a real record.
+    opencre:
+      - cre: https://www.opencre.org/cre/757-271
+        match: partial
+        basis: "Both require every change to carry its reason so changes can be traced; the requirement covers source check-ins, while this term covers a published record's derived values."
 
 # change_admission: the decision that admits or rejects one proposed change to
 # an AI agent's harness (its system prompt, procedures, tool-call guards and tool
@@ -382,6 +408,10 @@ change_admission:
       A harness change that was tried and refused is the evidence that the
       process can say no. If only admissions are signed, a reader cannot tell a
       process that rejects bad changes from one that never evaluated them.
+    opencre:
+      - cre: https://www.opencre.org/cre/112-648
+        match: structural
+        basis: "Each proposed change to an agent's harness gets one recorded admit or reject decision, and a rejection is signed like an admission."
 
   admission_gate:
     status: proposed
@@ -409,6 +439,13 @@ change_admission:
       re-run on the training cases or a fresh held-out comparison against a
       measured noise floor. A gate name with one definition is what lets a
       consumer require the second and refuse the first.
+    opencre:
+      - cre: https://www.opencre.org/cre/124-564
+        match: structural
+        basis: "Names the checks a harness change must pass before it is admitted, the change-control and impact-analysis step (CM-3, CM-4) applied to an agent's harness."
+      - cre: https://www.opencre.org/cre/547-824
+        match: partial
+        basis: "The heldout and no_regression gates validate the changed agent's behaviour on fresh runs; the change is to the harness, not the model, and the other gates are not validation."
 
   evaluation_mode:
     status: proposed
@@ -447,6 +484,10 @@ change_admission:
       "No false positives found" over a sample and over the whole recorded
       history are different claims. The count travels with the verdict so a
       consumer can require the second.
+    opencre:
+      - cre: https://www.opencre.org/cre/433-442
+        match: partial
+        basis: "States whether a replay checked every recorded trace or stopped early, the coverage a test result has to declare (SA-11); it covers replays of guards only."
 
   replay_snapshot:
     status: proposed
@@ -481,6 +522,13 @@ change_admission:
       A process that improves a harness automatically must not be able to grant
       itself new tools. The term names the one exception, a human signature over
       the exact candidate, so a consumer can count how often it was used.
+    opencre:
+      - cre: https://www.opencre.org/cre/524-603
+        match: structural
+        basis: "A harness change that adds a tool or removes a guard modifies the agent's access policy, and needs a human-signed approval naming the exact candidate."
+      - cre: https://www.opencre.org/cre/220-442
+        match: partial
+        basis: "Holds a candidate's tool allowlist to its parent's unless a human approves the widening; it bounds growth, and does not show the parent's set was minimal."
 
 # system_attributes: four things a FILER declares about their own system, all
 # four together. This block carries no status and no review-by date, and it is

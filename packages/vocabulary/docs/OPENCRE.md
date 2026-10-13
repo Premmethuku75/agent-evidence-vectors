@@ -1,25 +1,59 @@
-# Proposed OpenCRE links
+# OpenCRE links
 
-[`opencre-links.json`](../opencre-links.json) gives OpenCRE three concrete links
-to review: recomputing a result, checking observation vantage, and naming coverage
-gaps. Each row pairs a vocabulary term with an accepting and a rejecting
-observed-effect example. The rows target CRE `307-507`; OpenCRE has not accepted
-this proposal.
+Eight terms in [`vocabulary.yaml`](../vocabulary.yaml) carry an `opencre` list
+that links each one to the Common Requirement in [OpenCRE](https://www.opencre.org)
+whose standards state the same requirement. The links live in the registry
+itself, which is the self-maintaining method OpenCRE's contributing guide
+prefers: OpenCRE's importer reads `https://www.opencre.org/cre/NNN-NNN` URLs from
+the file at a release tag, so a link moves with its term and needs no separate
+mapping sheet. The `meta.opencre_links` key in the registry states the field's
+rules.
 
-The vocabulary source is v0.3.0 at
-`78225a7b2b6d30518f77f7d7a88df2f648008d5d`. The vector examples come from v0.16.0
-at `8d6295fb5db3e57c52df09f2fbeeb758b09f5c7d`. Their observed-effect corpus digest
-is `d708b2d69d7051adbc2f5c849a43f03e4330b0e36a05ac099948b5af33dbd042`.
+Each link declares its fit with a crosswalk match type. `structural` means the
+term and the requirement answer the same question in a different shape.
+`partial` means real overlap with a named divergence, which the basis states.
+No link here is `exact`.
 
-These are proposed control links, not an issuer crosswalk or a term promotion.
-The `match` and `basis` fields describe the actual fit. Agreement recomputation
-is one example of derived-result checking; it does not implement the whole AEE
-result lattice. Vantage labels need a consumer's trust policy. Path gaps and
-committed population denominators express different coverage models, so that
-row is a partial mapping. A passing fixture supplies no outside observer.
+| term | CRE | match | basis |
+| --- | --- | --- | --- |
+| `evidence_dimensions.observation_vantage` | [026-280](https://www.opencre.org/cre/026-280) Securely transfer logs (remotely) | partial | Both keep the record of an execution where the executed party cannot alter it; the requirement moves logs off the host, while this term grades where each input was obtained. |
+| `posture_and_coverage.containment_posture` | [515-021](https://www.opencre.org/cre/515-021) Sandbox, containerize and/or isolate applications at the network level | structural | The term records which network isolation the artifact actually ran inside, read from the substrate, so a consumer can require the isolation that requirement asks for. |
+| `posture_and_coverage.coverage_denominator` | [433-442](https://www.opencre.org/cre/433-442) Verification | partial | Testing at a stated depth and coverage (SA-11) needs the assessed population named; the term commits that population so an empty result over nothing assessed cannot pass as a clean one. |
+| `record_lifecycle.revision_reason` | [757-271](https://www.opencre.org/cre/757-271) Use source code control system with change traceability and access control | partial | Both require every change to carry its reason so changes can be traced; the requirement covers source check-ins, while this term covers a published record's derived values. |
+| `change_admission.admission_decision` | [112-648](https://www.opencre.org/cre/112-648) Change management | structural | Each proposed change to an agent's harness gets one recorded admit or reject decision, and a rejection is signed like an admission. |
+| `change_admission.admission_gate` | [124-564](https://www.opencre.org/cre/124-564) Configuration Management | structural | Names the checks a harness change must pass before it is admitted, the change-control and impact-analysis step (CM-3, CM-4) applied to an agent's harness. |
+| `change_admission.admission_gate` | [547-824](https://www.opencre.org/cre/547-824) AI model performance validation | partial | The heldout and no_regression gates validate the changed agent's behaviour on fresh runs; the change is to the harness, not the model, and the other gates are not validation. |
+| `change_admission.replay_coverage` | [433-442](https://www.opencre.org/cre/433-442) Verification | partial | States whether a replay checked every recorded trace or stopped early, the coverage a test result has to declare (SA-11); it covers replays of guards only. |
+| `change_admission.authority_change` | [524-603](https://www.opencre.org/cre/524-603) Limit modification of access controls to specifically authorized actors/users | structural | A harness change that adds a tool or removes a guard modifies the agent's access policy, and needs a human-signed approval naming the exact candidate. |
+| `change_admission.authority_change` | [220-442](https://www.opencre.org/cre/220-442) Model action privilege minimization | partial | Holds a candidate's tool allowlist to its parent's unless a human approves the widening; it bounds growth, and does not show the parent's set was minimal. |
 
-The row shape retains `id`, `name`, `permalink`, `vector`, and `opencre[].id`,
-with accepting controls and review status added. This follows the separate-import
-request in [OpenCRE #1045](https://github.com/OWASP/OpenCRE/issues/1045).
-Corrections should name the row, the source requirement, and the case that changes
-its interpretation.
+## Terms with no link
+
+Each was checked against all 522 CREs that OpenCRE's REST API returned on
+2026-10-13, reading every candidate's linked standards.
+
+| term | why no CRE fits |
+| --- | --- |
+| `evidence_dimensions.observation_directness` | no standard in OpenCRE separates a live capture from a post-hoc reconstruction |
+| `evidence_dimensions.witness_scope` | a label for whose account a record is; segregation of duties (284-521) is an anti-fraud authorization control |
+| `evidence_dimensions.field_evidence_partition` | no requirement splits one signed object's fields by which signer backs each |
+| `evidence_dimensions.issuance_time_basis` | the time requirements (770-362, NIST AU-8) trust the system clock, the opposite of an issuer-independent time floor |
+| `posture_and_coverage.does_not_assert` | the transparency requirements tell users about a system's limits, not what one signed claim withholds |
+| `posture_and_coverage.claim_subject` | no requirement separates claims about a tool, an agent and an organization |
+| `outcome_lattice.result` | the nearest, 307-507, is about where build and runtime code comes from; a verdict a relying party recomputes from carried records has no CRE |
+| `change_admission.evaluation_mode` | no requirement distinguishes a fresh evaluation from a replayed or cached one |
+| `change_admission.replay_snapshot` | archiving build data for a release (461-680) is the nearest, and pinning the evaluation input of one decision is a different requirement |
+
+## History
+
+On 2026-09-25 three terms (`result`, `observation_vantage` and
+`coverage_denominator`) were proposed under CRE 307-507 in
+[OpenCRE #1045](https://github.com/OWASP/OpenCRE/issues/1045#issuecomment-5833174570),
+and on 2026-10-01 `opencre-links.json` recorded them in this repository. Read
+against 307-507's own standards (ASVS V10.3.2, NIST SSDF PS.2.1), none of the
+three holds: those sections are about the integrity and origin of code and
+resources a deployer loads. The links above replace that file, so the registry
+is the one place a link is declared.
+
+`scripts/check_opencre_links.py` holds the registry and this page to each other
+on every push, and asks opencre.org that every linked CRE exists.

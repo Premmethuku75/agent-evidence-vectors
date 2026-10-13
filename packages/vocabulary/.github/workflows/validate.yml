@@ -1,6 +1,6 @@
-# Four checks, none of which needs a credential, so all belong on every push and
-# none on a schedule: the crosswalk validator, the guide's own worked example run
-# through it, the ruled-out-phrase check, and the forbidden-string scan.
+# Every check below needs no credential beyond the job's own token, so all of
+# them belong on every push and none on a schedule. Each step says what it holds
+# the repository to; two of them read a live service on purpose and say so.
 #
 # Hermetic is a claim worth making precisely. The validator CAN reach the network:
 # it resolves an https source_path on an emitted claim with a live HEAD request,
@@ -106,6 +106,19 @@ jobs:
           # public would vanish from a term with nothing turning red. This
           # requires each recorded credit on its own term, by name. Offline.
           python3 scripts/test_attribution.py
+
+      - name: Hold the OpenCRE links to the shape OpenCRE imports
+        run: |
+          # OpenCRE's importer reads every opencre.org CRE URL in vocabulary.yaml,
+          # so each one must be a declared link on a term, in the one shape the
+          # importer reads, and docs/OPENCRE.md must list the same links. The test
+          # builds one wrong registry per way a link can be malformed and requires
+          # each refusal by name. The check then asks opencre.org that every
+          # linked CRE exists, a network call made on purpose: only the live
+          # catalogue can say whether an id is real. Exit 2 there means the
+          # catalogue could not be asked, which fails the job and is never a pass.
+          python3 scripts/test_check_opencre_links.py
+          python3 scripts/check_opencre_links.py --live
 
       - name: Hold the AIMM levels page to its pinned releases
         run: |
