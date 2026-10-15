@@ -65,6 +65,7 @@ npm ci --prefix npm --ignore-scripts
 python3 npm/build.py --require-clean
 npm exec --prefix npm -- playwright install chromium --only-shell
 npm test --prefix npm
+python3 npm/test/release-guard.py
 ```
 
 The test packs `npm/dist`, installs the actual tarball into an empty consumer
@@ -80,6 +81,9 @@ checks, not new independent corpus evidence or a universal verifier claim.
 tool versions and artifact hashes. The packed test report records the tarball's
 SHA-256 and npm integrity string. A release must pass those checks on the actual
 installed artifact, with the source files still matching the recorded inputs.
+The release gate checks the complete stage and runtime population, native exit
+and signal values, fixture hashes, byte-profile counts, and package/source
+identity. Synthetic artifact mutation controls cannot satisfy consumer evidence.
 
 ## Release authority and provenance
 

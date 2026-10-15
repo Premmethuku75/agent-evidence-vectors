@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/npm-package.yml
 
   publish:
+    if: github.repository == 'probityai/jcs-admit'
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -44,6 +45,11 @@ jobs:
         with:
           name: ${{ needs.package.outputs.artifact-name }}
           path: qualified
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.19.0
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
       - name: verify the exact qualified artifact
         id: artifact
         run: |
@@ -55,11 +61,6 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('tarball=' + record['tarball'] + '\n')
           PY
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24.19.0
-          package-manager-cache: false
-          registry-url: https://registry.npmjs.org
       - name: publish the tested bytes with npm trusted publishing
         env:
           QUALIFIED_TARBALL: ${{ steps.artifact.outputs.tarball }}

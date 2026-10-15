@@ -16,6 +16,12 @@ def source_identity(root):
     paths += [root/'npm'/name for name in ['package.json', 'README.md', 'artifact.py', 'build.py', 'check_release.py', 'wasm/Cargo.toml', 'wasm/Cargo.lock']]
     paths += sorted(p for p in (root/'npm/lib').rglob('*') if p.is_file())
     paths += sorted((root/'npm/wasm/src').rglob('*.rs'))
+    # The release validator reads these exact qualification inputs. Keep their
+    # population in the same source identity as the validator and generator.
+    paths += [root/'npm/test/cases.mjs', root/'.github/workflows/npm-package.yml']
+    for directory in ['rfc8785/input', 'rfc8785/output', 'cross-rail/input', 'cross-rail/canonical']:
+        paths += sorted((root/'tests/vectors'/directory).glob('*.json'))
+    paths += [root/'tests/vectors'/name for name in ['attack/strings-keys-members.tsv', 'es-number-ties.tsv']]
     if any(p.is_symlink() or not p.is_file() for p in paths):
         raise ValueError('Source population contains a missing file or symlink.')
     hashes = {str(p.relative_to(root)):sha256(p.read_bytes()) for p in paths}

@@ -42,10 +42,10 @@ jobs:
       - run: cargo build --locked --features serde --example wasm_oracle
       - run: npm ci --prefix npm --ignore-scripts --no-audit --no-fund
       - run: python3 npm/build.py --require-clean
-      - run: python3 npm/test/release-guard.py
       - run: npx --no-install playwright install --with-deps chromium --only-shell
         working-directory: npm
       - run: npm test --prefix npm
+      - run: python3 npm/test/release-guard.py
       - name: verify the tested tarball and exact source identity
         run: python3 npm/check_release.py npm/test-results --commit "$GITHUB_SHA"
       - name: retain the actual tarball and native consumer records
