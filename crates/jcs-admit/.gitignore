@@ -5,3 +5,8 @@
 *.packet.md
 .jury/
 .build/
+/npm/dist/
+/npm/node_modules/
+/npm/test-results/
+/npm/.build/
+/npm/wasm/target/

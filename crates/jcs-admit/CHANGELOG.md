@@ -13,6 +13,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `Options::check_input_length` byte-cap check for allocation boundaries. The
   check does not parse or admit bytes. Native defaults and refusal fields are
   unchanged.
+- A separate public WASM binding crate for raw-byte `admit` and `admit_ijson`,
+  requiring Rust 1.81 or newer and retaining its own dependency lock. It does not
+  raise the native core's Rust or dependency floors.
+- An ESM npm package for Node and browsers, with one Rust-built WASM artifact,
+  `Uint8Array` input and output, and `JcsError` preserving native variants and
+  fields. Its first version is prepared as `0.1.0`; registry publication is a
+  separate release step.
+- Packed Node, browser and TypeScript consumer checks against the native core
+  and retained independent fixtures, plus an OIDC release workflow that publishes
+  the qualified tarball with provenance.
+
 ## 0.1.1 - 2026-09-30
 
 ### Changed

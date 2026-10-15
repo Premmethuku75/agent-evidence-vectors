@@ -45,8 +45,8 @@ It refuses a repeated object member, compared on the decoded name; nesting past 
 by default, the value the in-toto attestation specification sets; a string whose bytes aren't
 Unicode scalar values, such as an unpaired surrogate or an overlong form; a number with no finite
 double, and under the opt-in I-JSON profile an integer at or above 2^53; and an input past a size
-cap. Each refusal is a named error variant carrying a byte offset, so a verifier can act on the
-fault. Number formatting is delegated to
+cap. Each refusal is a named error variant with structured fault details, such as a byte offset
+or offending token. Number formatting is delegated to
 [serde_json_canonicalizer](https://crates.io/crates/serde_json_canonicalizer).
 
 ## Status
@@ -56,10 +56,14 @@ load vectors produced by the Go implementation in
 [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors), never by this crate,
 and every refusal is mutation-tested.
 
+Source version 0.1.2 is an unreleased candidate with optional error serialization
+and the shared byte-cap check. The npm package has its own version and release.
+
 ## Documentation
 
 | page | read it for |
 | --- | --- |
+| [JavaScript and WebAssembly](https://github.com/probityai/jcs-admit/blob/main/docs/NPM.md) | raw-byte Node and browser API, packed consumer checks and npm release status |
 | <a name="what-a-serializer-cannot-check"></a><a name="what-the-delegate-does-with-a-hostile-document"></a><a name="what-it-delegates"></a><a name="evidence"></a>[Design and evidence](https://github.com/probityai/jcs-admit/blob/main/docs/DESIGN.md) | why a serializer can't make these checks, what the delegate does with a hostile document, and the test evidence |
 | [APS canonical-byte comparison](https://github.com/probityai/jcs-admit/blob/main/interop/aps-canonical-bytes/README.md) | pinned 8-case and 10-case byte results and how to reproduce them |
 | [Python byte-profile comparison](https://github.com/probityai/jcs-admit/blob/main/interop/rfc8785-py/README.md) | independent byte cases, native raw-input refusals and a source-pinned Python consumer |

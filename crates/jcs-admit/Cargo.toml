@@ -17,7 +17,7 @@ repository = "https://github.com/probityai/jcs-admit"
 # /tools/humanizer_config holds the writing-gate Layer 3 for this crate's own prose: a
 # destination descriptor plus a gitignored capture of other crates' READMEs. It calibrates the
 # documentation and is not part of the library, so it does not ship.
-exclude = ["/.github", "/scripts", "/tools/humanizer_config", "/interop"]
+exclude = ["/.github", "/scripts", "/tools/humanizer_config", "/interop", "/npm"]
 
 [features]
 default = []
@@ -41,6 +41,10 @@ serde_json_canonicalizer = "0.3.2"
 # build a value its parser never saw, so it needs both crates directly. The
 # floor is the delegate's real one, so the floors job can test serde at 1.0.100.
 serde_json = "1.0.87"
+
+[[example]]
+name = "wasm_oracle"
+required-features = ["serde"]
 
 [lints.rust]
 unsafe_code = "forbid"
