@@ -8,6 +8,8 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -179,12 +181,39 @@ def main():
             refusal = observed(lambda: validate_artifact(directory, package, commit))
             artifact_outcomes.append({'control': label, 'expected_guard': message, 'observed_guard': refusal,
                                       'passed': refusal == message, 'fixture_tarball_sha256': package['sha256']})
+    integration = {'state': 'UNRUN', 'reason': 'Historical-report fixture mode tests validators separately; it cannot establish current clean-head release composition.'}
+    if args.consumer_receipts is None:
+        # Mirror the release job: both downloaded inputs and shell redirection
+        # stay outside the source checkout before the strict CLI checks Git.
+        before = subprocess.check_output(['git', 'status', '--porcelain=v1'], cwd=ROOT)
+        with tempfile.TemporaryDirectory(prefix='jcs-external-release-') as temporary:
+            directory = Path(temporary).resolve()
+            if directory == ROOT or ROOT in directory.parents:
+                raise RuntimeError('Release integration receipts must be outside the checkout.')
+            shutil.copyfile(source/'RESULT.json', directory/'RESULT.json')
+            shutil.copyfile(actual_tar, directory/actual_tar.name)
+            verified = directory/'verified-npm.json'
+            with verified.open('wb') as out:
+                child = subprocess.run([sys.executable, str(NPM/'check_release.py'), str(directory),
+                                        '--commit', actual_build['source_commit']], cwd=ROOT, stdout=out, stderr=subprocess.PIPE)
+            output = verified.read_bytes()
+            after = subprocess.check_output(['git', 'status', '--porcelain=v1'], cwd=ROOT)
+            (receipts/'external-integration.stdout').write_bytes(output)
+            (receipts/'external-integration.stderr').write_bytes(child.stderr)
+            passed = child.returncode == 0 and before == after == b''
+            if passed:
+                verified_record = json.loads(output)
+                passed = verified_record['source_commit'] == actual_build['source_commit'] and verified_record['tarball'] == str(directory/actual_tar.name)
+            integration = {'state': 'EXECUTED', 'native_exit': child.returncode,
+                           'receipts_outside_checkout': True, 'redirection_outside_checkout': True,
+                           'source_clean_before_and_after': before == after == b'', 'passed': passed}
     result = {
         'scope': 'Validator mutation controls only. The retained real consumer report supplies the positive report fixture. Synthetic artifact-only controls never count as clean source, installed consumers, release CLI success or publication.',
         'real_consumer_report': {'path': str(source/'RESULT.json'), 'sha256': hashlib.sha256(raw_report).hexdigest(),
                                  'tarball_sha256': hashlib.sha256(raw_tar).hexdigest()},
         'consumer_contract_controls': outcomes, 'synthetic_artifact_controls': artifact_outcomes,
-        'native_exit': 0 if all(row['passed'] for row in outcomes+artifact_outcomes) else 1,
+        'external_receipt_integration': integration,
+        'native_exit': 0 if all(row['passed'] for row in outcomes+artifact_outcomes) and integration.get('passed', True) else 1,
     }
     (receipts/'RESULT.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
