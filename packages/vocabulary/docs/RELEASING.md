@@ -77,6 +77,21 @@ the installed data outside the checkout, rebuilds from the source archive and
 checks that installed consumer too. The artifact retains source and package
 hashes, installation reports and consumer results.
 
+The release-tool lock selects setuptools 84.0.0. The source backend requires
+setuptools 77.0.3 or later for SPDX license metadata and both license files, so
+compatible build environments do not have to use that exact release toolchain.
+
+The build job has read access only. On a push to this repository's main branch,
+a separate job signs build provenance for the same checked wheel and source
+distribution. It checks their hashes after transfer and does not rebuild them.
+That job receives only `contents: read`, `id-token: write` and
+`attestations: write`. The signed bundle is retained in the separate
+`python-build-provenance` artifact; the `python-distributions` artifact keeps
+its original files. Verify each distribution with
+[`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify),
+binding the repository, workflow and exact source commit. A GitHub build
+attestation is separate from a PyPI Publish attestation and registry publication.
+
 The existing `v0.4.0` data tag stays immutable. The first Python packaging
 release uses `python-v0.4.0`, which identifies the packaging source while its
 package version still matches the contained registry. The separate tag names
@@ -87,8 +102,8 @@ and the digest checks in `scripts/check-artifacts.py` and
 Only a non-prerelease GitHub release with the matching `python-vX.Y.Z` tag on
 main can reach the publish job. Configure an [existing or pending PyPI trusted publisher](https://docs.pypi.org/trusted-publishers/)
 with owner `probityai`, repository `agent-evidence-vocabulary`, workflow
-`python-distribution.yml`, and environment `pypi`. Only the separate publisher
-job receives `id-token: write`. The pinned PyPA action uploads
+`python-distribution.yml`, and environment `pypi`. The separate publisher
+job receives `contents: read` and `id-token: write`. The pinned PyPA action uploads
 [PyPI attestations](https://docs.pypi.org/attestations/producing-attestations/)
 without an account-token or password fallback. A prepared workflow does not
 prove the account binding exists or that publication ran.
