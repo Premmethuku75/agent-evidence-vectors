@@ -5,6 +5,14 @@ All notable changes to this crate are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this crate
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.2 candidate - Unreleased
+
+### Added
+
+- Optional `serde` serialization of the existing error enum and a shared
+  `Options::check_input_length` byte-cap check for allocation boundaries. The
+  check does not parse or admit bytes. Native defaults and refusal fields are
+  unchanged.
 ## 0.1.1 - 2026-09-30
 
 ### Changed

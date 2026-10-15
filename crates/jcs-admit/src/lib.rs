@@ -179,6 +179,31 @@ impl Options {
         self
     }
 
+    /// Check only the configured byte cap before allocating an input buffer.
+    ///
+    /// This does not inspect, parse or admit any bytes. Passing the check means
+    /// only that `len` is within the configured cap, or that no cap is set.
+    /// Admission still requires [`admit_with`], which uses this same check first.
+    ///
+    /// ```
+    /// use jcs_admit::{admit_with, Error, Options};
+    /// let opts = Options::rfc8785().max_bytes(Some(16));
+    /// assert_eq!(opts.check_input_length(16), Ok(()));
+    /// assert_eq!(opts.check_input_length(17),
+    ///     Err(Error::TooLarge { len: 17, limit: 16 }));
+    /// // A length within the cap does not establish valid JSON.
+    /// assert!(opts.check_input_length(1).is_ok());
+    /// assert!(admit_with(b"{", &opts).is_err());
+    /// ```
+    pub fn check_input_length(&self, len: usize) -> Result<(), Error> {
+        if let Some(limit) = self.max_bytes {
+            if len > limit {
+                return Err(Error::TooLarge { len, limit });
+            }
+        }
+        Ok(())
+    }
+
     /// Refuse an integer outside the range where an IEEE-754 double is exact.
     #[must_use]
     pub const fn safe_integers(mut self, refuse: bool) -> Self {
@@ -274,14 +299,7 @@ pub fn admit_ijson(input: &[u8]) -> Result<Vec<u8>, Error> {
 ///
 /// As [`admit`], under the supplied [`Options`].
 pub fn admit_with(input: &[u8], opts: &Options) -> Result<Vec<u8>, Error> {
-    if let Some(limit) = opts.max_bytes {
-        if input.len() > limit {
-            return Err(Error::TooLarge {
-                len: input.len(),
-                limit,
-            });
-        }
-    }
+    opts.check_input_length(input.len())?;
     let node = parse::Parser::new(input, opts).document()?;
     serde_json_canonicalizer::to_vec(&node).map_err(|e| Error::Canonicalization {
         detail: e.to_string(),

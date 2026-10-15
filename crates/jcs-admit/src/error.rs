@@ -16,6 +16,8 @@ use core::fmt;
 /// input produces bytes two parties can disagree about, which is the whole
 /// failure canonicalization exists to remove.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(tag = "variant", content = "fields"))]
 #[non_exhaustive]
 pub enum Error {
     /// The bytes are not one syntactically valid JSON value.
