@@ -1,6 +1,6 @@
 [package]
 name = "dsse"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -9,7 +9,7 @@ repository = "https://github.com/probityai/dsse"
 documentation = "https://docs.rs/dsse"
 homepage = "https://github.com/probityai/dsse#readme"
 readme = "README.md"
-exclude = ["*.ledger.json", ".humanizer/", "/.github", "/scripts", "/vectors/generate"]
+exclude = ["*.ledger.json", ".humanizer/", "/.github", "/scripts", "/vectors/generate", "/npm"]
 keywords = ["dsse", "in-toto", "sigstore", "signing", "attestation"]
 categories = ["cryptography", "encoding"]
 

@@ -3,7 +3,8 @@
 use thiserror::Error;
 
 /// Errors from envelope, threshold and key validation, or a signing backend.
-#[derive(Debug, Error, PartialEq, Eq, Clone)]
+#[derive(Debug, Error, PartialEq, Eq, Clone, serde::Serialize)]
+#[serde(tag = "variant", content = "fields")]
 #[non_exhaustive]
 pub enum Error {
     /// The envelope was not well-formed JSON, or a required member was absent.
