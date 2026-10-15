@@ -40,3 +40,68 @@ once it is pushed.
    ```
 
    The digest must equal the one in the README's quick start.
+
+## Python data distribution
+
+The Python package is `agent-evidence-vocabulary` 0.4.0. It contains the exact
+`vocabulary.yaml` bytes from data release `v0.4.0`, with SHA-256
+`8a3ba9c501af3b190865f34eb4d27db3067638016c87b904f52712c7f00f1dac`.
+The repository keeps one copy of the YAML. The package maps that file directly
+into `agent_evidence_vocabulary`; no generated copy can drift from it.
+
+After building the checked wheel, install it with a selected YAML parser:
+
+```sh
+uv venv vocabulary-env --python 3.12
+uv pip install --python vocabulary-env/bin/python \
+  dist/agent_evidence_vocabulary-0.4.0-py3-none-any.whl PyYAML==6.0.3
+vocabulary-env/bin/python - <<'PY'
+from importlib.resources import files
+import yaml
+
+raw = files("agent_evidence_vocabulary").joinpath("vocabulary.yaml").read_bytes()
+registry = yaml.safe_load(raw)
+print(registry["evidence_dimensions"]["observation_vantage"]["values"])
+PY
+```
+
+It prints `['substrate', 'artifact']`. The data comes from the installed package;
+the consumer does not need a checkout. The package has no runtime dependency
+on a particular YAML parser. Python 3.10 or later is supported; the installed
+consumer uses Python 3.12. A package install does not promote any term or
+establish that another system emits it.
+
+The `Python distribution` workflow builds and checks wheel and source archive
+contents, both grants, the data version and every wheel RECORD hash. It reads
+the installed data outside the checkout, rebuilds from the source archive and
+checks that installed consumer too. The artifact retains source and package
+hashes, installation reports and consumer results.
+
+The existing `v0.4.0` data tag stays immutable. The first Python packaging
+release uses `python-v0.4.0`, which identifies the packaging source while its
+package version still matches the contained registry. The separate tag names
+identify two different artifacts. A later data release updates `pyproject.toml`
+and the digest checks in `scripts/check-artifacts.py` and
+`scripts/check-installed.py` with the other versioned files above.
+
+Only a non-prerelease GitHub release with the matching `python-vX.Y.Z` tag on
+main can reach the publish job. Configure an [existing or pending PyPI trusted publisher](https://docs.pypi.org/trusted-publishers/)
+with owner `probityai`, repository `agent-evidence-vocabulary`, workflow
+`python-distribution.yml`, and environment `pypi`. Only the separate publisher
+job receives `id-token: write`. The pinned PyPA action uploads
+[PyPI attestations](https://docs.pypi.org/attestations/producing-attestations/)
+without an account-token or password fallback. A prepared workflow does not
+prove the account binding exists or that publication ran.
+
+After publication, read the registry metadata, download both artifacts, compare
+their hashes and check the installed data again. Confirm provenance through
+PyPI's integrity API before reporting a provenance result. Keep the raw data
+download and its original release digest in the README until the package
+release actually exists.
+
+Regenerate the release-tool lock with:
+
+```sh
+uv pip compile --python-version 3.12 --generate-hashes --no-header --no-annotate \
+  requirements-release.in --output-file requirements-release.lock
+```

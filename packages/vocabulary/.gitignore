@@ -6,3 +6,6 @@ __pycache__/
 # into its notes, absolute paths and dossier names included. Never publishable.
 *.ledger.json
 *.humanizer-ledger.json
+.release-qualification/
+dist/
+rebuilt/
