@@ -59,6 +59,9 @@ Version 0.1.2 on [crates.io](https://crates.io/crates/dsse). The rules come from
 specification text at version 1.0.2, and the tests load cross-language fixtures built by the
 DSSE reference Go implementation, recorded in PROVENANCE.md.
 
+Source version 0.1.3 adds optional error serialization. The npm package has its
+own version, 0.1.0, and a separate registry artifact identity.
+
 ## Documentation
 
 | page | read it for |
@@ -67,6 +70,7 @@ DSSE reference Go implementation, recorded in PROVENANCE.md.
 | [Version 0.1.2 API reference](https://docs.rs/dsse/0.1.2/dsse/) | every type, trait and error in the installed release |
 | [Agent guide](llms.txt) | installation, API entry points and runnable comparisons |
 | [Sigstore JS consumer](https://github.com/probityai/dsse/blob/main/docs/SIGSTORE-JS-THRESHOLD.md) | runnable offline threshold checks under consumer-selected keys |
+| [JavaScript and browser verification](https://github.com/probityai/dsse/blob/main/docs/NPM.md) | raw-byte Ed25519 verification, checked payloads and package identity |
 | [Provenance](https://github.com/probityai/dsse/blob/main/PROVENANCE.md) | the specification text and commit each rule was read from |
 | [Contributing](https://github.com/probityai/dsse/blob/main/CONTRIBUTING.md) and [changelog](https://github.com/probityai/dsse/blob/main/CHANGELOG.md) | how to propose a change, and what each release changed |
 

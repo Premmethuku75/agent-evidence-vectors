@@ -4,6 +4,22 @@ A record of every notable change to this Rust crate. Its format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and its version numbers
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.3
+
+### Added
+
+An npm 0.1.0 package for Node and browser use, backed by the public Rust
+Ed25519 threshold verifier through WebAssembly. It accepts raw envelope/key
+bytes, returns the native verified payload and accepted-key list, and exposes
+PAE encoding. The [JavaScript guide](docs/NPM.md) records the API, public fixture,
+transport limits and package identity.
+
+Native error serialization preserves each variant's discriminant and unit,
+tuple-string or struct fields. The JavaScript `DsseError` adds the original
+display message. These additive Rust 0.1.3 changes preserve the envelope,
+base64 and threshold acceptance rules. npm and native releases have separate
+registry artifact identities.
+
 ## 0.1.2 - 2026-10-09
 
 No change to what the crate signs or verifies. This release adds release checks
