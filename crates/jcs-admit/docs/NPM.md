@@ -5,10 +5,11 @@ It builds one WebAssembly artifact from the Rust parser and canonicalizer. The
 JavaScript layer loads that artifact and represents native refusals as errors.
 It does not parse JSON, canonicalize values or translate refusal reasons.
 
-The first package is being prepared as `jcs-admit` version `0.1.0`. Source changes,
-a packed tarball and a registry release are distinct states. A successful source
-check does not establish that a package has been published. The npm version has
-its own `npm-v0.1.0` tag; the existing Rust `v0.1.1` release is unchanged.
+The npm package is `jcs-admit` version `0.1.0`. Its release tag is `npm-v0.1.0`,
+separate from the native crate's version `0.1.2`. The existing Rust `v0.1.1`
+release and its pinned consumer examples remain unchanged. Registry metadata,
+artifact hashes and provenance identify a published package; a source tag alone
+does not establish registry availability.
 
 ## Consumer contract
 
@@ -94,12 +95,12 @@ identity before requesting npm publication through OIDC. Only that job receives
 `id-token: write`, behind the `npm-release` environment. It does not rebuild the
 tarball or use a long-lived npm token.
 
-Before the first release, the npm maintainer must establish the package identity
-and configure its GitHub trusted publisher for `probityai/jcs-admit`, the exact
-`npm-release.yml` workflow and the `npm-release` environment. Registry account
+The npm trusted-publisher configuration binds the package identity to
+`probityai/jcs-admit`, the exact `npm-release.yml` workflow and the `npm-release`
+environment. Establish the package identity and configure that binding through
+npm's supported account flow before the OIDC publish job runs. Registry account
 access alone does not establish namespace ownership, direct publication authority
-or the required OTP approval. Complete that setup through npm's supported flow;
-do not place credentials in the repository or skip an account approval.
+or any required OTP approval. Credentials stay outside the repository.
 
 Use npm CLI 11.5.1 or newer on a GitHub-hosted runner. The public repository and
 package metadata permit npm's provenance attestation. After publication, check

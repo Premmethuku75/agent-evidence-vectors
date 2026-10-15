@@ -5,7 +5,7 @@ All notable changes to this crate are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this crate
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.1.2 candidate - Unreleased
+## 0.1.2
 
 ### Added
 
@@ -18,8 +18,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   raise the native core's Rust or dependency floors.
 - An ESM npm package for Node and browsers, with one Rust-built WASM artifact,
   `Uint8Array` input and output, and `JcsError` preserving native variants and
-  fields. Its first version is prepared as `0.1.0`; registry publication is a
-  separate release step.
+  fields. Its first version is `0.1.0`, with its own `npm-v0.1.0` release tag and
+  registry artifact identity.
 - Packed Node, browser and TypeScript consumer checks against the native core
   and retained independent fixtures, plus an OIDC release workflow that publishes
   the qualified tarball with provenance.

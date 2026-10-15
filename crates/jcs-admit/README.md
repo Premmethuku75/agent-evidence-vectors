@@ -56,14 +56,14 @@ load vectors produced by the Go implementation in
 [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors), never by this crate,
 and every refusal is mutation-tested.
 
-Source version 0.1.2 is an unreleased candidate with optional error serialization
-and the shared byte-cap check. The npm package has its own version and release.
+Source version 0.1.2 adds optional error serialization and the shared byte-cap
+check. The npm package has its own version and release.
 
 ## Documentation
 
 | page | read it for |
 | --- | --- |
-| [JavaScript and WebAssembly](https://github.com/probityai/jcs-admit/blob/main/docs/NPM.md) | raw-byte Node and browser API, packed consumer checks and npm release status |
+| [JavaScript and WebAssembly](https://github.com/probityai/jcs-admit/blob/main/docs/NPM.md) | raw-byte Node and browser API, packed consumer checks and release verification |
 | <a name="what-a-serializer-cannot-check"></a><a name="what-the-delegate-does-with-a-hostile-document"></a><a name="what-it-delegates"></a><a name="evidence"></a>[Design and evidence](https://github.com/probityai/jcs-admit/blob/main/docs/DESIGN.md) | why a serializer can't make these checks, what the delegate does with a hostile document, and the test evidence |
 | [APS canonical-byte comparison](https://github.com/probityai/jcs-admit/blob/main/interop/aps-canonical-bytes/README.md) | pinned 8-case and 10-case byte results and how to reproduce them |
 | [Python byte-profile comparison](https://github.com/probityai/jcs-admit/blob/main/interop/rfc8785-py/README.md) | independent byte cases, native raw-input refusals and a source-pinned Python consumer |

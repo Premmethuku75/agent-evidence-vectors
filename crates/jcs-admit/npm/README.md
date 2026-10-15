@@ -4,8 +4,8 @@ Admit raw JSON bytes before signing or hashing them. This package calls the same
 Rust parser and RFC 8785 canonicalizer as the `jcs-admit` crate. It refuses
 duplicate members and malformed raw strings before decoding can lose them.
 
-This is the first npm distribution, prepared from the existing public Rust core.
-Until a registry release is recorded, install the built tarball:
+The npm distribution is `jcs-admit` version `0.1.0`, built from the public Rust
+core. To install a locally built tarball:
 
 ```sh
 npm install ./jcs-admit-0.1.0.tgz
@@ -54,4 +54,4 @@ try {
 
 Canonicalization is one primitive. It does not establish a signature, an evidence
 claim or a policy decision. See the [public source and build guide](https://github.com/probityai/jcs-admit/blob/main/docs/NPM.md)
-for exact profiles, artifact identity, parity tests and release status.
+for exact profiles, artifact identity, parity tests and release verification.
