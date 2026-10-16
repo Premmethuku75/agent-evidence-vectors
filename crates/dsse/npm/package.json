@@ -20,7 +20,7 @@
     "./browser": { "types": "./lib/browser.d.ts", "default": "./lib/browser.mjs" }
   },
   "files": ["lib", "generated", "README.md", "LICENSE", "BUILD.json"],
-  "publishConfig": { "access": "public", "provenance": true },
+  "publishConfig": { "access": "public" },
   "scripts": {
     "build": "python3 build.py",
     "test": "node test/packed-consumers.mjs"
