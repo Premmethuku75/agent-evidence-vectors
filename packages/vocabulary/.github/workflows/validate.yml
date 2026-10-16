@@ -171,3 +171,23 @@ jobs:
             echo "::error::The forbidden-string rule list failed to load; nothing was verified."
             exit 1
           fi
+
+  published-corpus-values:
+    # The closed values this registry defines, held against the corpora that
+    # the published agent-evidence-vectors package ships, installed from PyPI
+    # by version and wheel hash the way any consumer would get them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Install the published corpora
+        run: |
+          echo "agent-evidence-vectors==0.18.1 --hash=sha256:3953c8ab3c48f3e8b6d1779c2eafacb997f0336555ea0e1e6a83056fe2c5755f" > "$RUNNER_TEMP/corpora.lock"
+          pip install --no-deps --require-hashes -r "$RUNNER_TEMP/corpora.lock"
+      - name: Hold the check to refusing an undefined value
+        run: python3 scripts/check_published_corpus_values.py --self-test
+      - name: Hold the published corpora to the registry's closed values
+        run: python3 scripts/check_published_corpus_values.py
