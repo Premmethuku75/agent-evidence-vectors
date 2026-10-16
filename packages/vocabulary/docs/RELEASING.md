@@ -99,6 +99,9 @@ identify two different artifacts. A later data release updates `pyproject.toml`
 and the digest checks in `scripts/check-artifacts.py` and
 `scripts/check-installed.py` with the other versioned files above.
 
+A data release with a `vX.Y.Z` tag does not start the `Python distribution`
+workflow's release path; only a `python-vX.Y.Z` release does.
+
 Only a non-prerelease GitHub release with the matching `python-vX.Y.Z` tag on
 main can reach the publish job. Configure an [existing or pending PyPI trusted publisher](https://docs.pypi.org/trusted-publishers/)
 with owner `probityai`, repository `agent-evidence-vocabulary`, workflow
