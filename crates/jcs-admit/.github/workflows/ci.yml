@@ -130,3 +130,24 @@ jobs:
             tests/vectors/rfc8785
             tests/vectors/cross-rail
 
+
+  # Replays the RFC 8785 target of the a2a-jcs-v01 corpus, as shipped in a pinned
+  # agent-evidence-vectors release, against `admit` through examples/a2a_jcs.rs,
+  # using the published GitHub Action the way any other canonicalizer would.
+  a2a-jcs-vectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: cargo build --locked --example a2a_jcs
+      - name: replay the published a2a-jcs-v01 corpus, rfc8785 target
+        uses: probityai/agent-evidence-vectors@33d545104ff2f8c124cff465c96c013eeb809156 # v0.18.1
+        env:
+          A2A_JCS_TARGET: rfc8785
+        with:
+          corpus: vectors-a2a-jcs-v01
+          verifier: target/debug/examples/a2a_jcs
