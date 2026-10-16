@@ -33,6 +33,10 @@ sha2 = "0.11"
 name = "wasm_oracle"
 required-features = ["ed25519"]
 
+[[example]]
+name = "verify_corpus"
+required-features = ["ed25519"]
+
 [lints.rust]
 unsafe_code = "forbid"
 missing_docs = "deny"

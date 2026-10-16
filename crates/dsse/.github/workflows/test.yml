@@ -75,3 +75,25 @@ jobs:
         run: |
           go run . > "$RUNNER_TEMP/regenerated.json"
           diff -u ../cross_lang_signing.json "$RUNNER_TEMP/regenerated.json"
+
+  # Verifies every envelope of the agent audit record corpus shipped in the
+  # pinned agent-evidence-vectors package from PyPI, under the observer key its
+  # manifest publishes, and refuses a one-byte payload tamper of each.
+  published-envelopes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install the stable toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Verify the published audit record envelopes
+        run: |
+          corpus="$(uv run --no-project --python 3.13 --with agent-evidence-vectors==0.18.1 \
+            python -c 'import agent_evidence_vectors as a, pathlib; print(pathlib.Path(a.__file__).parent / "corpora" / "vectors-agent-audit-record")')"
+          test -f "$corpus/MANIFEST.json"
+          cargo run --locked --example verify_corpus -- "$corpus"
