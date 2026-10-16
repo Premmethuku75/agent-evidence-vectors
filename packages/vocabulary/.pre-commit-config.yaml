@@ -23,9 +23,15 @@ repos:
 
   - repo: local
     hooks:
+      # Unless VALIDATE_CROSSWALKS_OFFLINE is set, the validator sends a HEAD
+      # request to the source_path of each entry declaring evidence: emitted or
+      # recomputed (one, in aee-e2.yaml, today), which breaks the no-network
+      # promise above. Offline, it prints each skipped source_path as a warning
+      # instead. pre-commit has no per-hook env key, so env(1) sets the
+      # variable in the entry.
       - id: validate-crosswalks
         name: validate every crosswalk against vocabulary.yaml
-        entry: python3 scripts/validate_crosswalks.py
+        entry: env VALIDATE_CROSSWALKS_OFFLINE=1 python3 scripts/validate_crosswalks.py
         language: python
         additional_dependencies: ["PyYAML==6.0.3"]
         pass_filenames: false
