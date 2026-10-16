@@ -14,13 +14,14 @@ the envelope without taking a whole attestation stack along with it.
 
 ## Quick start
 
-Add it as a pinned dependency:
+Add it as a pinned dependency of a new project:
 
 ```bash
-cargo add dsse@=0.1.2
+cargo new dsse-demo && cd dsse-demo
+cargo add dsse@=0.1.3
 ```
 
-Then sign an envelope and verify it:
+Then put this in `src/main.rs` to sign an envelope and verify it:
 
 ```rust
 use dsse::{sign, verify, Ed25519Signer};
@@ -57,19 +58,19 @@ ed25519 feature and implement the `Signer` and `Verifier` traits.
 
 ## Status
 
-Version 0.1.2 on [crates.io](https://crates.io/crates/dsse). The rules come from DSSE's
+Version 0.1.3 on [crates.io](https://crates.io/crates/dsse). The rules come from DSSE's
 specification text at version 1.0.2, and the tests load cross-language fixtures built by the
 DSSE reference Go implementation, recorded in PROVENANCE.md.
 
-Source version 0.1.3 adds optional error serialization. The npm package has its
-own version, 0.1.0, and a separate registry artifact identity.
+Version 0.1.3 adds optional error serialization. The npm package described in
+[the JavaScript guide](https://github.com/probityai/dsse/blob/main/docs/NPM.md) has its own version, 0.1.0, and is not yet on the npm registry.
 
 ## Documentation
 
 | page | read it for |
 | --- | --- |
 | <a name="what-a-signature-covers"></a><a name="verify-then-read"></a><a name="bring-your-own-signatures"></a><a name="tests"></a><a name="provenance"></a>[Design and evidence](https://github.com/probityai/dsse/blob/main/docs/DESIGN.md) | the pre-authentication encoding, why verification returns the payload, each refusal and its reason, and the tests |
-| [Version 0.1.2 API reference](https://docs.rs/dsse/0.1.2/dsse/) | every type, trait and error in the installed release |
+| [Version 0.1.3 API reference](https://docs.rs/dsse/0.1.3/dsse/) | every type, trait and error in the installed release |
 | [Agent guide](llms.txt) | installation, API entry points and runnable comparisons |
 | [Sigstore JS consumer](https://github.com/probityai/dsse/blob/main/docs/SIGSTORE-JS-THRESHOLD.md) | runnable offline threshold checks under consumer-selected keys |
 | [JavaScript and browser verification](https://github.com/probityai/dsse/blob/main/docs/NPM.md) | raw-byte Ed25519 verification, checked payloads and package identity |
