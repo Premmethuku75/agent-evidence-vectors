@@ -44,6 +44,7 @@ jobs:
   visibility:
     name: Can Scorecard run here
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       public: ${{ steps.read.outputs.public }}
     steps:
@@ -73,6 +74,7 @@ jobs:
     needs: visibility
     if: needs.visibility.outputs.public == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       # Needed to upload the SARIF result to code scanning.
       security-events: write
