@@ -36,8 +36,8 @@ Release v0.4.0, tagged October 13, 2026. The registry file is CC0-1.0, and the r
 repository is Apache-2.0. Every term starts as proposed and is promoted only when an independent
 system emits it; the rules are in
 [GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md).
-The first crosswalk came from aee-e2, an independent implementation of the Adversarial Execution
-Evidence predicate, in
+The first crosswalk came from an independent implementation of the Adversarial Execution Evidence
+predicate, in
 [pull request 2](https://github.com/probityai/agent-evidence-vocabulary/pull/2).
 
 ## Documentation

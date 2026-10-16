@@ -11,7 +11,7 @@ they honestly don't."
 Read the registry file in full, and read every status key while you are in there. At version 0.4.0
 each one says proposed, which means the term carries a review_by date and still needs one
 independently-maintained issuer that is not us before promotion. Nothing here is canonical yet: the
-one crosswalk filed so far, aee-e2, is a verifier's, and a verifier emits no value, so it promotes
+one crosswalk filed so far is a verifier's, and a verifier emits no value, so it promotes
 nothing. Your filing is what moves a term, and the maintainer's own systems are held to the same
 bar, which is why they have not moved one either.
 

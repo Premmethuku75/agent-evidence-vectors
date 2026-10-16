@@ -53,7 +53,7 @@ conflict-free reviewer today; a filing from that system does not, and waits. Pro
 emitter that is not us. Every cited path is fetched by hand before a merge, ours included.
 
 The measurable consequence at 0.4.0 is that not one term here is canonical, because our own issuer
-does not count toward a promotion and the one crosswalk filed so far, aee-e2's, is a verifier's,
+does not count toward a promotion and the one crosswalk filed so far is a verifier's,
 which emits no value. Version 0.1.0 was different: six terms
 carried canonical status on our own issuer alone. That tag is still reachable, so both halves of
 this paragraph can be checked against the repository. Those six carried no crosswalk behind them,
@@ -101,7 +101,7 @@ Committer access is granted on a sustained maintenance record, meaning reviewing
 crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
 
 Nobody holds that record yet, the founding maintainer included. One crosswalk has been filed and
-reviewed, aee-e2's, and one review is not a sustained record. The first person to earn committer
+reviewed, and one review is not a sustained record. The first person to earn committer
 access here will earn it that way. Stated plainly so a reader testing the rule against the repository finds the answer
 already written down.
 
