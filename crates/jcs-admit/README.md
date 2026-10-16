@@ -15,13 +15,14 @@ DSSE payloads or signed receipts.
 
 ## Quick start
 
-Add it as a pinned dependency:
+Add it as a pinned dependency of a new project:
 
 ```bash
-cargo add jcs-admit@=0.1.1
+cargo new jcs-admit-demo && cd jcs-admit-demo
+cargo add jcs-admit@=0.1.2
 ```
 
-Then admit a document before you sign it:
+Then put this in `src/main.rs` to admit a document before you sign it:
 
 ```rust
 use jcs_admit::{admit, Error};
@@ -53,13 +54,13 @@ or offending token. Number formatting is delegated to
 
 ## Status
 
-Version 0.1.1 on [crates.io](https://crates.io/crates/jcs-admit), minimum Rust 1.74. The tests
+Version 0.1.2 on [crates.io](https://crates.io/crates/jcs-admit), minimum Rust 1.74. The tests
 load vectors produced by the Go implementation in
 [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors), never by this crate,
 and every refusal is mutation-tested.
 
-Source version 0.1.2 adds optional error serialization and the shared byte-cap
-check. The npm package has its own version and release.
+Version 0.1.2 adds optional error serialization and the shared byte-cap
+check. The npm package has its own version and release, and is not yet on the npm registry.
 
 ## Documentation
 
@@ -70,7 +71,7 @@ check. The npm package has its own version and release.
 | [APS canonical-byte comparison](https://github.com/probityai/jcs-admit/blob/main/interop/aps-canonical-bytes/README.md) | pinned 8-case and 10-case byte results and how to reproduce them |
 | [Python byte-profile comparison](https://github.com/probityai/jcs-admit/blob/main/interop/rfc8785-py/README.md) | independent byte cases, native raw-input refusals and a source-pinned Python consumer |
 | [Go raw-admission adapter](https://github.com/probityai/jcs-admit/blob/main/interop/go-jcs/README.md) | pinned Go bytes, original input admission and explicit root/profile boundaries |
-| [Version 0.1.1 API reference](https://docs.rs/jcs-admit/0.1.1/jcs_admit/) | every function, option and error variant in the installed release |
+| [Version 0.1.2 API reference](https://docs.rs/jcs-admit/0.1.2/jcs_admit/) | every function, option and error variant in the installed release |
 | [Agent guide](llms.txt) | raw-input admission, profile selection and runnable comparisons |
 | [Comparison with other RFC 8785 crates](https://github.com/probityai/jcs-admit/blob/main/docs/INCUMBENT-MEASUREMENT.md) | how seven RFC 8785 crates on crates.io handle hostile input |
 | [Mutation sweep](https://github.com/probityai/jcs-admit/blob/main/docs/MUTATION-SWEEP.md) | how each refusal was shown to be tested |
