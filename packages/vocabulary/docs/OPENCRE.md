@@ -38,8 +38,18 @@ Each was checked against all 522 CREs that OpenCRE's REST API returned on
 | `evidence_dimensions.witness_scope` | a label for whose account a record is; segregation of duties (284-521) is an anti-fraud authorization control |
 | `evidence_dimensions.field_evidence_partition` | no requirement splits one signed object's fields by which signer backs each |
 | `evidence_dimensions.issuance_time_basis` | the time requirements (770-362, NIST AU-8) trust the system clock, the opposite of an issuer-independent time floor |
+| `evidence_dimensions.attestation_tier` | no requirement separates a subject the signer re-derived from one it signed as supplied |
+| `evidence_dimensions.origin_kind` | no requirement names which party assembled a record |
+| `evidence_dimensions.independence_basis` | no requirement records whether a guarantee was shown by sources independent of the party it is about |
+| `evidence_dimensions.party_role` | no requirement assigns named roles to the parties around one evidence set |
+| `evidence_dimensions.control_relation` | no requirement states who can direct the party a claim is about |
+| `evidence_dimensions.evidence_origin_class` | no requirement classes an evidence item by the act that produced it |
+| `evidence_dimensions.intent_binding` | no requirement fixes whether an action's authorizing intent was committed before it ran or asserted after |
 | `posture_and_coverage.does_not_assert` | the transparency requirements tell users about a system's limits, not what one signed claim withholds |
 | `posture_and_coverage.claim_subject` | no requirement separates claims about a tool, an agent and an organization |
+| `posture_and_coverage.base_state_resolution` | no requirement fixes how the before-state of an observed change interval is resolved |
+| `posture_and_coverage.set_sufficiency` | no requirement grades an evidence set's sufficiency apart from each item's reliability |
+| `posture_and_coverage.material_change_trigger` | change management (112-648) governs changes to a system; ending a standing claim when an assumed circumstance changes is a different requirement |
 | `outcome_lattice.result` | the nearest, 307-507, is about where build and runtime code comes from; a verdict a relying party recomputes from carried records has no CRE |
 | `change_admission.evaluation_mode` | no requirement distinguishes a fresh evaluation from a replayed or cached one |
 | `change_admission.replay_snapshot` | archiving build data for a release (461-680) is the nearest, and pinning the evaluation input of one decision is a different requirement |

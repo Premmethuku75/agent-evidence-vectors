@@ -43,9 +43,9 @@ once it is pushed.
 
 ## Python data distribution
 
-The Python package is `agent-evidence-vocabulary` 0.4.0. It contains the exact
-`vocabulary.yaml` bytes from data release `v0.4.0`, with SHA-256
-`8a3ba9c501af3b190865f34eb4d27db3067638016c87b904f52712c7f00f1dac`.
+The Python package is `agent-evidence-vocabulary` 0.5.0. It contains the exact
+`vocabulary.yaml` bytes from data release `v0.5.0`, with SHA-256
+`6555b8c6e6c4fa6ebe3c59f6e95619ec383f93a0615036bed9da8a49f6302e09`.
 The repository keeps one copy of the YAML. The package maps that file directly
 into `agent_evidence_vocabulary`; no generated copy can drift from it.
 
@@ -54,7 +54,7 @@ After building the checked wheel, install it with a selected YAML parser:
 ```sh
 uv venv vocabulary-env --python 3.12
 uv pip install --python vocabulary-env/bin/python \
-  dist/agent_evidence_vocabulary-0.4.0-py3-none-any.whl PyYAML==6.0.3
+  dist/agent_evidence_vocabulary-0.5.0-py3-none-any.whl PyYAML==6.0.3
 vocabulary-env/bin/python - <<'PY'
 from importlib.resources import files
 import yaml
@@ -92,8 +92,8 @@ its original files. Verify each distribution with
 binding the repository, workflow and exact source commit. A GitHub build
 attestation is separate from a PyPI Publish attestation and registry publication.
 
-The existing `v0.4.0` data tag stays immutable. The first Python packaging
-release uses `python-v0.4.0`, which identifies the packaging source while its
+The existing `v0.5.0` data tag stays immutable. The first Python packaging
+release uses `python-v0.5.0`, which identifies the packaging source while its
 package version still matches the contained registry. The separate tag names
 identify two different artifacts. A later data release updates `pyproject.toml`
 and the digest checks in `scripts/check-artifacts.py` and
