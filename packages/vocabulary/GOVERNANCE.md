@@ -53,8 +53,9 @@ conflict-free reviewer today; a filing from that system does not, and waits. Pro
 emitter that is not us. Every cited path is fetched by hand before a merge, ours included.
 
 The measurable consequence at 0.4.0 is that not one term here is canonical, because our own issuer
-does not count toward a promotion and the one crosswalk filed so far is a verifier's,
-which emits no value. Version 0.1.0 was different: six terms
+does not count toward a promotion and none of the three crosswalks on file promotes one: one is a
+verifier's, which emits no value, and two were made from outside, about systems and proposals this
+project does not maintain. Version 0.1.0 was different: six terms
 carried canonical status on our own issuer alone. That tag is still reachable, so both halves of
 this paragraph can be checked against the repository. Those six carried no crosswalk behind them,
 the exact defect a listing must not carry under the rule above. Nobody had filed one then either.
@@ -100,8 +101,10 @@ reviewer, not alongside another. This is the same bar CONTRIBUTING.md and MAINTA
 Committer access is granted on a sustained maintenance record, meaning reviewing other people's
 crosswalks accurately over time. Filing one earns none, and running the validator once earns none.
 
-Nobody holds that record yet, the founding maintainer included. One crosswalk has been filed and
-reviewed, and one review is not a sustained record. The first person to earn committer
+Nobody holds that record yet, the founding maintainer included. One crosswalk from another system's
+team has been filed and reviewed, and one review is not a sustained record. The other two on file
+were authored from outside by the founding maintainer, and filing earns no access by the rule
+directly above. The first person to earn committer
 access here will earn it that way. Stated plainly so a reader testing the rule against the repository finds the answer
 already written down.
 

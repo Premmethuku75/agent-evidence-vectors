@@ -11,8 +11,10 @@ they honestly don't."
 Read the registry file in full, and read every status key while you are in there. At version 0.4.0
 each one says proposed, which means the term carries a review_by date and still needs one
 independently-maintained issuer that is not us before promotion. Nothing here is canonical yet: the
-one crosswalk filed so far is a verifier's, and a verifier emits no value, so it promotes
-nothing. Your filing is what moves a term, and the maintainer's own systems are held to the same
+three crosswalks on file promote nothing. One is a verifier's, and a verifier emits no value. The
+other two are marked `third_party_authored: true`, mapping a pinned implementation and a proposed
+field set this project does not maintain, and a filing made from outside records provenance and
+never counts toward promotion. Your filing is what moves a term, and the maintainer's own systems are held to the same
 bar, which is why they have not moved one either.
 
 Read GOVERNANCE.md as well. In particular, your crosswalk will be reviewed by a maintainer who
