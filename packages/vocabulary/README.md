@@ -1,11 +1,16 @@
 # agent-evidence-vocabulary
 
+[![PyPI](https://img.shields.io/pypi/v/agent-evidence-vocabulary.svg)](https://pypi.org/project/agent-evidence-vocabulary/)
+[![Downloads (PePy)](https://static.pepy.tech/badge/agent-evidence-vocabulary)](https://pepy.tech/projects/agent-evidence-vocabulary)
+
 A closed, versioned vocabulary for claims about an agent's execution: what it attempted, what the
 system beneath it observed or refused, how directly and from what vantage the claim was obtained,
 and how much of a population the claim covers.
 
 It's for anyone who writes a predicate, a verifier or an evidence format for agents and needs each
 term to mean one thing across vendors, including teams who want to map their own fields onto it.
+
+Install the Python package for vocabulary v0.4.0: `pip install agent-evidence-vocabulary==0.4.0`.
 
 ## Quick start
 
