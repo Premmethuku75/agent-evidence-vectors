@@ -184,7 +184,9 @@ def test_binding_and_native_crate_agree_on_the_whole_corpus(oracle):
         [str(oracle)],
         input="".join(json.dumps(r) + "\n" for r in requests),
         capture_output=True,
-        text=True,
+        # The oracle writes UTF-8 JSON; the locale's codec (cp1252 on Windows)
+        # would turn a member name like U+1F600 into four wrong characters.
+        encoding="utf-8",
         check=True,
     )
     responses = [json.loads(line) for line in run.stdout.splitlines()]

@@ -39,7 +39,7 @@ def bound_crate(name: str) -> Crate:
         ],
         check=True,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
     ).stdout
     packages = [p for p in json.loads(out)["packages"] if p["name"] == name]
     assert len(packages) == 1, f"expected one resolved {name}, found {len(packages)}"
