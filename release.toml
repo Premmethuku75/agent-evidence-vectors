@@ -6,3 +6,9 @@
 #
 # registry "crates.io" reads the version from <directory>/Cargo.toml;
 # registry "pypi" reads it from <directory>/pyproject.toml.
+
+[[unit]]
+prefix = "dsse"
+name = "dsse"
+registry = "crates.io"
+directory = "crates/dsse"
