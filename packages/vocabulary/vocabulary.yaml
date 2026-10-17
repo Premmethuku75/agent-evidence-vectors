@@ -1313,6 +1313,10 @@ done_verification:
       A file or directory the contract names as off limits to the agent, with a
       digest. A directory entry may list path segment names (such as
       __pycache__) left out of its digest and its event match. Tests, graders
+    opencre:
+      - cre: https://www.opencre.org/cre/433-442
+        match: partial
+        basis: "Testing in development and acceptance (ISO 27001, SA-11) asks that tests be run and their results kept; the term adds that a separate verifier reruns the contract's commands on the rebuilt final tree, which the requirement does not ask for."
       and reward files are the usual members.
     check: >
       protected_paths/v1. A recorded mutation of a protected path, or a rename or

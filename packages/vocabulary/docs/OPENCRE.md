@@ -1,6 +1,6 @@
 # OpenCRE links
 
-Eight terms in [`vocabulary.yaml`](../vocabulary.yaml) carry an `opencre` list
+Nine terms in [`vocabulary.yaml`](../vocabulary.yaml) carry an `opencre` list
 that links each one to the Common Requirement in [OpenCRE](https://www.opencre.org)
 whose standards state the same requirement. The links live in the registry
 itself, which is the self-maintaining method OpenCRE's contributing guide
@@ -25,12 +25,15 @@ No link here is `exact`.
 | `change_admission.admission_gate` | [547-824](https://www.opencre.org/cre/547-824) AI model performance validation | partial | The heldout and no_regression gates validate the changed agent's behaviour on fresh runs; the change is to the harness, not the model, and the other gates are not validation. |
 | `change_admission.replay_coverage` | [433-442](https://www.opencre.org/cre/433-442) Verification | partial | States whether a replay checked every recorded trace or stopped early, the coverage a test result has to declare (SA-11); it covers replays of guards only. |
 | `change_admission.authority_change` | [524-603](https://www.opencre.org/cre/524-603) Limit modification of access controls to specifically authorized actors/users | structural | A harness change that adds a tool or removes a guard modifies the agent's access policy, and needs a human-signed approval naming the exact candidate. |
+| `done_verification.acceptance_observed` | [433-442](https://www.opencre.org/cre/433-442) Verification | partial | Testing in development and acceptance (ISO 27001, SA-11) asks that tests be run and their results kept; the term adds that a separate verifier reruns the contract's commands on the rebuilt final tree, which the requirement does not ask for. |
 | `change_admission.authority_change` | [220-442](https://www.opencre.org/cre/220-442) Model action privilege minimization | partial | Holds a candidate's tool allowlist to its parent's unless a human approves the widening; it bounds growth, and does not show the parent's set was minimal. |
 
 ## Terms with no link
 
 Each was checked against all 522 CREs that OpenCRE's REST API returned on
-2026-10-13, reading every candidate's linked standards.
+2026-10-13, reading every candidate's linked standards. The seven
+`done_verification` terms below were searched on 2026-10-17 in the names
+and linked standards of the same 522 CREs.
 
 | term | why no CRE fits |
 | --- | --- |
@@ -52,6 +55,13 @@ Each was checked against all 522 CREs that OpenCRE's REST API returned on
 | `posture_and_coverage.material_change_trigger` | change management (112-648) governs changes to a system; ending a standing claim when an assumed circumstance changes is a different requirement |
 | `outcome_lattice.result` | the nearest, 307-507, is about where build and runtime code comes from; a verdict a relying party recomputes from carried records has no CRE |
 | `change_admission.evaluation_mode` | no requirement distinguishes a fresh evaluation from a replayed or cached one |
+| `done_verification.done_contract` | no requirement fixes the definition of done for an automated worker before it acts and binds later records to its digest |
+| `done_verification.done_receipt` | no requirement asks for a replayable bundle from which a third party recomputes a done verdict |
+| `done_verification.protected_path` | the nearest, change management (112-648), governs changes to a system; a list of files an automated worker must not touch during one task is a different requirement |
+| `done_verification.claimed_tool_output` | no requirement separates what an automated worker says it ran from what was recorded |
+| `done_verification.observed_tool_output` | the nearest, secure log transfer (026-280), moves logs off a host; recording what an automated worker executed from a vantage it cannot reach is a different requirement |
+| `done_verification.stop_decision` | no requirement keys the continuation of an automated loop to a published table of verdicts |
+| `done_verification.inconclusive_verdict` | no requirement gives the unknown outcome of a check its own value apart from pass and fail |
 | `change_admission.replay_snapshot` | archiving build data for a release (461-680) is the nearest, and pinning the evaluation input of one decision is a different requirement |
 
 ## History
