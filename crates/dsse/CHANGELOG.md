@@ -4,6 +4,23 @@ A record of every notable change to this Rust crate. Its format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and its version numbers
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.4
+
+### Changed
+
+The minimum supported Rust version is now 1.88. The 0.1.3 release declared 1.85,
+but a fresh dependency resolution takes `sha2` 0.11.1 through `ed25519-dalek` 3,
+which needs 1.88; the old figure held only while `Cargo.lock` pinned `sha2`
+0.11.0, and a user who resolved fresh got a build error. A new CI job deletes the
+lock file, resolves fresh and tests at the declared version, so the figure cannot
+drift from what a fresh resolution builds.
+
+### Fixed
+
+`sign_with` with an empty signer list now returns `Error::NoSignatures`. It used
+to return an envelope with no signatures, which `verify` always refuses. No new
+error variant was added.
+
 ## 0.1.3
 
 ### Added
