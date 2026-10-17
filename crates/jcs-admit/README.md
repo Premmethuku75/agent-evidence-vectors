@@ -61,12 +61,14 @@ and every refusal is mutation-tested.
 
 Version 0.1.2 adds optional error serialization and the shared byte-cap
 check. The npm package has its own version and release, and is not yet on the npm registry.
+The Python wheel is built and tested from `python/` and is not yet on PyPI.
 
 ## Documentation
 
 | page | read it for |
 | --- | --- |
 | [JavaScript and WebAssembly](https://github.com/probityai/jcs-admit/blob/main/docs/NPM.md) | raw-byte Node and browser API, packed consumer checks and release verification |
+| [Python](https://github.com/probityai/jcs-admit/blob/main/docs/PYTHON.md) | the `probityai` wheel's bytes-in, bytes-out API, its refusal contract and the corpora it is tested on |
 | <a name="what-a-serializer-cannot-check"></a><a name="what-the-delegate-does-with-a-hostile-document"></a><a name="what-it-delegates"></a><a name="evidence"></a>[Design and evidence](https://github.com/probityai/jcs-admit/blob/main/docs/DESIGN.md) | why a serializer can't make these checks, what the delegate does with a hostile document, and the test evidence |
 | [APS canonical-byte comparison](https://github.com/probityai/jcs-admit/blob/main/interop/aps-canonical-bytes/README.md) | pinned 8-case and 10-case byte results and how to reproduce them |
 | [Python byte-profile comparison](https://github.com/probityai/jcs-admit/blob/main/interop/rfc8785-py/README.md) | independent byte cases, native raw-input refusals and a source-pinned Python consumer |
