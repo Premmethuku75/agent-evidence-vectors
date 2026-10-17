@@ -20,6 +20,13 @@ pyo3::create_exception!(
     "A refusal from jcs-admit. `variant` is the Rust variant name and `fields` its fields, unchanged."
 );
 
+pyo3::create_exception!(
+    probityai.dsse,
+    DsseError,
+    PyValueError,
+    "A refusal from dsse. `variant` is the Rust variant name and `fields` its fields, unchanged."
+);
+
 /// Builds the exception for one native refusal.
 ///
 /// `fields` is a dict for a struct variant, the bare value for a one-field tuple

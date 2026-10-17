@@ -5,12 +5,12 @@ build-backend = "maturin"
 [project]
 name = "probityai"
 version = "0.1.0"
-description = "Canonical JSON admission (RFC 8785) for evidence records, from the jcs-admit Rust crate"
+description = "RFC 8785 canonical JSON admission and DSSE signing for evidence records, from the jcs-admit and dsse Rust crates"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 license-files = ["LICENSE-APACHE", "LICENSE-MIT"]
 requires-python = ">=3.10"
-keywords = ["jcs", "rfc8785", "canonicalization", "attestation", "in-toto"]
+keywords = ["jcs", "rfc8785", "canonicalization", "dsse", "attestation", "in-toto"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Rust",

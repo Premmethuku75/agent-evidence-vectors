@@ -1,6 +1,6 @@
 //! The native half of the `probityai` Python package.
 //!
-//! One extension module, `probityai._native`, carries the bindings. The Python
+//! One extension module, `probityai._native`, carries both bindings. The Python
 //! modules under `probityai` re-export its names; nothing here is meant to be
 //! imported directly.
 //!
@@ -9,17 +9,23 @@
 //! Python caller branches on the same discriminant a Rust caller matches and the
 //! npm package reports.
 
+mod dsse_binding;
 mod errors;
 mod jcs_binding;
 
-/// Native bindings for RFC 8785 admission (`jcs-admit`).
+/// Native bindings for RFC 8785 admission (`jcs-admit`) and DSSE (`dsse`).
 #[pyo3::pymodule]
 mod _native {
     #[pymodule_export]
-    use crate::errors::JcsError;
+    use crate::errors::{DsseError, JcsError};
 
     #[pymodule_export]
     use crate::jcs_binding::{admit, admit_ijson, admit_with, is_canonical, is_canonical_with};
+
+    #[pymodule_export]
+    use crate::dsse_binding::{
+        pae, sign, verify, verify_threshold, Ed25519Signer, Ed25519Verifier, VerifiedPayload,
+    };
 
     use pyo3::prelude::*;
 
@@ -29,6 +35,8 @@ mod _native {
         m.add("MAX_SUPPORTED_DEPTH", jcs_admit::MAX_SUPPORTED_DEPTH)?;
         m.add("DEFAULT_MAX_BYTES", jcs_admit::DEFAULT_MAX_BYTES)?;
         m.add("JCS_ADMIT_VERSION", crate::jcs_binding::BOUND_VERSION)?;
+        m.add("MAX_SIGNATURES", dsse::MAX_SIGNATURES)?;
+        m.add("DSSE_VERSION", crate::dsse_binding::BOUND_VERSION)?;
         Ok(())
     }
 }
