@@ -1,0 +1,47 @@
+[package]
+name = "probityai-native"
+version = "0.1.0"
+edition = "2021"
+# The highest floor among the dependencies: dsse 0.1.3 declares 1.85.
+rust-version = "1.85"
+description = "Python bindings for the jcs-admit and dsse crates, built into the probityai wheel"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/probityai/jcs-admit"
+# The extension ships on PyPI inside the probityai wheel, never on crates.io.
+publish = false
+
+# Its own workspace root. The crate above this directory has no [workspace] table, and this
+# one is not a member of it: the binding builds against the published crates pinned below,
+# not against the source next to it.
+[workspace]
+
+[lib]
+name = "_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+# Both pins are exact. The wheel binds one published, checksummed release of each crate,
+# and its tests read that same release's own corpus out of the Cargo registry, so the
+# bytes under test and the bytes bound cannot drift apart.
+jcs-admit = { version = "=0.1.2", features = ["serde"] }
+# One abi3 wheel per platform serves CPython 3.10 and every later release.
+pyo3 = { version = "=0.29.3", features = ["abi3-py310"] }
+# Both already in the graph through the two crates; used here only to read each crate's own
+# serialized refusal, so a Python error carries the native variant and fields unchanged.
+serde = "1.0"
+serde_json = "1.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+rust_2018_idioms = { level = "deny", priority = -1 }
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+todo = "deny"
+unimplemented = "deny"
+undocumented_unsafe_blocks = "deny"
