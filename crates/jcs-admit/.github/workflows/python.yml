@@ -24,7 +24,7 @@ on:
   workflow_call:
   workflow_dispatch:
   push:
-    tags-ignore: ["py-v*"]
+    branches: ["**"]
   pull_request:
 
 permissions:
