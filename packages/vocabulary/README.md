@@ -49,6 +49,7 @@ predicate, in
 
 | page | read it for |
 | --- | --- |
+| [Start a project](https://github.com/new?template_name=evidence-starter&template_owner=probityai) | a template with the evidence packages pinned and the conformance Action in CI |
 | <a name="why-this-exists"></a><a name="files"></a><a name="companion-project"></a>[About the vocabulary](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/ABOUT.md) | why it exists, what each file is for, and how the term set was chosen |
 | [vocabulary.yaml](https://github.com/probityai/agent-evidence-vocabulary/blob/main/vocabulary.yaml) | the registry itself |
 | [OpenCRE links](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/OPENCRE.md) | which terms link to which OpenCRE requirement, how closely, and why the rest have no link |
