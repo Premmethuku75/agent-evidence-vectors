@@ -16,7 +16,9 @@
 )]
 
 use base64::Engine as _;
-use dsse::{sign, verify, Ed25519Signer, Ed25519Verifier, Envelope, Error, Signature, Verifier};
+use dsse::{
+    sign, sign_with, verify, Ed25519Signer, Ed25519Verifier, Envelope, Error, Signature, Verifier,
+};
 
 const B64: base64::engine::general_purpose::GeneralPurpose =
     base64::engine::general_purpose::STANDARD;
@@ -218,5 +220,17 @@ fn an_empty_payload_type_is_refused_at_both_ends() {
     assert_eq!(
         verify(&hand_rolled, &[&s.verifier()], 1).unwrap_err(),
         Error::EmptyPayloadType
+    );
+}
+
+// ----------------------------------------------- an envelope nobody can accept
+
+#[test]
+fn signing_with_no_signers_is_refused() {
+    // An empty signer list used to mint an envelope with `signatures: []`, which
+    // `verify` refuses. It is refused at minting, with the error verification gives.
+    assert_eq!(
+        sign_with("application/vnd.in-toto+json", br#"{"a":1}"#, &[]).unwrap_err(),
+        Error::NoSignatures
     );
 }

@@ -24,6 +24,12 @@ pub fn sign_with(payload_type: &str, payload: &[u8], signers: &[&dyn Signer]) ->
     if payload_type.is_empty() {
         return Err(crate::Error::EmptyPayloadType);
     }
+    // Refused at minting for the same reason: verification refuses an envelope
+    // with no signatures, so an empty signer list can only produce an envelope
+    // nobody can accept.
+    if signers.is_empty() {
+        return Err(crate::Error::NoSignatures);
+    }
     let pre_image = pae(payload_type, payload);
     let mut signatures = Vec::with_capacity(signers.len());
     for signer in signers {

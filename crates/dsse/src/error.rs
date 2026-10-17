@@ -19,8 +19,9 @@ pub enum Error {
         field: &'static str,
     },
 
-    /// `signatures` was present but empty. The envelope schema requires at
-    /// least one signature, so an empty list can never be satisfied.
+    /// `signatures` was present but empty, or signing was asked to use no
+    /// signer. The envelope schema requires at least one signature, so an empty
+    /// list can never be satisfied.
     #[error("envelope carries no signatures; the schema requires at least one")]
     NoSignatures,
 
