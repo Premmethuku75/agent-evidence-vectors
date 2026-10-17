@@ -2,7 +2,7 @@
 name = "dsse-wasm"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.88"
 publish = false
 license = "Apache-2.0"
 description = "Public raw-byte DSSE Ed25519 verification bindings"
