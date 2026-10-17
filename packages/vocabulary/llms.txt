@@ -21,6 +21,7 @@ versioned in the companion conformance suite.
 - [vocabulary.yaml](https://github.com/probityai/agent-evidence-vocabulary/blob/main/vocabulary.yaml): The registry itself, CC0-1.0. Each term carries its definition, its grounding mechanism, and where it applies a `why_this_registry` note.
 - [OpenCRE links](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/OPENCRE.md): The terms that carry a link to an OpenCRE Common Requirement in their `opencre` field, the fit each declares, and why the other terms carry none.
 - [Agent change admission predicate](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/predicates/agent-change-admission-v1.md): The predicate a signed decision carries when it admits or rejects a change to an agent's harness, its fields, gates and verification steps.
+- [Done verification terms](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/done-verification.md): The `done_verification` section: eight terms for deciding that an agent's work is done from outside the agent, each carrying the check a verifier applies, with crosswalks to Claude Code goals, Codex goals and in-toto 604.
 - [Governance](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md): Promotion and demotion rules, merge discipline, and the no-self-grounding-exemption rule that binds the founding maintainer's own systems identically to anyone else's.
 - [Contributing](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CONTRIBUTING.md): How to file a crosswalk, with a worked example that CI runs through the validator.
 - [Maintainers](https://github.com/probityai/agent-evidence-vocabulary/blob/main/MAINTAINERS.md): Who maintains the registry and the recusal bar.
@@ -36,7 +37,7 @@ versioned in the companion conformance suite.
 
 ## Identifiers
 
-- Release tag: `v0.5.0`, the version `CITATION.cff` carries.
+- Release tag: `v0.6.0`, the version `CITATION.cff` carries.
 - Archival DOI: not yet minted. This line is replaced with the DOI when one exists.
 - [Citation](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CITATION.cff): The machine-readable citation GitHub renders.
 

@@ -55,11 +55,11 @@ actually spoken.
 
 ## Status
 
-Version 0.5.0, tagged October 16, 2026. It adds ten proposed terms: attestation tier, origin kind and base-state resolution, six terms anchored on a legal instrument, and intent binding. Version 0.4.0 added the `record_lifecycle` section, the `change_admission` section that the agent change admission predicate carries, and links from eight terms to the OpenCRE requirements their definitions state.
+Version 0.6.0, tagged October 17, 2026. It adds the `done_verification` section: eight proposed terms for deciding that an agent's work is done from outside the agent. Version 0.5.0 added ten proposed terms: attestation tier, origin kind and base-state resolution, six terms anchored on a legal instrument, and intent binding. Version 0.4.0 added the `record_lifecycle` section, the `change_admission` section that the agent change admission predicate carries, and links from eight terms to the OpenCRE requirements their definitions state.
 
 The initial term set came from reading the nearest comparable registry term by term and recording,
 for each of ours, whether it names ground nobody has named yet or overlaps something already in
-use. Both answers occur. Twenty-three of the twenty-seven terms carry a why_this_registry note
+use. Both answers occur. Thirty-one of the thirty-five terms carry a why_this_registry note
 saying which, and that note is a field in the file, so a reader who disagrees can point at the
 line. The other four make their case in the definition itself.
 

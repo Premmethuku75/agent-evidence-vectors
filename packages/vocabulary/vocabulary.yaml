@@ -19,11 +19,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.5.0"
+# version: "0.6.0"
 # status: "draft - open for review"
 
 meta:
-  version: "0.5.0"
+  version: "0.6.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/probityai/agent-evidence-vectors"
@@ -36,7 +36,9 @@ meta:
     Since 0.4.0 it also names the decision that admits or rejects a change to
     an agent's harness on that kind of evidence, in the change_admission
     section, whose terms the agent-change-admission predicate under
-    docs/predicates/ carries.
+    docs/predicates/ carries. Since 0.6.0 it names how a claim that an agent's
+    work is done is decided from outside the agent, in the done_verification
+    section.
     It does not define identity, reputation, wallet, or reasoning-integrity
     terms; those are out of scope by design (see out_of_scope below).
   promotion_lifecycle: >
@@ -114,6 +116,13 @@ meta:
     that were measured and an explicit refusal to assert the per-criterion
     counts the converted source cannot support.
     intent_binding, the tenth, is proposed and lists no issuer.
+    Version 0.6.0 adds the done_verification section: eight terms, all
+    proposed, none listing an issuer. Each carries a check, the rule a verifier
+    applies to decide the term. Three crosswalks are filed for it, for Claude
+    Code goals, Codex goals and in-toto/attestation#604. All three are marked
+    third_party_authored: true and declare evidence: asserted, so none promotes
+    a term and none is offered as promoting one. The v0.5.0 tag does not carry
+    the section.
   opencre_links: >
     A term whose definition states a requirement that one of OpenCRE's Common
     Requirements organizes carries an opencre list. Each item names the CRE by
@@ -1218,6 +1227,210 @@ change_admission:
       - cre: https://www.opencre.org/cre/220-442
         match: partial
         basis: "Holds a candidate's tool allowlist to its parent's unless a human approves the widening; it bounds growth, and does not show the parent's set was minimal."
+
+# done_verification: how a claim that an agent's work is done is decided by
+# something other than the agent. Added in 0.6.0. A done contract fixes what
+# done means before the agent acts, a verifier outside the agent's container
+# runs it, and a receipt carries the contract, the observation, the grade and
+# the claims so a third party can replay the verdict. Each term carries a
+# `check`: the rule a verifier applies to decide it, so a reader can tell a term
+# that is claimed from a term that is checked. The records and the three checks
+# are specified in the done-receipt guide of the probity-verify repository,
+# docs/done-receipt.md, at https://github.com/probityai/probity-verify.
+# Source paths that begin predicate. name fields of the done-receipt predicate,
+# whose specification fixes them at its release; the others name the record
+# formats that guide defines.
+done_verification:
+
+  done_contract:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      The definition of done for one task, sealed before the agent's first turn:
+      the paths the agent must leave alone, each with a digest; the acceptance
+      commands a verifier will run; how many generated mutants those commands
+      killed; and optionally the digests of a held-out split, a mutant set and
+      an authority record. The agent does not write it and cannot change it, and
+      every later record names its digest.
+    check: >
+      A verifier recomputes the SHA-256 of the contract's canonical bytes and
+      requires the grade record and the receipt to name that digest. A grade run
+      on any other contract is refused (grade_contract_mismatch).
+    source_path: "probity-done-contract/v1: protected_paths, acceptance, adequacy"
+    issuers_in_production: []
+    why_this_registry: >
+      "Done" judged against a condition the agent can still reword is judged
+      against the agent. Sealing the condition and naming its digest in the
+      grade is what lets a consumer tell a verdict about the contract from a
+      verdict about something else.
+
+  done_receipt:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      The record of one done decision: the contract's digest, the final tree's
+      digest, the observation of the agent's run, the verifier's grade, the
+      agent's tool claims, and the verdict the three checks reach. It is a
+      replay bundle, so a party who distrusts the producer can rerun the
+      checks on the same bytes.
+    check: >
+      A verifier given the bundle recomputes each check's verdict and the
+      combined verdict, and requires them to equal the receipt's. Any
+      contradicted check gives contradicted; all supported gives supported;
+      anything else gives not_established.
+    source_path: "predicate.verdict"
+    issuers_in_production: []
+    why_this_registry: >
+      A verdict stated without its evidence is a claim. A verdict that ships with
+      the records it was computed from can be checked by someone who does not
+      trust the party that produced it.
+
+  acceptance_observed:
+    status: proposed
+    review_by: "2027-04-17"
+    values: [supported, contradicted, not_established]
+    value_definitions:
+      supported: "The verifier rebuilt the agent's final tree, reset the protected paths from the contract, ran every acceptance command, and every command exited zero, under a contract that killed at least one mutant."
+      contradicted: "At least one acceptance command exited non-zero in the verifier, or the grade names another contract."
+      not_established: "The grade is absent, was run on another tree, is not independent of the observed party, or the contract killed no mutant and so cannot tell a fix from a no-op."
+    definition: >
+      Whether the contract's acceptance commands pass when a separate verifier
+      runs them on the agent's final tree. The agent's own report that its tests
+      passed is not an input.
+    check: >
+      acceptance_observed/v1. The grade must name the pinned contract digest
+      (grade_contract_mismatch) and the final tree's digest (grade_tree_unbound),
+      answer every acceptance command with the contract's exact argv and nothing
+      else, and come from a producer independent of the observed party. Any
+      non-zero exit contradicts (acceptance_failed_in_verifier); all passing
+      supports (acceptance_passed_in_verifier) only when the contract killed at
+      least one mutant (contract_adequacy_zero otherwise).
+    source_path: "predicate.checks[claim=acceptance_observed].verdict"
+    issuers_in_production: []
+    why_this_registry: >
+      A pass printed by the agent's own tool call tells a reader what the agent
+      chose to show. The same command run by a verifier that rebuilt the tree
+      tells the reader what the tree does.
+    opencre:
+      - cre: https://www.opencre.org/cre/433-442
+        match: partial
+        basis: "Testing in development and acceptance (ISO 27001, SA-11) asks that tests be run and their results kept; the term adds that a separate verifier reruns the contract's commands on the rebuilt final tree, which the requirement does not ask for."
+
+  protected_path:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      A file or directory the contract names as off limits to the agent, with a
+      digest. A directory entry may list path segment names (such as
+      __pycache__) left out of its digest and its event match. Tests, graders
+      and reward files are the usual members.
+    check: >
+      protected_paths/v1. A recorded mutation of a protected path, or a rename or
+      link onto one, contradicts (protected_path_mutated) even under incomplete
+      coverage, which catches an edit the agent reverted. Otherwise an
+      independent final tree whose protected digests differ from the contract
+      contradicts (protected_path_digest_changed). An empty record supports only
+      when the observer makes every mutation type visible, coverage is complete
+      and the independent final tree matches the contract.
+    source_path: "probity-done-contract/v1: protected_paths[].path"
+    issuers_in_production: []
+    why_this_registry: >
+      A final-state diff misses an edit that was made and reverted, and an event
+      log misses an edit it did not see. The term fixes the list both are held
+      to, so each can be checked against the same paths.
+
+  claimed_tool_output:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      A command the agent says it ran, as an argument vector with an optional
+      claimed exit status, parsed from the agent's transcript. It is the agent's
+      statement and carries no vantage pin; no check treats it as evidence of
+      the run.
+    check: >
+      tool_claim_match/v1 compares every claim with observed_tool_output. A claim
+      with no matching exec was never run (tool_claim_unmatched).
+    source_path: "probity-tool-claims/v1: claims[].argv, claims[].exit"
+    issuers_in_production: []
+    why_this_registry: >
+      A fabricated "12 passed" is a well-formed claim. Naming the claim as a
+      distinct term keeps it from being counted as the observation that would
+      confirm it.
+
+  observed_tool_output:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      The exec events an independent observer recorded for a command, with the
+      process's exit status when the observer saw it end, and the order of every
+      file mutation around it. It is what a claim is checked against, and it is
+      usable only from an observation that is independent of the observed party,
+      sees exec and every mutation type, and has complete coverage.
+    check: >
+      tool_claim_match/v1. Candidates are the exec events with exactly the
+      claimed argv. A run is fresh when its step follows the last edit made
+      outside its own process tree (tool_claim_precedes_last_edit otherwise); a
+      claimed exit must equal a fresh run's recorded exit (tool_claim_exit_mismatch),
+      and a fresh run whose exit was not seen leaves the claim not_established
+      (tool_exit_unobserved).
+    source_path: "probity-observation/v2: events[type=exec]"
+    issuers_in_production: []
+    why_this_registry: >
+      The check that separates a run from a story about a run needs a record the
+      story's author could not write. The term names that record and the three
+      conditions under which it counts.
+
+  stop_decision:
+    status: proposed
+    review_by: "2027-04-17"
+    values: [continue, replan, escalate, stop]
+    value_definitions:
+      continue: "The agent proceeds; the verdict history does not call for a change."
+      replan: "The agent is told once to change its plan, with the reason code of the verdict."
+      escalate: "Control returns to a person, after two contradicted verdicts."
+      stop: "The run ends because its budget is spent."
+    definition: >
+      The action a published policy table returns for the history of verdicts in
+      one run. The table is public and its digest is carried by the receipt, so
+      whether an agent was allowed to carry on is a function of records, not of
+      anyone's judgement in the moment.
+    check: >
+      A verifier recomputes the action from the receipt's verdict history using
+      the table whose digest the receipt carries, and requires it to equal the
+      recorded action.
+    source_path: "predicate.stop_decision"
+    issuers_in_production: []
+    why_this_registry: >
+      An agent loop that keeps going until a model says it is satisfied has no
+      stopping rule a third party can check. A table keyed by verdicts does.
+
+  inconclusive_verdict:
+    status: proposed
+    review_by: "2027-04-17"
+    values: null
+    definition: >
+      The verdict not_established: the records do not show the claim true and do
+      not show it false. It is a result in its own right, never a pass and never
+      a failure. Reasons include a self-reported or mismatched observation,
+      missing visibility, incomplete coverage, no usable final tree
+      (contract_adequacy_zero, tool_exit_unobserved and witness_scope_below_required
+      are three codes), and a consumer that requires an external witness
+      receiving evidence that rests on a peer witness.
+    check: >
+      A verifier returns not_established, with its reason, whenever the evidence
+      a supported or contradicted verdict rests on is missing, and never returns
+      supported from it. A consumer treats it as not done.
+    source_path: "predicate.verdict"
+    issuers_in_production: []
+    why_this_registry: >
+      A harness that reads a lost record as a pass has made the commonest
+      failure invisible. Giving the unknown its own name keeps it from being
+      folded into either side.
 
 # system_attributes: four things a FILER declares about their own system, all
 # four together. This block carries no status and no review-by date, and it is
