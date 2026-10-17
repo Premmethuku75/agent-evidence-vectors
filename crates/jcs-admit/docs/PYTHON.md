@@ -4,7 +4,7 @@
 `jcs-admit` 0.1.2 and `dsse` 0.1.3 crates from crates.io, unchanged, and exposes them as
 `probityai.jcs` and `probityai.dsse`. `python/twin/` builds `jcs-admit`, a pure-Python
 wheel that re-exports `probityai.jcs` under the crate's name and depends on one exact
-`probityai` release. Neither is on PyPI yet.
+`probityai` release. [Releasing](#releasing) puts them on PyPI.
 
 ## Consumer contract
 
@@ -63,3 +63,34 @@ cd python
 uv sync --locked
 uv run --locked pytest
 ```
+
+## Releasing
+
+A `py-v<version>` tag publishes both projects. `.github/workflows/python-release.yml`
+runs `python.yml` on the tagged commit, so the files uploaded are the ones that
+workflow built and tested, then runs `scripts/check-python-release.py`, which refuses
+unless:
+
+- the tag is `py-v` plus the version in `python/pyproject.toml`, and the commit is on
+  `main`'s history;
+- the file set is exactly seven `probityai` abi3 wheels, its sdist, the twin's wheel
+  and its sdist;
+- every file's own metadata carries the right name and version, and the twin requires
+  exactly that `probityai` release.
+
+Then `publish-probityai` uploads the `probityai` files, and `publish-twin` waits for
+that release to be installable from PyPI before uploading `jcs-admit`. Both jobs run in
+the GitHub environment `pypi` (deployments allowed from `py-v*` tags only) and upload
+through PyPI trusted publishing, so no token exists anywhere. If only the twin job
+fails, re-run that job: the `probityai` upload is already on PyPI and PyPI refuses a
+second upload of the same file.
+
+One-time setup, per PyPI project, before the first tag: a trusted publisher with owner
+`probityai`, repository `jcs-admit`, workflow `python-release.yml` and environment
+`pypi`. `probityai` already exists on PyPI, so its publisher goes on the project's
+publishing settings. `jcs-admit` does not exist yet, so its publisher is a pending
+publisher on the account's publishing page, and the first upload creates the project.
+
+To release: bump `python/pyproject.toml` (and the twin, `BOUND_VERSION` and the crate
+pins together), merge to `main`, then push a signed tag `py-v<version>` on the merge
+commit. A tag on a commit not on `main` is refused.
