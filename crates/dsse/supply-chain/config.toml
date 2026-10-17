@@ -111,12 +111,14 @@ version = "1.0.229"
 criteria = "safe-to-deploy"
 
 [[exemptions.serde_json]]
-version = "1.0.151"
+version = "1.0.154"
 criteria = "safe-to-deploy"
+notes = "Patch bump from the exempted 1.0.151. Published by dtolnay, whom the imported isrg, mozilla and bytecode-alliance audit sets trust; no imported audit covers 1.0.154 yet."
 
 [[exemptions.sha2]]
-version = "0.11.0"
+version = "0.11.1"
 criteria = "safe-to-deploy"
+notes = "Patch bump from the exempted 0.11.0, published by the RustCrypto/hashes team. Used by ed25519-dalek and the tests; no imported audit covers 0.11.1 yet."
 
 [[exemptions.signature]]
 version = "3.0.0"
