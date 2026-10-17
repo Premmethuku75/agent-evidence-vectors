@@ -14,25 +14,24 @@ check = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check)
 
 PV = check.project("python/pyproject.toml")["version"]
-TV = check.project("python/twin/pyproject.toml")["version"]
+STEM = f"jcs_admit-{PV}"
 WHEELS = [
     "manylinux_2_28_x86_64", "manylinux_2_28_aarch64", "musllinux_1_2_x86_64",
     "musllinux_1_2_aarch64", "macosx_10_12_x86_64", "macosx_11_0_arm64", "win_amd64",
 ]
 
 
-def meta(name, version, requires=None):
-    text = f"Metadata-Version: 2.4\nName: {name}\nVersion: {version}\n"
-    return text + (f"Requires-Dist: {requires}\n" if requires else "")
+def meta(name, version):
+    return f"Metadata-Version: 2.4\nName: {name}\nVersion: {version}\n"
 
 
-def wheel(path, name, version, requires=None):
+def wheel(path, name, version):
     with zipfile.ZipFile(path, "w") as z:
-        z.writestr(f"{name.replace('-', '_')}-{version}.dist-info/METADATA", meta(name, version, requires))
+        z.writestr(f"{name.replace('-', '_')}-{version}.dist-info/METADATA", meta(name, version))
 
 
-def sdist(path, name, version, requires=None):
-    data = meta(name, version, requires).encode()
+def sdist(path, name, version):
+    data = meta(name, version).encode()
     with tarfile.open(path, "w:gz") as t:
         info = tarfile.TarInfo(f"{name.replace('-', '_')}-{version}/PKG-INFO")
         info.size = len(data)
@@ -41,16 +40,13 @@ def sdist(path, name, version, requires=None):
 
 def build(dist):
     for tag in WHEELS:
-        wheel(dist / f"probityai-{PV}-cp310-abi3-{tag}.whl", "probityai", PV)
-    sdist(dist / f"probityai-{PV}.tar.gz", "probityai", PV)
-    req = f"probityai=={PV}"
-    wheel(dist / f"jcs_admit-{TV}-py3-none-any.whl", "jcs-admit", TV, req)
-    sdist(dist / f"jcs_admit-{TV}.tar.gz", "jcs-admit", TV, req)
+        wheel(dist / f"{STEM}-cp310-abi3-{tag}.whl", "jcs-admit", PV)
+    sdist(dist / f"{STEM}.tar.gz", "jcs-admit", PV)
 
 
-def run(dist, tag, project, out):
+def run(dist, tag, out):
     try:
-        check.main([str(dist), "--tag", tag, "--project", project, "--out", str(out)])
+        check.main([str(dist), "--tag", tag, "--out", str(out)])
     except SystemExit as exit_:
         return str(exit_)
     return None
@@ -62,7 +58,7 @@ def case(label, mutate, tag=f"py-v{PV}", expect=None):
         dist.mkdir()
         build(dist)
         mutate(dist)
-        err = run(dist, tag, "probityai", out)
+        err = run(dist, tag, out)
         ok = (err is None) if expect is None else (err is not None and expect in err)
         print(("ok   " if ok else "FAIL ") + label + ("" if ok else f": {err}"))
         return ok
@@ -75,18 +71,18 @@ def main():
         case("a missing wheel is refused", lambda d: next(d.glob("*win_amd64.whl")).unlink(), expect="win_amd64"),
         case("an extra file is refused", lambda d: (d / "stray.txt").write_text("x"), expect="extra"),
         case("a wrong version inside a wheel is refused",
-             lambda d: wheel(next(d.glob("*musllinux_1_2_x86_64.whl")), "probityai", "0.0.1"), expect="Version"),
-        case("a twin that requires another release is refused",
-             lambda d: wheel(d / f"jcs_admit-{TV}-py3-none-any.whl", "jcs-admit", TV, "probityai==0.0.1"), expect="Requires-Dist"),
+             lambda d: wheel(next(d.glob("*musllinux_1_2_x86_64.whl")), "jcs-admit", "0.0.1"), expect="Version"),
+        case("a wrong name inside the sdist is refused",
+             lambda d: sdist(d / f"{STEM}.tar.gz", "probityai", PV), expect="Name"),
     ]
     with tempfile.TemporaryDirectory() as tmp:
         dist, out = Path(tmp, "dist"), Path(tmp, "out")
         dist.mkdir()
         build(dist)
-        err = run(dist, f"py-v{PV}", "jcs-admit", out)
+        err = run(dist, f"py-v{PV}", out)
         staged = sorted(p.name for p in out.iterdir())
-        ok = err is None and staged == sorted([f"jcs_admit-{TV}-py3-none-any.whl", f"jcs_admit-{TV}.tar.gz"])
-        print(("ok   " if ok else "FAIL ") + f"the twin upload directory holds only the twin {staged}")
+        ok = err is None and len(staged) == len(WHEELS) + 1
+        print(("ok   " if ok else "FAIL ") + f"the upload directory holds the seven wheels and the sdist {staged}")
         results.append(ok)
     sys.exit(0 if all(results) else 1)
 

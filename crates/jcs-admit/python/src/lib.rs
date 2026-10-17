@@ -1,7 +1,7 @@
-//! The native half of the `probityai` Python package.
+//! The native half of the `jcs_admit` Python package.
 //!
-//! One extension module, `probityai._native`, carries both bindings. The Python
-//! modules under `probityai` re-export its names; nothing here is meant to be
+//! One extension module, `jcs_admit._native`, carries both bindings. The Python
+//! modules under `jcs_admit` re-export its names; nothing here is meant to be
 //! imported directly.
 //!
 //! Every refusal crosses the boundary with the native variant name and fields

@@ -1,7 +1,7 @@
 """The bound release's own test corpus, through the binding, two ways.
 
 1. Against the corpus's expectations. Every pinned vector file the `jcs-admit`
-   release ships in `tests/vectors/` is replayed through `probityai.jcs` under
+   release ships in `tests/vectors/` is replayed through `jcs_admit` under
    the profile the crate's own Rust test uses, and must give the same accepted
    bytes and the same refusal classes. None of those expectations was produced
    by the crate (their provenance is `tests/vectors/PROVENANCE.md`).
@@ -26,7 +26,7 @@ from pathlib import Path
 import pytest
 
 from conftest import bound_crate, data_lines
-from probityai import jcs
+import jcs_admit as jcs
 
 CRATE = bound_crate("jcs-admit")
 VECTORS = CRATE.root / "tests/vectors"

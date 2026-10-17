@@ -1,4 +1,4 @@
-//! `probityai.jcs`: admission and RFC 8785 canonicalization through `jcs-admit`.
+//! `jcs_admit`: admission and RFC 8785 canonicalization through `jcs-admit`.
 //!
 //! The functions take `bytes` and return `bytes`. A `str` is refused with a
 //! `TypeError` rather than encoded, for the reason the crate takes `&[u8]`: the

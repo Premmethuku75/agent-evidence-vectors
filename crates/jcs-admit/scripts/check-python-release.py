@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Verify the built Python files before PyPI publication, then lay out one upload directory per project.
+"""Verify the built Python files before PyPI publication, then lay them out in one upload directory.
 
-    check-python-release.py DIST --tag py-v0.1.0 --project probityai --out UPLOAD
+    check-python-release.py DIST --tag py-v0.1.0 --out UPLOAD
 
 DIST holds every file the python workflow built. The check refuses unless the tag names
 the version in python/pyproject.toml, the file set is exactly the expected population
-(seven probityai wheels, its sdist, the jcs-admit twin's wheel and sdist, nothing else),
-every wheel and sdist carries the project's name and version in its own metadata, and the
-twin requires exactly that probityai release. It copies the chosen project's files to OUT.
+(seven jcs-admit abi3 wheels and its sdist, nothing else), and every wheel and sdist
+carries the project's name and version in its own metadata. It copies the files to OUT.
 """
 import argparse
 import re
@@ -19,6 +18,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+NAME = "jcs-admit"
 PLATFORMS = (
     "manylinux_2_28_x86_64",
     "manylinux_2_28_aarch64",
@@ -55,18 +55,16 @@ def field(text, name):
     return [m.group(1).strip() for m in re.finditer(rf"^{name}: (.*)$", text, re.M)]
 
 
-def plan(dist, binding, twin):
-    """Map each expected file name to its project name and version."""
+def plan(dist, binding):
+    """Map each expected file name to its project name."""
     files = {p.name: p for p in dist.iterdir()}
-    pv, tv = binding["version"], twin["version"]
-    expected = {f"probityai-{pv}.tar.gz": "probityai"}
-    expected[f"jcs_admit-{tv}-py3-none-any.whl"] = "jcs-admit"
-    expected[f"jcs_admit-{tv}.tar.gz"] = "jcs-admit"
-    wheels = [n for n in files if n.startswith(f"probityai-{pv}-cp310-abi3-") and n.endswith(".whl")]
+    stem = f"{NAME.replace('-', '_')}-{binding['version']}"
+    expected = {f"{stem}.tar.gz": NAME}
+    wheels = [n for n in files if n.startswith(f"{stem}-cp310-abi3-") and n.endswith(".whl")]
     for family in PLATFORMS:
         hits = [n for n in wheels if family in n]
         need(len(hits) == (2 if family == "macosx_" else 1), f"wheels for {family}: {hits}")
-        expected.update({n: "probityai" for n in hits})
+        expected.update({n: NAME for n in hits})
     need(files.keys() == expected.keys(), f"file set differs: extra {sorted(files.keys() - expected.keys())}, missing {sorted(expected.keys() - files.keys())}")
     return files, expected
 
@@ -75,30 +73,25 @@ def main(argv):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("dist", type=Path)
     ap.add_argument("--tag", required=True)
-    ap.add_argument("--project", choices=("probityai", "jcs-admit"), required=True)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args(argv)
 
-    binding, twin = project("python/pyproject.toml"), project("python/twin/pyproject.toml")
-    need(binding["name"] == "probityai" and twin["name"] == "jcs-admit", "project names changed")
+    binding = project("python/pyproject.toml")
+    need(binding["name"] == NAME, f"project name {binding['name']} is not {NAME}")
     need(args.tag == "py-v" + binding["version"], f"tag {args.tag} is not py-v{binding['version']}")
-    need(twin["dependencies"] == [f"probityai=={binding['version']}"], f"twin dependencies {twin['dependencies']}")
-    files, expected = plan(args.dist, binding, twin)
+    files, expected = plan(args.dist, binding)
 
-    versions = {"probityai": binding["version"], "jcs-admit": twin["version"]}
-    for name, owner in expected.items():
+    for name in expected:
         text = metadata(files[name])
-        need(field(text, "Name") == [owner], f"{name}: Name {field(text, 'Name')}")
-        need(field(text, "Version") == [versions[owner]], f"{name}: Version {field(text, 'Version')}")
-        if owner == "jcs-admit":
-            need(field(text, "Requires-Dist") == [f"probityai=={binding['version']}"], f"{name}: Requires-Dist {field(text, 'Requires-Dist')}")
+        need(field(text, "Name") == [NAME], f"{name}: Name {field(text, 'Name')}")
+        need(field(text, "Version") == [binding["version"]], f"{name}: Version {field(text, 'Version')}")
 
     args.out.mkdir(parents=True, exist_ok=True)
     need(not any(args.out.iterdir()), f"{args.out} is not empty")
-    chosen = sorted(n for n, owner in expected.items() if owner == args.project)
+    chosen = sorted(expected)
     for name in chosen:
         shutil.copy2(files[name], args.out / name)
-    print(f"{args.project} {versions[args.project]}: {len(chosen)} files verified and staged in {args.out}")
+    print(f"{NAME} {binding['version']}: {len(chosen)} files verified and staged in {args.out}")
     for name in chosen:
         print("  " + name)
 

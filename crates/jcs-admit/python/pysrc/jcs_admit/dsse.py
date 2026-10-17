@@ -10,14 +10,14 @@ covered. Check ``payload_type`` before acting on ``payload``.
 A refusal raises :class:`DsseError`, whose ``variant`` and ``fields`` are the
 Rust variant name and fields, unchanged.
 
->>> from probityai import dsse
+>>> from jcs_admit import dsse
 >>> signer = dsse.Ed25519Signer(bytes(range(32)), key_id="harness")
 >>> envelope = dsse.sign("application/vnd.in-toto+json", b'{"a":1}', signer)
 >>> dsse.verify(envelope, signer.verifier()).payload
 b'{"a":1}'
 """
 
-from probityai._native import (
+from jcs_admit._native import (
     DSSE_VERSION,
     MAX_SIGNATURES,
     DsseError,

@@ -14,7 +14,7 @@ import struct
 import pytest
 
 from conftest import bound_crate, data_lines
-from probityai import jcs
+import jcs_admit as jcs
 
 
 def rows() -> list[tuple[str, str, str]]:

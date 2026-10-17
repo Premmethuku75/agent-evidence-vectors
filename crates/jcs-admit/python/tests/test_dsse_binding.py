@@ -8,7 +8,7 @@ import json
 import pytest
 
 from conftest import bound_crate
-from probityai import _native, dsse
+from jcs_admit import _native, dsse
 
 PT = "application/vnd.in-toto+json"
 
@@ -184,4 +184,4 @@ def test_types_live_where_users_import_them():
     for name in ("DsseError", "Ed25519Signer", "Ed25519Verifier", "VerifiedPayload"):
         obj = getattr(dsse, name)
         assert obj is getattr(_native, name)
-        assert obj.__module__ == "probityai.dsse"
+        assert obj.__module__ == "jcs_admit.dsse"

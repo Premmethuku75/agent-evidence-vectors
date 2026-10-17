@@ -176,6 +176,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "jcs-admit-python"
+version = "0.1.0"
+dependencies = [
+ "dsse",
+ "jcs-admit",
+ "pyo3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -208,17 +219,6 @@ name = "portable-atomic"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05c8b63e8d9609db387f0324918f81d68fe27748f084ef092fb35954d0539a85"
-
-[[package]]
-name = "probityai-native"
-version = "0.1.0"
-dependencies = [
- "dsse",
- "jcs-admit",
- "pyo3",
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "proc-macro2"

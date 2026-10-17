@@ -1,4 +1,4 @@
-//! `probityai.dsse`: DSSE envelopes and the pre-authentication encoding, through
+//! `jcs_admit.dsse`: DSSE envelopes and the pre-authentication encoding, through
 //! the `dsse` crate with its ed25519 backend.
 //!
 //! Envelopes cross the boundary as their JSON bytes. Verification returns a
@@ -31,7 +31,7 @@ fn public_key_of(verifier: &dsse::Ed25519Verifier) -> PyResult<Vec<u8>> {
 ///
 /// `secret_key` is the 32-byte seed. The `keyid` is written into each signature
 /// entry; it is unauthenticated and creates no trust.
-#[pyclass(frozen, module = "probityai.dsse")]
+#[pyclass(frozen, module = "jcs_admit.dsse")]
 pub(crate) struct Ed25519Signer {
     inner: dsse::Ed25519Signer,
     public_key: Vec<u8>,
@@ -84,7 +84,7 @@ impl Ed25519Signer {
 ///
 /// `public_key` is the 32 raw bytes. A threshold above one requires every key
 /// to carry a distinct `key_id`; the crate refuses a key set it cannot count.
-#[pyclass(frozen, module = "probityai.dsse")]
+#[pyclass(frozen, module = "jcs_admit.dsse")]
 pub(crate) struct Ed25519Verifier {
     inner: dsse::Ed25519Verifier,
     public_key: Vec<u8>,
@@ -131,7 +131,7 @@ impl Ed25519Verifier {
 /// authenticated type; check the type before acting on the payload.
 /// `accepted_keys` names every distinct trusted key that verified, in the order
 /// the keys were supplied (a key with no identifier is named `#<n>`).
-#[pyclass(frozen, module = "probityai.dsse")]
+#[pyclass(frozen, module = "jcs_admit.dsse")]
 pub(crate) struct VerifiedPayload {
     #[pyo3(get)]
     payload_type: String,

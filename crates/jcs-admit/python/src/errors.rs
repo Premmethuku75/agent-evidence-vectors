@@ -14,14 +14,14 @@ use serde::Serialize;
 use serde_json::Value;
 
 pyo3::create_exception!(
-    probityai.jcs,
+    jcs_admit,
     JcsError,
     PyValueError,
     "A refusal from jcs-admit. `variant` is the Rust variant name and `fields` its fields, unchanged."
 );
 
 pyo3::create_exception!(
-    probityai.dsse,
+    jcs_admit.dsse,
     DsseError,
     PyValueError,
     "A refusal from dsse. `variant` is the Rust variant name and `fields` its fields, unchanged."

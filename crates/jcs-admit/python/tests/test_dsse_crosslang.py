@@ -16,7 +16,8 @@ import json
 import pytest
 
 from conftest import bound_crate
-from probityai import dsse, jcs
+import jcs_admit as jcs
+from jcs_admit import dsse
 
 DOC = json.loads((bound_crate("dsse").root / "vectors/cross_lang_signing.json").read_text(encoding="utf-8"))
 FIXTURES = DOC["fixtures"]

@@ -1,4 +1,4 @@
-# probityai
+# jcs-admit
 
 Python bindings for two Rust crates: [`jcs-admit`](https://crates.io/crates/jcs-admit)
 admits a JSON document on its raw bytes and returns its RFC 8785 canonical form, and
@@ -6,23 +6,23 @@ admits a JSON document on its raw bytes and returns its RFC 8785 canonical form,
 threshold over distinct keys.
 
 ```sh
-pip install probityai==0.1.0
+pip install jcs-admit==0.1.0
 ```
 
 ```python
-from probityai import jcs
+import jcs_admit
 
-jcs.admit(b'{ "b": 1, "a": [1.0, 1e30] }')  # b'{"a":[1,1e+30],"b":1}'
+jcs_admit.admit(b'{ "b": 1, "a": [1.0, 1e30] }')  # b'{"a":[1,1e+30],"b":1}'
 
 try:
-    jcs.admit(b'{"a":1,"a":2}')
-except jcs.JcsError as e:
+    jcs_admit.admit(b'{"a":1,"a":2}')
+except jcs_admit.JcsError as e:
     print(e.variant, e.fields)  # DuplicateMember {'name': 'a', 'offset': 7}
 ```
 
 ```python
 import os
-from probityai import dsse
+from jcs_admit import dsse
 
 harness = dsse.Ed25519Signer(os.urandom(32), key_id="harness")
 witness = dsse.Ed25519Signer(os.urandom(32), key_id="witness")

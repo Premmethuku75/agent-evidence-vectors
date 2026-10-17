@@ -1,14 +1,13 @@
 # Python distribution
 
-`python/` builds the `probityai` wheel: one abi3 extension that links the published
+`python/` builds the `jcs-admit` wheel: one abi3 extension that links the published
 `jcs-admit` 0.1.2 and `dsse` 0.1.3 crates from crates.io, unchanged, and exposes them as
-`probityai.jcs` and `probityai.dsse`. `python/twin/` builds `jcs-admit`, a pure-Python
-wheel that re-exports `probityai.jcs` under the crate's name and depends on one exact
-`probityai` release. [Releasing](#releasing) puts them on PyPI.
+the `jcs_admit` package and its `jcs_admit.dsse` module. [Releasing](#releasing) puts it
+on PyPI.
 
 ## Consumer contract
 
-`probityai.jcs` has `admit`, `admit_ijson`, `admit_with`, `is_canonical` and
+`jcs_admit` has `admit`, `admit_ijson`, `admit_with`, `is_canonical` and
 `is_canonical_with`. Each takes `bytes`; `str`, `bytearray` and `memoryview` raise
 `TypeError`, because the faults the crate refuses include byte sequences no `str` can
 hold. `admit_with` and `is_canonical_with` take the crate's `Options` as keyword
@@ -16,7 +15,7 @@ arguments with the crate's defaults: `max_depth=128` (saturating at 512),
 `max_bytes=20971520` (`None` removes the cap), `safe_integers`, `integers_only` and
 `reject_noncharacters`.
 
-`probityai.dsse` has `pae`, `sign`, `verify` and `verify_threshold`, with
+`jcs_admit.dsse` has `pae`, `sign`, `verify` and `verify_threshold`, with
 `Ed25519Signer`, `Ed25519Verifier` and `VerifiedPayload`. Envelopes cross the boundary
 as their JSON bytes. `verify_threshold` counts distinct trusted keys, never signature
 entries, and returns the exact bytes the signatures covered with the authenticated
@@ -56,7 +55,7 @@ that shipped with the code under test:
 - the DSSE PAE attack cases, and the go-securesystemslib cross-language vectors,
   including signatures reproduced byte for byte from the published test seed.
 
-`python -m mypy.stubtest probityai._native` holds the type stub to the built module.
+`python -m mypy.stubtest jcs_admit._native` holds the type stub to the built module.
 
 ```sh
 cd python
@@ -66,31 +65,29 @@ uv run --locked pytest
 
 ## Releasing
 
-A `py-v<version>` tag publishes both projects. `.github/workflows/python-release.yml`
+A `py-v<version>` tag publishes the project. `.github/workflows/python-release.yml`
 runs `python.yml` on the tagged commit, so the files uploaded are the ones that
 workflow built and tested, then runs `scripts/check-python-release.py`, which refuses
 unless:
 
 - the tag is `py-v` plus the version in `python/pyproject.toml`, and the commit is on
   `main`'s history;
-- the file set is exactly seven `probityai` abi3 wheels, its sdist, the twin's wheel
-  and its sdist;
-- every file's own metadata carries the right name and version, and the twin requires
-  exactly that `probityai` release.
+- the file set is exactly seven `jcs-admit` abi3 wheels and its sdist;
+- every file's own metadata carries the right name and version.
 
-Then `publish-probityai` uploads the `probityai` files, and `publish-twin` waits for
-that release to be installable from PyPI before uploading `jcs-admit`. Both jobs run in
-the GitHub environment `pypi` (deployments allowed from `py-v*` tags only) and upload
-through PyPI trusted publishing, so no token exists anywhere. If only the twin job
-fails, re-run that job: the `probityai` upload is already on PyPI and PyPI refuses a
-second upload of the same file.
+Then the `publish` job uploads the files. It runs in the GitHub environment `pypi`
+(deployments allowed from `py-v*` tags only) and uploads through PyPI trusted
+publishing, so no token exists anywhere.
 
-One-time setup, per PyPI project, before the first tag: a trusted publisher with owner
-`probityai`, repository `jcs-admit`, workflow `python-release.yml` and environment
-`pypi`. `probityai` already exists on PyPI, so its publisher goes on the project's
-publishing settings. `jcs-admit` does not exist yet, so its publisher is a pending
-publisher on the account's publishing page, and the first upload creates the project.
+One-time setup before the first tag: `jcs-admit` does not exist on PyPI yet, so its
+trusted publisher is a pending publisher on the account's publishing page (project
+`jcs-admit`, the owner, repository, workflow file and environment `pypi` of the
+repository that tags the release), and the first upload creates the project.
 
-To release: bump `python/pyproject.toml` (and the twin, `BOUND_VERSION` and the crate
-pins together), merge to `main`, then push a signed tag `py-v<version>` on the merge
+The distribution name is `jcs-admit` and the import package is `jcs_admit`. The name
+`probityai` belongs to the `probity` command-line distribution, so the two install
+side by side in one environment.
+
+To release: bump `python/pyproject.toml` (and `BOUND_VERSION` and the crate pins
+together), merge to `main`, then push a signed tag `py-v<version>` on the merge
 commit. A tag on a commit not on `main` is refused.

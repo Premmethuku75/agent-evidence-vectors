@@ -3,9 +3,9 @@ requires = ["maturin==1.15.0"]
 build-backend = "maturin"
 
 [project]
-name = "probityai"
+name = "jcs-admit"
 version = "0.1.0"
-description = "RFC 8785 canonical JSON admission and DSSE signing for evidence records, from the jcs-admit and dsse Rust crates"
+description = "Admission control and RFC 8785 canonicalization for JSON about to be signed, plus DSSE signing, from the jcs-admit and dsse Rust crates"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 license-files = ["LICENSE-APACHE", "LICENSE-MIT"]
@@ -26,7 +26,7 @@ Issues = "https://github.com/probityai/jcs-admit/issues"
 dev = ["maturin==1.15.0", "pytest==9.1.1", "mypy==2.4.0"]
 
 [tool.maturin]
-module-name = "probityai._native"
+module-name = "jcs_admit._native"
 python-source = "pysrc"
 
 [tool.uv]

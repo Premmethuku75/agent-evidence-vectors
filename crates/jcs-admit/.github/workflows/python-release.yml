@@ -1,9 +1,8 @@
 name: release python
 
-# A py-v<version> tag publishes the wheels and sdists that python.yml builds from the
-# tagged commit: probityai first, then the jcs-admit twin, which requires that exact
-# probityai release. Both upload through PyPI trusted publishing (OIDC, no token) from
-# the pypi environment. The tag must name the version in python/pyproject.toml and sit
+# A py-v<version> tag publishes the jcs-admit wheels and sdist that python.yml builds
+# from the tagged commit, through PyPI trusted publishing (OIDC, no token) from the pypi
+# environment. The tag must name the version in python/pyproject.toml and sit
 # on main's history. Steps for the first release: docs/PYTHON.md.
 
 on:
@@ -21,7 +20,7 @@ jobs:
   package:
     uses: ./.github/workflows/python.yml
 
-  publish-probityai:
+  publish:
     if: github.repository == 'probityai/jcs-admit'
     needs: package
     runs-on: ubuntu-latest
@@ -44,56 +43,19 @@ jobs:
           pattern: python-*
           merge-multiple: true
           path: built
-      - name: verify the built files and stage probityai
-        run: python3 scripts/check-python-release.py built --tag "$GITHUB_REF_NAME" --project probityai --out upload
+      - name: verify the built files and stage them
+        run: python3 scripts/check-python-release.py built --tag "$GITHUB_REF_NAME" --out upload
       - name: install the staged files alone and import them
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
-          "$RUNNER_TEMP/venv/bin/pip" install --no-index --only-binary :all: --find-links upload probityai
+          "$RUNNER_TEMP/venv/bin/pip" install --no-index --only-binary :all: --find-links upload jcs-admit
           "$RUNNER_TEMP/venv/bin/python" - <<'PY'
           import os
           from importlib.metadata import version
-          import probityai.dsse, probityai.jcs
-          assert "py-v" + version("probityai") == os.environ["GITHUB_REF_NAME"]
+          import jcs_admit, jcs_admit.dsse
+          assert "py-v" + version("jcs-admit") == os.environ["GITHUB_REF_NAME"]
           PY
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: upload
 
-  publish-twin:
-    if: github.repository == 'probityai/jcs-admit'
-    needs: [package, publish-probityai]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment: pypi
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: the tag is on main history
-        run: |
-          test "$GITHUB_REF_TYPE" = tag
-          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: python-*
-          merge-multiple: true
-          path: built
-      - name: verify the built files and stage the twin
-        run: python3 scripts/check-python-release.py built --tag "$GITHUB_REF_NAME" --project jcs-admit --out upload
-      - name: the exact probityai release is on PyPI
-        run: |
-          version="${GITHUB_REF_NAME#py-v}"
-          for _ in 1 2 3 4 5 6 7 8 9 10; do
-            if python3 -m pip download "probityai==$version" --no-deps --only-binary :all: --dest "$RUNNER_TEMP/probot"; then exit 0; fi
-            sleep 30
-          done
-          echo "probityai $version is not installable from PyPI" >&2
-          exit 1
-      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
-        with:
-          packages-dir: upload

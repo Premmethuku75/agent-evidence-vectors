@@ -8,12 +8,18 @@ A refusal raises :class:`JcsError`. ``error.variant`` is the Rust variant name
 with their Rust names, the same pair the crate serializes and the npm package
 reports.
 
->>> from probityai import jcs
->>> jcs.admit(b'{ "b": 1, "a": [1.0, 1e30] }')
+``jcs_admit.dsse`` signs and verifies DSSE envelopes through the ``dsse``
+crate, linked into the same extension.
+
+>>> import jcs_admit
+>>> jcs_admit.admit(b'{ "b": 1, "a": [1.0, 1e30] }')
 b'{"a":[1,1e+30],"b":1}'
 """
 
-from probityai._native import (
+from importlib.metadata import version as _version
+
+from jcs_admit import dsse
+from jcs_admit._native import (
     DEFAULT_MAX_BYTES,
     DEFAULT_MAX_DEPTH,
     JCS_ADMIT_VERSION,
@@ -37,4 +43,7 @@ __all__ = [
     "admit_with",
     "is_canonical",
     "is_canonical_with",
+    "dsse",
 ]
+
+__version__ = _version("jcs-admit")

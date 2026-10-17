@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from probityai import dsse
+from jcs_admit import dsse
 
 
 def test_length_prefix_counts_bytes_not_characters():

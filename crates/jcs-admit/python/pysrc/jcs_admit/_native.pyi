@@ -1,5 +1,5 @@
 # Type stub for the compiled extension. CI runs `python -m mypy.stubtest
-# probityai._native` against the built module, so a binding change that is not
+# jcs_admit._native` against the built module, so a binding change that is not
 # reflected here fails the build.
 
 from collections.abc import Sequence

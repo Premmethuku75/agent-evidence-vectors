@@ -7,7 +7,8 @@ import inspect
 import pytest
 
 from conftest import bound_crate
-from probityai import _native, jcs
+import jcs_admit as jcs
+from jcs_admit import _native
 
 
 def refusal(fn, data, **kw) -> jcs.JcsError:
@@ -109,7 +110,7 @@ def test_the_reported_version_is_the_version_cargo_linked():
 
 def test_exception_lives_where_users_import_it():
     assert jcs.JcsError is _native.JcsError
-    assert jcs.JcsError.__module__ == "probityai.jcs"
+    assert jcs.JcsError.__module__ == "jcs_admit"
 
 
 @pytest.mark.parametrize("fn", [jcs.admit_with, jcs.is_canonical_with])
@@ -119,3 +120,16 @@ def test_the_shown_signature_defaults_are_the_crates_constants(fn):
     assert params["max_bytes"].default == jcs.DEFAULT_MAX_BYTES
     for flag in ("safe_integers", "integers_only", "reject_noncharacters"):
         assert params[flag].default is False
+
+
+
+def test_the_distribution_is_jcs_admit_and_installs_only_jcs_admit():
+    # The name `probityai` belongs to the `probity` command-line distribution. This
+    # wheel must install beside it, so it carries no file outside `jcs_admit`.
+    from importlib.metadata import distribution
+
+    dist = distribution("jcs-admit")
+    assert dist.metadata["Name"] == "jcs-admit"
+    assert jcs.__version__ == dist.version
+    tops = {f.parts[0] for f in dist.files or ()}
+    assert not tops & {"probityai", "probityai.pth"}, sorted(tops)
