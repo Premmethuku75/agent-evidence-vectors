@@ -8,12 +8,13 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full, and read every status key while you are in there. At version 0.5.0
+Read the registry file in full, and read every status key while you are in there. At version 0.6.0
 each one says proposed, which means the term carries a review_by date and still needs one
 independently-maintained issuer that is not us before promotion. Nothing here is canonical yet: the
-five crosswalks on file promote nothing. One is a verifier's, and a verifier emits no value. The
-other four are marked `third_party_authored: true`, mapping a pinned implementation, a proposed
-field set and published specifications this project does not maintain, and a filing made from outside
+eight crosswalks on file promote nothing. One is a verifier's, and a verifier emits no value. The
+other seven are marked `third_party_authored: true`, mapping a pinned implementation, proposed
+field sets, published specifications, vendor documentation and a proposed predicate that this project
+does not maintain, and a filing made from outside
 records provenance and never counts toward promotion. Your filing is what moves a term, and the
 maintainer's own systems are held to the same
 bar, which is why they have not moved one either.
@@ -53,7 +54,7 @@ instructions.
 system: your-system-name
 system_url: https://example.invalid/your/system
 crosswalk_version: "0.1.0"
-vocabulary_version_targeted: "0.5.0"
+vocabulary_version_targeted: "0.6.0"
 
 maintainer:
   github: your-github-handle

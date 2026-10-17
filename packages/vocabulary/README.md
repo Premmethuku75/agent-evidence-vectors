@@ -17,8 +17,8 @@ Install the Python package for vocabulary v0.4.0: `pip install agent-evidence-vo
 Pin the registry at a release and check its digest:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/probityai/agent-evidence-vocabulary/v0.5.0/vocabulary.yaml
-echo "6555b8c6e6c4fa6ebe3c59f6e95619ec383f93a0615036bed9da8a49f6302e09  vocabulary.yaml" | sha256sum -c
+curl -fsSLO https://raw.githubusercontent.com/probityai/agent-evidence-vocabulary/v0.6.0/vocabulary.yaml
+echo "4a5fdc8397c2fd82ee5795f50d2ad00203dd8d5a122bf77c5d0d0edb67d35760  vocabulary.yaml" | sha256sum -c
 ```
 
 Then read a term:
@@ -37,7 +37,7 @@ and run `python3 scripts/validate_crosswalks.py` before opening a pull request.
 
 ## Status
 
-Release v0.5.0, tagged October 16, 2026. It adds ten proposed terms. The registry file is CC0-1.0, and the rest of the
+Release v0.6.0, tagged October 17, 2026. It adds the `done_verification` section, eight proposed terms. The registry file is CC0-1.0, and the rest of the
 repository is Apache-2.0. Every term starts as proposed and is promoted only when an independent
 system emits it; the rules are in
 [GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md).
