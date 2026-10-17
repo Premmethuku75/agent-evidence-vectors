@@ -27,7 +27,7 @@ env:
   CARGO_TERM_COLOR: always
   UV_VERSION: "0.12.8"
   MATURIN_VERSION: "v1.15.0"
-  PYO3_MSRV: "1.85"
+  BINDING_MSRV: "1.88"
 
 jobs:
   python-test:
@@ -76,9 +76,9 @@ jobs:
         with:
           persist-credentials: false
       - name: the declared rust-version is the one in Cargo.toml
-        run: grep -qx "rust-version = \"$PYO3_MSRV\"" Cargo.toml
-      - run: rustup toolchain install "$PYO3_MSRV" --profile minimal
-      - run: cargo "+$PYO3_MSRV" check --locked
+        run: grep -qx "rust-version = \"$BINDING_MSRV\"" Cargo.toml
+      - run: rustup toolchain install "$BINDING_MSRV" --profile minimal
+      - run: cargo "+$BINDING_MSRV" check --locked
 
   python-wheels:
     runs-on: ${{ matrix.runner }}

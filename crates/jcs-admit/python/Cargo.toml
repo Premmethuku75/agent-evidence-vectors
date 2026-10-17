@@ -2,8 +2,10 @@
 name = "probityai-native"
 version = "0.1.0"
 edition = "2021"
-# The highest floor among the dependencies: dsse 0.1.3 declares 1.85.
-rust-version = "1.85"
+# The highest floor in the locked graph: sha2 0.11.1, which dsse 0.1.3 reaches through
+# ed25519-dalek 3.0, needs 1.88 although dsse itself declares 1.85. The python-msrv CI job
+# builds on this version.
+rust-version = "1.88"
 description = "Python bindings for the jcs-admit and dsse crates, built into the probityai wheel"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/probityai/jcs-admit"
