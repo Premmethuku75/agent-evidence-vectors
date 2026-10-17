@@ -54,6 +54,7 @@ predicate, in
 | [vocabulary.yaml](https://github.com/probityai/agent-evidence-vocabulary/blob/main/vocabulary.yaml) | the registry itself |
 | [OpenCRE links](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/OPENCRE.md) | which terms link to which OpenCRE requirement, how closely, and why the rest have no link |
 | [Agent change admission predicate](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/predicates/agent-change-admission-v1.md) | the signed decision that admits or rejects a change to an agent's harness, and how to verify it |
+| [Done verification terms](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/done-verification.md) | the eight terms for deciding that an agent's work is done from outside the agent, each with its check, and the crosswalks to Claude Code goals, Codex goals and in-toto 604 |
 | [Releasing](https://github.com/probityai/agent-evidence-vocabulary/blob/main/docs/RELEASING.md) | how a version is cut, tagged and checked |
 | [GOVERNANCE.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/GOVERNANCE.md) and [CONTRIBUTING.md](https://github.com/probityai/agent-evidence-vocabulary/blob/main/CONTRIBUTING.md) | the promotion rules, and how to file a crosswalk |
 | [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) | the predicate specification and conformance vectors this vocabulary describes |
