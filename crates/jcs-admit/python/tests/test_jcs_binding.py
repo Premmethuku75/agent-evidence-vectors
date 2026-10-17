@@ -75,7 +75,7 @@ def test_rfc8785_admits_an_inexact_integer_and_ijson_refuses_it():
 
 
 def test_noncharacter_is_rfc8785_canonical_and_ijson_refused():
-    doc = '"￾"'.encode()
+    doc = '"\ufffe"'.encode()
     assert jcs.is_canonical(doc)
     assert not jcs.is_canonical_with(doc, reject_noncharacters=True)
     assert refusal(jcs.admit_ijson, doc).variant == "StringNotScalar"

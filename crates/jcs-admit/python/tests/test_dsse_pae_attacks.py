@@ -15,8 +15,8 @@ from probityai import dsse
 
 
 def test_length_prefix_counts_bytes_not_characters():
-    # "tybé" is four characters and five bytes.
-    assert dsse.pae("tybé", b"x") == b"DSSEv1 5 tyb\xc3\xa9 1 x"
+    # "tyb\u00e9" (e with an acute accent) is four characters and five bytes.
+    assert dsse.pae("tyb\u00e9", b"x") == b"DSSEv1 5 tyb\xc3\xa9 1 x"
 
 
 def test_length_prefix_counts_bytes_for_astral_characters():
@@ -97,7 +97,7 @@ KEY = SIGNER.verifier()
 SHIFTED = [
     (("ab", b"c"), ("a", b"bc")),
     (("a", b"b"), ("a b", b"")),
-    (("tybé", b"x"), ("tybÃ©", b"x")),
+    (("tyb\u00e9", b"x"), ("tyb\u00c3\u00a9", b"x")),
     (("Application/JSON", b"x"), ("application/json", b"x")),
 ]
 
