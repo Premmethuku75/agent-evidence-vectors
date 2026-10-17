@@ -28,6 +28,6 @@ API change ships as a new minor version.
 ## Release checks
 
 Every push and pull request runs the test suite on the declared minimum Rust
-version (1.85), `cargo semver-checks` against the newest release on crates.io,
+version (1.88), `cargo semver-checks` against the newest release on crates.io,
 and `cargo vet` over every dependency in `Cargo.lock`. The workflows are in
 `.github/workflows/`.

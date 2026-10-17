@@ -2,7 +2,7 @@
 name = "dsse"
 version = "0.1.3"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.88"
 license = "Apache-2.0"
 description = "DSSE (Dead Simple Signing Envelope) with PAE pre-authentication encoding: envelope construction, signing, and threshold verification."
 repository = "https://github.com/probityai/dsse"

@@ -3,7 +3,7 @@ name: policy
 # Release policy checks, each a job of its own so a failure names its rule.
 #
 # msrv: the crate builds and its tests pass on the rust-version Cargo.toml
-#   declares (1.85). Raising it is a breaking change for downstream callers, so
+#   declares (1.88). Raising it is a breaking change for downstream callers, so
 #   it happens in its own commit with this job green.
 # msrv-fresh: the same, on a fresh dependency resolution. The msrv job builds
 #   the versions Cargo.lock pins, so a newer release of a dependency that needs a
