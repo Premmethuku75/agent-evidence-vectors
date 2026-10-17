@@ -1,0 +1,44 @@
+# The jcs-admit name on PyPI, beside the same name on crates.io and npm.
+#
+# It carries no code of its own. Its one module re-exports probityai.jcs, and
+# its one dependency is an exact probityai release, so a Python user who looks
+# for the crate's name finds it, gets the identical binding, and never gets a
+# second native build that could drift from the first. Its version is the
+# jcs-admit crate version that probityai release links; a test holds the two
+# equal.
+
+[build-system]
+requires = ["uv_build==0.12.8"]
+build-backend = "uv_build"
+
+[project]
+name = "jcs-admit"
+version = "0.1.2"
+description = "Admission control and RFC 8785 canonicalization for JSON about to be signed, from the jcs-admit Rust crate"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-APACHE", "LICENSE-MIT"]
+requires-python = ">=3.10"
+dependencies = ["probityai==0.1.0"]
+keywords = ["jcs", "rfc8785", "canonicalization", "attestation", "in-toto"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Security :: Cryptography",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Source = "https://github.com/probityai/jcs-admit/tree/main/python/twin"
+Issues = "https://github.com/probityai/jcs-admit/issues"
+
+[dependency-groups]
+dev = ["pytest==9.1.1"]
+
+[tool.uv.sources]
+# Development only: resolve the binding from the sibling directory. Built
+# metadata carries the plain `probityai==0.1.0` requirement above.
+probityai = { path = "..", editable = false }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-ra"]
