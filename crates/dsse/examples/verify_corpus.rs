@@ -103,7 +103,7 @@ fn read_json(path: &Path) -> Result<Value, String> {
 }
 
 fn decode_hex(text: &str) -> Result<Vec<u8>, String> {
-    if text.len() % 2 != 0 {
+    if !text.len().is_multiple_of(2) {
         return Err("odd-length hex key".into());
     }
     (0..text.len())
