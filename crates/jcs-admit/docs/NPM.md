@@ -5,7 +5,7 @@ It builds one WebAssembly artifact from the Rust parser and canonicalizer. The
 JavaScript layer loads that artifact and represents native refusals as errors.
 It does not parse JSON, canonicalize values or translate refusal reasons.
 
-The npm package is `jcs-admit` version `0.1.0`. Its release tag is `npm-v0.1.0`,
+The npm package is `jcs-admit` version `0.1.0`. Its release tag is `jcs-admit-npm-v0.1.0`,
 separate from the native crate's version `0.1.2`. The existing Rust `v0.1.1`
 release and its pinned consumer examples remain unchanged. Registry metadata,
 artifact hashes and provenance identify a published package; a source tag alone
@@ -45,7 +45,7 @@ Node 22.14 or newer loads the WASM bytes internally through the package's ESM
 entry point. Browsers import `jcs-admit/browser` and await its default initializer.
 A bundler or static server must retain the adjacent generated modules and `.wasm`
 file. Both routes use the same bytes, without an install script or runtime npm
-dependency. See [the package README](https://github.com/probityai/jcs-admit/blob/main/npm/README.md) for complete consumer
+dependency. See [the package README](https://github.com/probityai/agent-evidence/blob/main/crates/jcs-admit/npm/README.md) for complete consumer
 examples.
 
 ## Build and verify a tarball
@@ -88,15 +88,15 @@ identity. Synthetic artifact mutation controls cannot satisfy consumer evidence.
 
 ## Release authority and provenance
 
-The release workflow uses a reviewed `npm-v<package-version>` tag whose commit
-belongs to `main`. Its build job has read-only repository permissions. A separate
+The repository's `release.yml` publishes from a GitHub release whose tag is
+`jcs-admit-npm-v<package-version>` and whose commit belongs to `main`. Its build job has read-only repository permissions. A separate
 publish job downloads the qualified artifact and verifies its hashes and source
 identity before requesting npm publication through OIDC. Only that job receives
-`id-token: write`, behind the `npm-release` environment. It does not rebuild the
+`id-token: write`, behind the `npm` environment. It does not rebuild the
 tarball or use a long-lived npm token.
 
 The npm trusted-publisher configuration binds the package identity to
-`probityai/jcs-admit`, the exact `npm-release.yml` workflow and the `npm-release`
+`probityai/agent-evidence`, the exact `release.yml` workflow and the `npm`
 environment. Establish the package identity and configure that binding through
 npm's supported account flow before the OIDC publish job runs. Registry account
 access alone does not establish namespace ownership, direct publication authority

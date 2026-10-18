@@ -36,7 +36,7 @@ arrives with its own name and fields.
 
 One wheel per platform serves CPython 3.10 and later (`cp310-abi3`): manylinux 2_28 and
 musllinux 1_2 on x86_64 and aarch64, macOS on x86_64 and arm64, and Windows x64, plus
-an sdist. `.github/workflows/python.yml` builds them on every push and installs each
+an sdist. The repository's `.github/workflows/crate-jcs-admit.yml` builds them for every change and installs each
 runnable wheel into a clean environment, with no source on the path, to run the whole
 suite against it.
 
@@ -65,18 +65,18 @@ uv run --locked pytest
 
 ## Releasing
 
-A `py-v<version>` tag publishes the project. `.github/workflows/python-release.yml`
-runs `python.yml` on the tagged commit, so the files uploaded are the ones that
-workflow built and tested, then runs `scripts/check-python-release.py`, which refuses
-unless:
+A GitHub release tagged `jcs-admit-py-v<version>` publishes the project. The
+repository's `.github/workflows/release.yml` runs `jcs-admit-python-build.yml` on the
+tagged commit, so the files uploaded are the ones that workflow built, then runs
+`scripts/check-jcs-admit-python-release.py`, which refuses unless:
 
-- the tag is `py-v` plus the version in `python/pyproject.toml`, and the commit is on
-  `main`'s history;
+- the tag is `jcs-admit-py-v` plus the version in `python/pyproject.toml`, and the
+  commit is on `main`'s history;
 - the file set is exactly seven `jcs-admit` abi3 wheels and its sdist;
 - every file's own metadata carries the right name and version.
 
 Then the `publish` job uploads the files. It runs in the GitHub environment `pypi`
-(deployments allowed from `py-v*` tags only) and uploads through PyPI trusted
+ and uploads through PyPI trusted
 publishing, so no token exists anywhere.
 
 One-time setup before the first tag: `jcs-admit` does not exist on PyPI yet, so its
@@ -89,5 +89,5 @@ The distribution name is `jcs-admit` and the import package is `jcs_admit`. The 
 side by side in one environment.
 
 To release: bump `python/pyproject.toml` (and `BOUND_VERSION` and the crate pins
-together), merge to `main`, then push a signed tag `py-v<version>` on the merge
-commit. A tag on a commit not on `main` is refused.
+together), merge to `main`, then publish a GitHub release tagged `jcs-admit-py-v<version>` on
+the merge commit. A tag on a commit not on `main` is refused.

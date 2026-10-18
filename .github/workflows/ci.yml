@@ -80,9 +80,14 @@ jobs:
     secrets:
       DSSE_FORBIDDEN_SHA256: ${{ secrets.DSSE_FORBIDDEN_SHA256 }}
 
+  crate-jcs-admit:
+    needs: changes
+    if: fromJSON(needs.changes.outputs.areas)['crates/jcs-admit']
+    uses: ./.github/workflows/crate-jcs-admit.yml
+
   ci-ok:
     if: always()
-    needs: [changes, repository, crate-dsse]
+    needs: [changes, repository, crate-dsse, crate-jcs-admit]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

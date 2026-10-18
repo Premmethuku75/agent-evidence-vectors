@@ -18,7 +18,8 @@ def source_identity(root):
     paths += sorted((root/'npm/wasm/src').rglob('*.rs'))
     # The release validator reads these exact qualification inputs. Keep their
     # population in the same source identity as the validator and generator.
-    paths += [root/'npm/test/cases.mjs', root/'.github/workflows/npm-package.yml']
+    # The qualification workflow lives at the repository root, two levels up.
+    paths += [root/'npm/test/cases.mjs', root/'../../.github/workflows/crate-jcs-admit-npm.yml']
     for directory in ['rfc8785/input', 'rfc8785/output', 'cross-rail/input', 'cross-rail/canonical']:
         paths += sorted((root/'tests/vectors'/directory).glob('*.json'))
     paths += [root/'tests/vectors'/name for name in ['attack/strings-keys-members.tsv', 'es-number-ties.tsv']]

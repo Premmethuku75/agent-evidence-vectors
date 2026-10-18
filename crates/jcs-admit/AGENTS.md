@@ -15,5 +15,5 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) first; these are the rules an agent most
   what `jcs_admit._native` exports changes `python/pysrc/jcs_admit/_native.pyi` in the same
   commit; CI runs `mypy.stubtest` against the built module. The Python tests read vectors from
   the bound crate's registry source; never copy them into `python/`.
-- Keep `README.md` to the first screen. Detail goes in `docs/`, and `scripts/readme-lint.py`
+- Keep `README.md` to the first screen. Detail goes in `docs/`, and the repository root's `scripts/readme-lint.py`
   fails a README over its word limit.

@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/probityai/jcs-admit/tree/main/python"
-Issues = "https://github.com/probityai/jcs-admit/issues"
+Source = "https://github.com/probityai/agent-evidence/tree/main/crates/jcs-admit/python"
+Issues = "https://github.com/probityai/agent-evidence/issues"
 
 [dependency-groups]
 dev = ["maturin==1.15.0", "pytest==9.1.1", "mypy==2.4.0"]

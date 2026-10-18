@@ -5,7 +5,7 @@
 //! builds with far less, and a host on serde 1.0.228 had its lockfile moved to
 //! 1.0.229, which also brought in syn 3 beside syn 2.
 //!
-//! The `floors` job in `.github/workflows/ci.yml` resolves every dependency,
+//! The `floors` job in `.github/workflows/crate-jcs-admit.yml` (repository root) resolves every dependency,
 //! direct and transitive, to its declared minimum and runs the whole suite at
 //! the MSRV, so it proves each floor below is enough. It cannot notice a floor that was
 //! raised for no reason, because a higher floor also passes. This test does:

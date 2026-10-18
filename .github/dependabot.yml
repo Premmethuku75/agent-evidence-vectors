@@ -12,3 +12,7 @@ updates:
     directory: /crates/dsse
     schedule:
       interval: weekly
+  - package-ecosystem: cargo
+    directory: /crates/jcs-admit
+    schedule:
+      interval: weekly

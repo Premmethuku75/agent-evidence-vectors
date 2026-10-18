@@ -1,4 +1,14 @@
-name: qualify npm artifact
+name: crate-jcs-admit-npm
+
+# Builds the jcs-admit npm package from crates/jcs-admit/npm, installs the
+# packed tarball into Node and browser consumers, and checks the tarball
+# against the exact source identity (crates/jcs-admit/npm/check_release.py).
+# crate-jcs-admit.yml calls it for every change to the crate; release.yml calls
+# it for a jcs-admit-npm-v<version> release and publishes the artifact it
+# uploads, never a rebuild.
+#
+# crates/jcs-admit/npm/artifact.py hashes this file into the package's source
+# identity, and check_release.py reads the two Node pins below from it.
 
 on:
   workflow_call:
@@ -9,6 +19,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: crates/jcs-admit
 
 jobs:
   package:
@@ -43,7 +57,7 @@ jobs:
       - run: npm ci --prefix npm --ignore-scripts --no-audit --no-fund
       - run: python3 npm/build.py --require-clean
       - run: npx --no-install playwright install --with-deps chromium --only-shell
-        working-directory: npm
+        working-directory: crates/jcs-admit/npm
       - run: npm test --prefix npm
       - run: python3 npm/test/release-guard.py
       - name: verify the tested tarball and exact source identity
@@ -55,4 +69,4 @@ jobs:
           name: jcs-npm-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: warn
           retention-days: 90
-          path: npm/test-results/
+          path: crates/jcs-admit/npm/test-results/
