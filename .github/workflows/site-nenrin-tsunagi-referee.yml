@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/nenrin-tsunagi-referee.yml when the package was imported;
+# its steps run from site.
 name: nenrin-tsunagi-referee
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-nenrin-tsunagi-referee.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-nenrin-tsunagi-referee.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   action-presence-under-the-board-referee:
@@ -33,12 +41,12 @@ jobs:
           PYTHONPATH=interop/action-presence:interop/nenrin-tsunagi .research-cache/reader/bin/python -m pytest interop/nenrin-tsunagi/test_batch.py -q
       - name: Score the reader with nenrin-tsunagi, offline, corpus from the pinned wheel
         env:
-          PYTHONPATH: ${{ github.workspace }}/interop/action-presence
+          PYTHONPATH: ${{ github.workspace }}/site/interop/action-presence
         run: |
           mkdir -p .research-cache/referee-run
           set +e
           .research-cache/referee/bin/nenrin-tsunagi run nenrin-interop-v0.2-action-presence -- \
-            "${GITHUB_WORKSPACE}/.research-cache/reader/bin/python ${GITHUB_WORKSPACE}/interop/nenrin-tsunagi/batch.py {in} {out}" \
+            "${GITHUB_WORKSPACE}/site/.research-cache/reader/bin/python ${GITHUB_WORKSPACE}/site/interop/nenrin-tsunagi/batch.py {in} {out}" \
             > .research-cache/referee-run/tsunagi.txt 2>&1
           status=$?
           set -e
@@ -50,4 +58,4 @@ jobs:
         if: always()
         with:
           name: nenrin-tsunagi-referee
-          path: .research-cache/referee-run/tsunagi.txt
+          path: site/.research-cache/referee-run/tsunagi.txt

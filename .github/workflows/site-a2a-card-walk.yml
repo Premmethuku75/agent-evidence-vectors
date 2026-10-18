@@ -1,20 +1,28 @@
+# Moved from site/.github/workflows/a2a-card-walk.yml when the package was imported;
+# its steps run from site.
 name: a2a-card-walk
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-a2a-card-walk.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-a2a-card-walk.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   retained-walk-rechecks-offline:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: interop/a2a-card-walk
+        working-directory: site/interop/a2a-card-walk
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

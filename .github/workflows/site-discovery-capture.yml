@@ -1,12 +1,20 @@
+# Moved from site/.github/workflows/discovery-capture.yml when the package was imported;
+# its steps run from site.
 name: discovery-capture
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-discovery-capture.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-discovery-capture.yml']
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   synthetic-custody-controls:
@@ -31,5 +39,5 @@ jobs:
         if: always()
         with:
           name: discovery-capture-coverage
-          path: discovery-capture-coverage.json
+          path: site/discovery-capture-coverage.json
           if-no-files-found: error

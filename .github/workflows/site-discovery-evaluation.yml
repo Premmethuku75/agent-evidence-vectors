@@ -1,12 +1,20 @@
+# Moved from site/.github/workflows/discovery-evaluation.yml when the package was imported;
+# its steps run from site.
 name: discovery-evaluation
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-discovery-evaluation.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-discovery-evaluation.yml']
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   retained-packets:
@@ -40,7 +48,7 @@ jobs:
         with:
           name: discovery-packet-checks
           path: |
-            prompts-open-search.json
-            prompts-navigation.json
-            no-attempts-report.json
+            site/prompts-open-search.json
+            site/prompts-navigation.json
+            site/no-attempts-report.json
           if-no-files-found: error

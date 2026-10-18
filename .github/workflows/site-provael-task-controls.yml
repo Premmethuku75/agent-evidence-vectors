@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/provael-task-controls.yml when the package was imported;
+# its steps run from site.
 name: provael-task-controls
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-provael-task-controls.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-provael-task-controls.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   publisher-control-reader:
@@ -20,7 +28,7 @@ jobs:
         with:
           repository: provael/provael
           ref: f1dbc5352bfa7774c0a5599eff20407125914c78
-          path: .provael-source
+          path: site/.provael-source
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -43,10 +51,10 @@ jobs:
         with:
           name: provael-publisher-control-reader
           path: |
-            provael-control-report.json
-            provael-required-source.zip
-            tools/check_provael_controls.py
-            examples/provael-task-controls/contract.json
-            examples/provael-task-controls/source-record.json
-            examples/provael-task-controls/PROVAEL-LICENSE
-            examples/provael-task-controls/PROVAEL-NOTICE
+            site/provael-control-report.json
+            site/provael-required-source.zip
+            site/tools/check_provael_controls.py
+            site/examples/provael-task-controls/contract.json
+            site/examples/provael-task-controls/source-record.json
+            site/examples/provael-task-controls/PROVAEL-LICENSE
+            site/examples/provael-task-controls/PROVAEL-NOTICE

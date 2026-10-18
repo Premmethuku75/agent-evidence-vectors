@@ -1,20 +1,28 @@
+# Moved from site/.github/workflows/ap1-declared-constants.yml when the package was imported;
+# its steps run from site.
 name: ap1-declared-constants
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-ap1-declared-constants.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-ap1-declared-constants.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   known-answers-and-pinned-replay:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: interop/ap1-declared-constants
+        working-directory: site/interop/ap1-declared-constants
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

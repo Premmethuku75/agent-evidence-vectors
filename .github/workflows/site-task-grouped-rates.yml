@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/task-grouped-rates.yml when the package was imported;
+# its steps run from site.
 name: task-grouped-rates
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-task-grouped-rates.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-task-grouped-rates.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   paired-reader:
@@ -33,4 +41,4 @@ jobs:
         if: always()
         with:
           name: task-grouped-rate-reader
-          path: grouped-rate-report.json
+          path: site/grouped-rate-report.json

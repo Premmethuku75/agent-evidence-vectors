@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/trace-m1-consumer.yml when the package was imported;
+# its steps run from site.
 name: trace-m1-consumer
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-trace-m1-consumer.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-trace-m1-consumer.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   pinned-inputs-and-consumer-controls:
@@ -26,5 +34,5 @@ jobs:
         with:
           name: trace-m1-native-results
           path: |
-            interop/trace-m1/results/qualification/
-            interop/trace-m1/results/replay-r1/public-report.json
+            site/interop/trace-m1/results/qualification/
+            site/interop/trace-m1/results/replay-r1/public-report.json

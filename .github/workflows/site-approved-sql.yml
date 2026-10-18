@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/approved-sql.yml when the package was imported;
+# its steps run from site.
 name: approved-sql
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-approved-sql.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-approved-sql.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   supplied-record-controls:
@@ -20,10 +28,10 @@ jobs:
         with:
           version: "0.12.24"
       - name: Install the locked example tools in their own environment
-        working-directory: examples/approved-sql
+        working-directory: site/examples/approved-sql
         run: uv sync --frozen --group dev --python 3.14.7
       - name: Check the reader and every supplied-record outcome
-        working-directory: examples/approved-sql
+        working-directory: site/examples/approved-sql
         run: .venv/bin/python scripts/qualify.py
       - name: Refuse failing, empty and unrelated test runs
         run: examples/approved-sql/.venv/bin/python -m pytest tests/test_coverage_gate.py --junitxml=examples/approved-sql/gate-results/coverage-gate-tests.xml
@@ -31,4 +39,4 @@ jobs:
         if: always()
         with:
           name: approved-sql-supplied-record-controls
-          path: examples/approved-sql/gate-results/
+          path: site/examples/approved-sql/gate-results/

@@ -1,19 +1,25 @@
+# Moved from site/.github/workflows/aps-priorseal-replay.yml when the package was imported;
+# its steps run from site.
 name: APS and PriorSeal source replay
 
 on:
   push:
     branches: [main]
     paths:
-      - experiments/aps-priorseal-source-replay/**
-      - .github/workflows/aps-priorseal-replay.yml
+      - 'site/experiments/aps-priorseal-source-replay/**'
+      - '.github/workflows/site-aps-priorseal-replay.yml'
   pull_request:
     paths:
-      - experiments/aps-priorseal-source-replay/**
-      - .github/workflows/aps-priorseal-replay.yml
+      - 'site/experiments/aps-priorseal-source-replay/**'
+      - '.github/workflows/site-aps-priorseal-replay.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   source-replay:
@@ -27,35 +33,35 @@ jobs:
         with:
           repository: altrudev/Frequency-Federation-Review
           ref: 4162622af24c94efb843f53aa27940ffd1256ad6
-          path: .build/aps-priorseal-replay/capsule
+          path: site/.build/aps-priorseal-replay/capsule
           sparse-checkout: capsules/aps-priorseal-v0.1
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: altrudev/Frequency-Federation-Review
           ref: b12879d5878991d9c3ed260d06ee11716eb99d33
-          path: .build/aps-priorseal-replay/review-wrapper
+          path: site/.build/aps-priorseal-replay/review-wrapper
           sparse-checkout: capsules/aps-priorseal-v0.1
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: aeoess/agent-passport-system
           ref: 948f99b85343bef2c6fa677c8543965caacfc087
-          path: .build/aps-priorseal-replay/aps
+          path: site/.build/aps-priorseal-replay/aps
           sparse-checkout: fixtures/priorseal-decision-binding
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: imokokok/PriorSeal
           ref: d749d2691c3e6be139de4020e7b27cdafca2c428
-          path: .build/aps-priorseal-replay/priorseal
+          path: site/.build/aps-priorseal-replay/priorseal
           sparse-checkout: examples/aps-priorseal-decision-binding-v1
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "20"
       - name: Install the review adapter's locked dependencies
-        working-directory: .build/aps-priorseal-replay/capsule/capsules/aps-priorseal-v0.1/adapter
+        working-directory: site/.build/aps-priorseal-replay/capsule/capsules/aps-priorseal-v0.1/adapter
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Check the pinned sources, claims and failed controls
         run: |
@@ -86,15 +92,15 @@ jobs:
         with:
           name: aps-priorseal-source-replay
           path: |
-            .build/aps-priorseal-replay/result/receipt.json
-            .build/aps-priorseal-replay/contract-result/record.json
-            .build/aps-priorseal-replay/caller-controls/public-results/
-            .build/aps-priorseal-replay/caller-controls/public-artifact-manifest.json
-            .build/aps-priorseal-replay/result/*.command.json
-            .build/aps-priorseal-replay/result/*.stdout
-            .build/aps-priorseal-replay/result/*.stderr
-            .build/aps-priorseal-replay/contract-result/*.command.json
-            .build/aps-priorseal-replay/contract-result/*.stdout
-            .build/aps-priorseal-replay/contract-result/*.stderr
+            site/.build/aps-priorseal-replay/result/receipt.json
+            site/.build/aps-priorseal-replay/contract-result/record.json
+            site/.build/aps-priorseal-replay/caller-controls/public-results/
+            site/.build/aps-priorseal-replay/caller-controls/public-artifact-manifest.json
+            site/.build/aps-priorseal-replay/result/*.command.json
+            site/.build/aps-priorseal-replay/result/*.stdout
+            site/.build/aps-priorseal-replay/result/*.stderr
+            site/.build/aps-priorseal-replay/contract-result/*.command.json
+            site/.build/aps-priorseal-replay/contract-result/*.stdout
+            site/.build/aps-priorseal-replay/contract-result/*.stderr
           if-no-files-found: error
           include-hidden-files: true

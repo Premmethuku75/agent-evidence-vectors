@@ -1,13 +1,21 @@
+# Moved from site/.github/workflows/signed-action-presence.yml when the package was imported;
+# its steps run from site.
 name: signed-action-presence
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site-signed-action-presence.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site-signed-action-presence.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   supplied-bytes-and-refusal-controls:
@@ -48,5 +56,5 @@ jobs:
         with:
           name: signed-action-presence-controls
           path: |
-            .research-cache/signed-actions/tests.xml
-            .research-cache/signed-actions/coverage.json
+            site/.research-cache/signed-actions/tests.xml
+            site/.research-cache/signed-actions/coverage.json

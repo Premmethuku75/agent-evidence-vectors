@@ -1,3 +1,5 @@
+# Moved from site/.github/workflows/site.yml when the package was imported;
+# its steps run from site.
 name: site
 
 # Three checks keep the published site honest between releases:
@@ -11,14 +13,20 @@ name: site
 
 on:
   push:
+    paths: ['site/**', '.github/workflows/site.yml']
     branches: [main]
   pull_request:
+    paths: ['site/**', '.github/workflows/site.yml']
   schedule:
     - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: site
 
 jobs:
   build:
@@ -63,7 +71,7 @@ jobs:
         if: always()
         with:
           name: public-layout
-          path: public-layout-evidence/
+          path: site/public-layout-evidence/
 
   observer-admission:
     runs-on: ubuntu-24.04
@@ -77,7 +85,7 @@ jobs:
         with:
           repository: probityai/agent-evidence-observer
           ref: 8562c25fb7ec97596ea9d0297c495340298914b6
-          path: .observer-source
+          path: site/.observer-source
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -109,9 +117,9 @@ jobs:
         with:
           name: observer-admission
           path: |
-            observer-admission-run/
-            observer-admission-report.json
-            vocabulary-installed-replay/
+            site/observer-admission-run/
+            site/observer-admission-report.json
+            site/vocabulary-installed-replay/
 
   links:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -159,4 +167,4 @@ jobs:
         if: always()
         with:
           name: rederive
-          path: rederive.txt
+          path: site/rederive.txt
