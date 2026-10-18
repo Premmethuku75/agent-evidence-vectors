@@ -36,8 +36,8 @@ jobs:
           .research-cache/referee/bin/python -c "from importlib.metadata import version; v = version('nenrin-verify'); assert v == '0.5.5', v"
       - name: Check the batch adapter
         run: |
-          .research-cache/reader/bin/ruff check interop/nenrin-tsunagi
-          .research-cache/reader/bin/ruff format --check interop/nenrin-tsunagi
+          .research-cache/reader/bin/ruff check --isolated interop/nenrin-tsunagi
+          .research-cache/reader/bin/ruff format --isolated --check interop/nenrin-tsunagi
           PYTHONPATH=interop/action-presence:interop/nenrin-tsunagi .research-cache/reader/bin/python -m pytest interop/nenrin-tsunagi/test_batch.py -q
       - name: Score the reader with nenrin-tsunagi, offline, corpus from the pinned wheel
         env:
