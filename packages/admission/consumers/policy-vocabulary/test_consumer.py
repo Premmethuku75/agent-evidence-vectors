@@ -3,14 +3,14 @@ import copy
 import importlib.util
 import io
 import os
-from pathlib import Path
 import signal
 import stat
 import tempfile
 import time
 import unittest
-from unittest.mock import patch
 import zipfile
+from pathlib import Path
+from unittest.mock import patch
 
 _spec = importlib.util.spec_from_file_location("consumer", Path(__file__).with_name("consumer.py"))
 consumer = importlib.util.module_from_spec(_spec)
@@ -84,18 +84,16 @@ class HostBoundaryControls(unittest.TestCase):
             return set_timer(timer, min(seconds, 0.05))
         started = time.monotonic()
         previous = signal.getsignal(signal.SIGALRM)
-        with patch.object(consumer.signal, "setitimer", side_effect=accelerated):
-            with self.assertRaises(TimeoutError):
-                self.download(Response(slow=True))
+        with patch.object(consumer.signal, "setitimer", side_effect=accelerated), self.assertRaises(TimeoutError):
+            self.download(Response(slow=True))
         self.assertLess(time.monotonic() - started, 0.5)
         self.assertFalse((self.root / "packet.zip").exists())
         self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
 
     def test_an_existing_host_alarm_is_preserved(self):
         previous = signal.getsignal(signal.SIGALRM)
-        with patch.object(consumer.signal, "getitimer", return_value=(10.0, 0.0)):
-            with self.assertRaises(ValueError):
-                self.download(Response())
+        with patch.object(consumer.signal, "getitimer", return_value=(10.0, 0.0)), self.assertRaises(ValueError):
+            self.download(Response())
         self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
 
     def archive(self, entries):
@@ -236,9 +234,8 @@ class HostBoundaryControls(unittest.TestCase):
             changed["qualityPolicy"][field] -= 1
             chosen = self.root / "host-selection.json"
             consumer.save(chosen, changed)
-            with patch.object(consumer, "SELECTION", chosen):
-                with self.subTest(field=field), self.assertRaises(ValueError):
-                    consumer.selection()
+            with patch.object(consumer, "SELECTION", chosen), self.subTest(field=field), self.assertRaises(ValueError):
+                consumer.selection()
 
     def test_installation_site_population_has_a_declared_bound(self):
         output, site = self.installation()
@@ -252,9 +249,11 @@ class HostBoundaryControls(unittest.TestCase):
         source = site / consumer.PACKAGE / "cli.py"
         source.unlink()
         source.mkdir()
-        with patch.object(Path, "rglob", side_effect=AssertionError("recursive traversal is forbidden")):
-            with self.assertRaisesRegex(ValueError, "nonregular entry"):
-                consumer.verify_installation(output)
+        with (
+            patch.object(Path, "rglob", side_effect=AssertionError("recursive traversal is forbidden")),
+            self.assertRaisesRegex(ValueError, "nonregular entry"),
+        ):
+            consumer.verify_installation(output)
 
     def test_installed_source_read_obeys_the_declared_byte_bound(self):
         output, site = self.installation()
@@ -296,9 +295,8 @@ class HostBoundaryControls(unittest.TestCase):
             os.mkfifo(path)
             return original_open(path, flags)
         started = time.monotonic()
-        with patch.object(consumer.os, "open", side_effect=replace_at_open):
-            with self.assertRaisesRegex(ValueError, "regular file"):
-                consumer.authenticate_archive(archive)
+        with patch.object(consumer.os, "open", side_effect=replace_at_open), self.assertRaisesRegex(ValueError, "regular file"):
+            consumer.authenticate_archive(archive)
         self.assertLess(time.monotonic() - started, 0.5)
 
     def test_source_copy_refuses_a_fifo_swapped_after_namespace_validation(self):

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import hashlib
 import json
-from pathlib import Path
 import re
 import sqlite3
 import time
-from typing import Callable, Iterator
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from pathlib import Path
 
 MAX_INTEGER = (1 << 53) - 1
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")

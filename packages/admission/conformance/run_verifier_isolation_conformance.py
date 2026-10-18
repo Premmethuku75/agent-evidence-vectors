@@ -69,8 +69,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import verifier_isolation_rails as rails  # noqa: E402  (a sibling module, found through the path line above)
-from verifier_isolation_rails import CouldNotRun  # noqa: E402
+import verifier_isolation_rails as rails
+from verifier_isolation_rails import CouldNotRun
+
 MODULE = ROOT / "rego" / "verifier_isolation.rego"
 TESTS = ROOT / "rego" / "verifier_isolation_test.rego"
 VECTORS = ROOT / "rego" / "verifier_isolation_vectors.json"
@@ -78,7 +79,7 @@ REGISTRY = ROOT / "registry" / "verifier-isolation.json"
 MAP = ROOT / "verifier-isolation" / "PROFILE-MAP.json"
 PAGE = ROOT / "docs" / "VERIFIER-ISOLATION.md"
 
-RULE_RE = re.compile(r"^errors contains (?:sprintf\()?\"(?P<reason>[^\"]+)\"[^\n]*\{\n.*?\n\}\n", re.M | re.S)
+RULE_RE = re.compile(r"^errors contains (?:sprintf\()?\"(?P<reason>[^\"]+)\"[^\n]*\{\n.*?\n\}\n", re.MULTILINE | re.DOTALL)
 BASELINE = "baseline-admitted"
 
 # The closed vocabulary a row's obstruction comes from. An open one would let "it is complicated"

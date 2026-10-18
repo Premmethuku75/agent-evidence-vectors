@@ -16,10 +16,11 @@ import binascii
 import hashlib
 import json
 import urllib.request
-from xml.etree import ElementTree
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
+from xml.etree import ElementTree
 
 FETCH_TIMEOUT_SECONDS = 60
 

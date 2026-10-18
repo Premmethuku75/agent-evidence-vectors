@@ -6,7 +6,6 @@ import hashlib
 import io
 import json
 import os
-from pathlib import Path, PurePosixPath
 import resource
 import signal
 import stat
@@ -15,8 +14,9 @@ import sys
 import tempfile
 import time
 import urllib.request
-from urllib.parse import urlsplit
 import zipfile
+from pathlib import Path, PurePosixPath
+from urllib.parse import urlsplit
 
 HERE = Path(__file__).resolve().parent
 SELECTION = HERE / "host-selection.json"
@@ -311,7 +311,7 @@ def repeat_selected_reader(command: list[str], output: Path) -> dict:
     calls = []
     for number in (1, 2):
         call = subprocess.run(command, cwd=output, env=environment(),
-                              capture_output=True, timeout=30)
+                              capture_output=True, timeout=30, check=False)
         (output / f"reader-{number}.json").write_bytes(call.stdout)
         (output / f"reader-{number}.stderr").write_bytes(call.stderr)
         if call.returncode not in {0, 1}:

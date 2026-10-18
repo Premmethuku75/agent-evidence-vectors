@@ -88,8 +88,8 @@ ESCAPED_JSON_HOST = "\\u0067" + SITE[1:]
 ESCAPED_HTML_HOST = "&#103;" + SITE[1:]
 # Joined from parts so that no line of this file is itself a hit: the history
 # scanner reads every line this file adds.
-HOME_PATH = "/".join(("", "home", "someone", "notes.txt"))
-DOSSIER_PATH = "/".join(("research", "123-private-dossier"))
+HOME_PATH = "/".join(("", "home", "someone", "notes.txt"))  # noqa: FLY002 (see above)
+DOSSIER_PATH = "/".join(("research", "123-private-dossier"))  # noqa: FLY002 (see above)
 # Two hex halves, each of which decodes to harmless text, so neither this
 # file nor any guard that decodes it carries the joined name.
 THIRD_PRODUCT = _hex("6d63702d74657374" + "2d746f6f6c6b6974")
@@ -249,8 +249,10 @@ def _hook_control() -> list[str]:
     """The harness itself must pass a message that names nothing."""
     if _hook("a body that names nothing at all") != 0:
         return [
-            "the commit-message harness failed its own control: a message naming "
-            "nothing was refused, so every hook case below would be meaningless"
+            (
+                "the commit-message harness failed its own control: a message naming "
+                "nothing was refused, so every hook case below would be meaningless"
+            )
         ]
     return []
 

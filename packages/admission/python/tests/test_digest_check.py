@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from agent_evidence_admission import digest_check
 from agent_evidence_admission.cli import main
 

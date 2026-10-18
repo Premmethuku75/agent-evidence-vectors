@@ -169,7 +169,7 @@ def main(argv: list[str]) -> int:
     )
 
     oracle = measured["verdicts"]["rego"]
-    for rail in RAILS:
+    for rail, artifact in RAILS.items():
         verdicts = measured["verdicts"][rail]
         rows: dict[str, dict[str, object]] = {}
         for ob in obligations:
@@ -201,7 +201,7 @@ def main(argv: list[str]) -> int:
             json.dumps(
                 {
                     "rail": rail,
-                    "artifact": RAILS[rail],
+                    "artifact": artifact,
                     "corpusDigest": registry["source"]["corpusDigest"],
                     "derived_by": "scripts/gen_profile_map.py",
                     "obligations": rows,

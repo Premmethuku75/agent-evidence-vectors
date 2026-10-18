@@ -7,10 +7,10 @@ import copy
 import hashlib
 import importlib.metadata
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 

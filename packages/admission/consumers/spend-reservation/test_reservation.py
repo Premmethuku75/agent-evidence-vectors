@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import copy
 import importlib.util
-import json
 import multiprocessing
 import os
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("spend_reservation", HERE / "probity_spend_reservation.py")

@@ -213,10 +213,10 @@ class CelRail:
         """Every reason the engine returns for the statement, one validation at a time."""
         d = self.split_dir(pin)
         out = self._apply(d, statement)
-        passed, failed, errors = self._summary(out)
+        _passed, failed, errors = self._summary(out)
         if errors:
             raise CouldNotRun("the CEL engine raised a runtime error on a vector; a validation is not total")
-        found = re.findall(r"^policy rule-\d+ -> resource \S+ failed:\n1 -  (.*)$", out, re.M)
+        found = re.findall(r"^policy rule-\d+ -> resource \S+ failed:\n1 -  (.*)$", out, re.MULTILINE)
         if len(found) != failed:
             raise CouldNotRun(f"kyverno reported {failed} failing rules and {len(found)} reasons could be read: {out.strip()[:300]}")
         return normalise(found)
@@ -277,6 +277,6 @@ class CueRail:
         message = (proc.stderr or proc.stdout).strip()
         # A policy that does not compile says nothing about the vector. Only an error that names a
         # path under the statement is a refusal.
-        if not re.search(r"^\"?(predicate|predicateType|_type|subject)\"?[.:]", message, re.M):
+        if not re.search(r"^\"?(predicate|predicateType|_type|subject)\"?[.:]", message, re.MULTILINE):
             raise CouldNotRun(f"cue failed without naming a field of the statement: {message[:300]}")
         return False

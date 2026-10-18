@@ -2,11 +2,11 @@
 """Check the source license copy and the license in built Python archives."""
 
 import argparse
-from email.parser import BytesParser
-from pathlib import Path
 import sys
 import tarfile
 import zipfile
+from email.parser import BytesParser
+from pathlib import Path
 
 
 def require(condition: bool, message: str) -> None:

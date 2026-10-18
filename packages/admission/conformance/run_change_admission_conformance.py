@@ -182,7 +182,7 @@ def mutation_sweep(opa: str) -> list[str]:
     source = MODULE.read_text(encoding="utf-8")
     spans = [
         (m.start(), m.end())
-        for m in re.finditer(r"^errors contains [^\n]*\{\n.*?\n\}\n|^errors contains [^\n{]*\n", source, re.M | re.S)
+        for m in re.finditer(r"^errors contains [^\n]*\{\n.*?\n\}\n|^errors contains [^\n{]*\n", source, re.MULTILINE | re.DOTALL)
     ]
     if not spans:
         raise CouldNotRun("no refusal rule found to mutate")

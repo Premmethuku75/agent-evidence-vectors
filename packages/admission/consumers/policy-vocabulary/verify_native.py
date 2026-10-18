@@ -5,11 +5,11 @@ import argparse
 import importlib.util
 import json
 import marshal
-from pathlib import Path
 import struct
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 _spec = importlib.util.spec_from_file_location("consumer", Path(__file__).with_name("consumer.py"))
 consumer = importlib.util.module_from_spec(_spec)
@@ -106,7 +106,7 @@ def verify(checkout: Path, archive: Path, output: Path) -> dict:
     # Only this test invokes the deliberately unsafe import, before the gate.
     probe = subprocess.run([str(original / "env/bin/python"), "-I", "-S", "-c",
                             "import sys;sys.path.insert(0,sys.argv[1]);import " + consumer.PACKAGE + ".cli",
-                            str(site)], capture_output=True, env=consumer.environment(), timeout=30)
+                            str(site)], capture_output=True, env=consumer.environment(), timeout=30, check=False)
     require(probe.returncode == 79 and marker.read_text() == "executed", "poisoned bytecode control was inert")
     marker.unlink()
     bytecode_refusal = consumer.evaluate(original, archive, output / "bytecode-refusal")
@@ -139,7 +139,7 @@ def verify(checkout: Path, archive: Path, output: Path) -> dict:
     for purpose, expected in (("publication", 0), ("model-quality", 1)):
         call = subprocess.run([sys.executable, "-I", "-B", str(script), "evaluate", str(replacement), str(archive),
                                str(output / ("cli-" + purpose)), "--purpose", purpose],
-                              capture_output=True, timeout=60)
+                              capture_output=True, timeout=60, check=False)
         (output / ("cli-" + purpose + ".stdout.json")).write_bytes(call.stdout)
         (output / ("cli-" + purpose + ".stderr")).write_bytes(call.stderr)
         require(call.returncode == expected, "host CLI failure propagation changed: " + purpose)

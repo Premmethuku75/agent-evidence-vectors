@@ -5,10 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.metadata
-import json
-from pathlib import Path
 import shutil
 import sys
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 api_distribution = importlib.metadata.distribution("probity-spend-reservation")
@@ -16,6 +15,7 @@ api_path = Path(api_distribution.locate_file("probity_spend_reservation.py"))
 if api_path.is_symlink() or api_path.read_bytes() != (HERE / "probity_spend_reservation.py").read_bytes():
     raise ValueError("installed-admission-source-differs")
 import probity_spend_reservation as reservation
+
 Budget, Refused, encode, sha = reservation.Budget, reservation.Refused, reservation.encode, reservation.sha
 CASES = ("accepted", "single-call-overshoot", "unknown-price", "stale-price",
          "varied-argument-loop", "unresolved-receipt", "synthetic-s005-overshoot")
@@ -69,7 +69,12 @@ def run_case(output: Path, case: str) -> dict:
     # Installed package imports happen only after the launcher checks every source.
     from probity_observer.broker import Broker
     from probity_observer.crypto import SigningKey
-    from probity_observer.history import Witness, append_history, read_history, verify_checkpoint
+    from probity_observer.history import (
+        Witness,
+        append_history,
+        read_history,
+        verify_checkpoint,
+    )
     from probity_observer.verify import verify_packet
 
     directory = output / "cases" / case
