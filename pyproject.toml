@@ -32,4 +32,7 @@ addopts = ["--strict-markers", "-ra"]
 # The repository tools read TOML with tomllib, which needs Python 3.11.
 [tool.ruff]
 target-version = "py311"
-extend-exclude = ["crates"]
+# site/ is the conformance board: its docs/ are published bytes and its
+# experiments are frozen with recorded digests. Row CONS-ORG-SITE-RUFF holds
+# the findings in its tools and tests.
+extend-exclude = ["crates", "site"]
