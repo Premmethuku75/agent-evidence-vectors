@@ -1,0 +1,359 @@
+name: ci
+
+# Four rails ship here and every one of them is a file that looks correct. The
+# reason this workflow exists is that a policy document is not evidence of
+# anything until something has run it: three of these four artifacts spent
+# months in a repository with no execution of any kind, so every defect ever
+# found in them was found by reading. The `rails` job below runs all four over
+# every vector of a pinned corpus and compares each answer against the oracle.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # The corpus these rails are measured against, installed the way any consumer
+  # gets it: the published agent-evidence-vectors package from PyPI, pinned by
+  # version AND by the SHA-256 of its wheel, and then held to the corpus digest
+  # the vendored registry records. That release ships the AEE corpus of tag
+  # v0.10.1 unchanged (same corpus digest), so the projection is the same bytes.
+  VECTORS_PACKAGE: agent-evidence-vectors==0.12.1
+  VECTORS_WHEEL_SHA256: 9b9e7371feff06d96657cd8116150d394211ea639275f35d71461857bb4b0d8d
+  VECTORS_CORPUS_DIGEST: 8b035678def9e5ac00ba761b8c640e4412c57163134afb9d2c1a90f49d573a52
+
+  # Engine versions, each with the SHA-256 of the release asset. An unpinned
+  # engine turns a red build into a question about which binary ran.
+  OPA_VERSION: v1.18.0
+  OPA_SHA256: 65d700b14b99b354982b61031b40bdc8e316ea93dadd61818f066d1d9a69dcce
+  KYVERNO_VERSION: v1.18.2
+  KYVERNO_SHA256: cb2feb8356149fd2fe774c894ccf0969f4a60a83867dd913af724f74ffbbc18b
+  CUE_VERSION: v0.17.1
+  CUE_SHA256: a39b0c97695069d95d276d99be0f5dbabb081d801bfdc9ba49b76efaf94e2369
+
+  # The CNCF Automated Governance Maturity Model that
+  # docs/AUTOMATED-GOVERNANCE-MATURITY-MODEL.md quotes, pinned by the commit of its
+  # repository the page was written against and by the SHA-256 of the file at that
+  # commit. The repository is archived, so neither should move; if either does, the
+  # page is re-read against the new text rather than the pin moved to match it.
+  MATURITY_MODEL_COMMIT: 5fb87f474808e02e7786d7c5548e65ffc1a6e29e
+  MATURITY_MODEL_SHA256: ec10156148ce93889761ef1f1718aa5a4e8afc9b403c6fc6fa38885e70461114
+
+jobs:
+  hygiene:
+    name: hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # The whole history, because the mark check below reads every commit that
+      # any ref reaches. A shallow checkout would give it three commits to call
+      # clean, and it refuses to run on one rather than say so.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: every referenced host is on the allowlist
+        run: python3 scripts/host-allowlist-gate.py --list
+      - name: no prose carries an authorship mark or a banned form
+        run: python3 scripts/docs-style-gate.py
+      - name: no commit that any ref reaches carries an authorship mark
+        run: python3 scripts/docs-style-gate.py --history
+      - name: the profile registry is what the maps render
+        run: python3 scripts/gen_profile_registry.py --check
+      - name: the ratchet report agrees with its own data
+        run: python3 scripts/ratchet_report.py --check
+      - name: the maturity-model gate fires on its own positive controls
+        run: python3 scripts/maturity-map-gate.py --selftest
+      - name: the maturity-model page cites files that exist and quotes the model exactly
+        run: |
+          set -euo pipefail
+          curl -sSfL -o "$RUNNER_TEMP/maturity-model.md" \
+            "https://raw.githubusercontent.com/cncf/tag-security/${MATURITY_MODEL_COMMIT}/community/resources/automated-governance-maturity-model/README.md"
+          echo "${MATURITY_MODEL_SHA256}  $RUNNER_TEMP/maturity-model.md" | sha256sum -c -
+          python3 scripts/maturity-map-gate.py --model "$RUNNER_TEMP/maturity-model.md"
+      # This repository already carried the salted rule file the message gate
+      # reads, and carried nothing that applied those rules to its tracked
+      # CONTENT. So a word the hook refuses in a commit message could sit in a
+      # committed file and no run said so. The scanner is the same file the two
+      # sibling repositories run, and it reads the same sidecar, so one rule
+      # file now governs both surfaces here as it does there.
+      - name: no tracked file carries a word the rule file forbids
+        run: python3 scripts/forbidden-word-scan.py
+      - name: the README stays one screen and every link in it resolves
+        run: |
+          python3 scripts/readme-lint.py README.md
+          python3 scripts/readme-lint-test.py
+
+  engines:
+    # The rails run on three third-party binaries. Every one is pinned by
+    # version and by the SHA-256 of its release asset, so a run is
+    # reproducible and the bytes are what the pin says. Neither property says
+    # the pinned version is free of a published advisory, and until this job
+    # existed nothing asked: a green pipeline was a statement about the rails
+    # and said nothing at all about the engines that ran them.
+    #
+    # The gate resolves the same version pins the install steps below use
+    # against the OSV database and fails on any advisory not held in
+    # ENGINE-ADVISORIES.toml with a reason and an expiry. It exits 2, never 0,
+    # when it could not reach the database: an unreachable database and a
+    # clean one are the same silence and only one of them is a result.
+    name: pinned engines against the advisory database
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: the disposition file is complete
+        run: python3 scripts/engine-advisory-gate.py --selftest
+      - name: every pinned engine resolves against OSV
+        run: python3 scripts/engine-advisory-gate.py
+
+  corpus:
+    name: corpus projection
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install the published vectors package at the pinned hash
+        run: |
+          set -euo pipefail
+          echo "$VECTORS_PACKAGE --hash=sha256:$VECTORS_WHEEL_SHA256" > "$RUNNER_TEMP/vectors.lock"
+          # Only the corpus files are read and nothing from the package is
+          # imported, so the wheel's own interpreter floor does not apply here.
+          python3 -m pip install --quiet --disable-pip-version-check --no-deps --require-hashes \
+            --only-binary=:all: --ignore-requires-python --target "$RUNNER_TEMP/vectors-pkg" \
+            -r "$RUNNER_TEMP/vectors.lock"
+          corpus="$RUNNER_TEMP/vectors-pkg/agent_evidence_vectors/corpora"
+          got="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["corpusDigest"])' "$corpus/vectors/MANIFEST.json")"
+          if [ "$got" != "$VECTORS_CORPUS_DIGEST" ]; then
+            echo "$VECTORS_PACKAGE ships corpus digest $got, not the pinned $VECTORS_CORPUS_DIGEST" >&2
+            exit 1
+          fi
+          ln -s "$corpus" "$RUNNER_TEMP/vectors"
+          echo "$VECTORS_PACKAGE ships corpus $got, as pinned"
+      - name: the vendored obligation registry is the corpus registry
+        run: python3 scripts/gen_condition_registry.py --check --corpus "$RUNNER_TEMP/vectors"
+      - name: the corpus projection re-derives from that corpus
+        run: python3 rego/gen_corpus_vectors.py --check --corpus "$RUNNER_TEMP/vectors"
+
+  oracle:
+    name: oracle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install opa
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/opa \
+            "https://github.com/open-policy-agent/opa/releases/download/${OPA_VERSION}/opa_linux_amd64_static"
+          echo "${OPA_SHA256}  /tmp/opa" | sha256sum -c -
+          chmod +x /tmp/opa
+          sudo mv /tmp/opa /usr/local/bin/opa
+          opa version
+      - name: the module's own suite
+        run: opa test --timeout 300s rego/
+      - name: the deployed manifest still embeds the module verbatim
+        run: python3 policy-controller/gen_soundness_cip.py --check
+
+  change-admission:
+    # The agent change admission rule set: one rego module, its Kyverno CEL policy
+    # and its generated policy-controller manifest, held to one vector file. The
+    # vectors regenerate byte for byte from their generator, the manifest embeds
+    # the module, every rail returns the reference answer on every vector, and
+    # deleting any single refusal rule turns the module's own tests red.
+    name: change admission rails
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install opa
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/opa \
+            "https://github.com/open-policy-agent/opa/releases/download/${OPA_VERSION}/opa_linux_amd64_static"
+          echo "${OPA_SHA256}  /tmp/opa" | sha256sum -c -
+          chmod +x /tmp/opa
+          sudo mv /tmp/opa /usr/local/bin/opa
+      - name: install the kyverno cli
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/kyverno.tar.gz \
+            "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz"
+          echo "${KYVERNO_SHA256}  /tmp/kyverno.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/kyverno.tar.gz -C /tmp kyverno
+          sudo mv /tmp/kyverno /usr/local/bin/kyverno
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: install the signing library the vector generator uses
+        run: python3 -m pip install cryptography==50.0.2
+      - name: the vectors are what the generator writes
+        run: python3 rego/gen_agent_change_admission_vectors.py --check
+      - name: the deployed manifest embeds the module
+        run: python3 policy-controller/gen_change_admission_cip.py --check
+      - name: the module's own tests
+        run: opa test --timeout 300s rego/
+      - name: every rail agrees on every vector and every refusal rule is load-bearing
+        run: python3 conformance/run_change_admission_conformance.py
+
+  verifier-isolation:
+    # The verifier isolation rule set: one rego module, a Kyverno CEL policy and a CUE policy, held
+    # to a vector file and a registry of nine obligations. The vectors and their tests regenerate
+    # byte for byte, the module answers every vector with the reasons it declares, the two engine
+    # rails answer every vector as the module does, deleting any single refusal rule turns a check
+    # red, and the committed measurement and the rendered registry equal a fresh run.
+    name: verifier isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install opa
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/opa \
+            "https://github.com/open-policy-agent/opa/releases/download/${OPA_VERSION}/opa_linux_amd64_static"
+          echo "${OPA_SHA256}  /tmp/opa" | sha256sum -c -
+          chmod +x /tmp/opa
+          sudo mv /tmp/opa /usr/local/bin/opa
+      - name: install the kyverno cli
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/kyverno.tar.gz \
+            "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz"
+          echo "${KYVERNO_SHA256}  /tmp/kyverno.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/kyverno.tar.gz -C /tmp kyverno
+          sudo mv /tmp/kyverno /usr/local/bin/kyverno
+      - name: install cue
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/cue.tar.gz \
+            "https://github.com/cue-lang/cue/releases/download/${CUE_VERSION}/cue_${CUE_VERSION}_linux_amd64.tar.gz"
+          echo "${CUE_SHA256}  /tmp/cue.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/cue.tar.gz -C /tmp cue
+          sudo mv /tmp/cue /usr/local/bin/cue
+      - name: the vectors and their tests are what the generator writes
+        run: python3 rego/gen_verifier_isolation_vectors.py --check
+      - name: the module's own tests
+        run: opa test --timeout 300s rego/verifier_isolation.rego rego/verifier_isolation_test.rego rego/verifier_isolation_vectors.json
+      - name: every obligation is measured on every rail and every refusal rule is load-bearing
+        run: python3 conformance/run_verifier_isolation_conformance.py
+      - name: the profile registry and the README count render the family
+        run: python3 scripts/gen_profile_registry.py --check
+
+  rails:
+    name: every rail over the pinned corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: install opa
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/opa \
+            "https://github.com/open-policy-agent/opa/releases/download/${OPA_VERSION}/opa_linux_amd64_static"
+          echo "${OPA_SHA256}  /tmp/opa" | sha256sum -c -
+          chmod +x /tmp/opa
+          sudo mv /tmp/opa /usr/local/bin/opa
+          opa version
+
+      - name: install the kyverno cli
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/kyverno.tar.gz \
+            "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz"
+          echo "${KYVERNO_SHA256}  /tmp/kyverno.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/kyverno.tar.gz -C /tmp kyverno
+          sudo mv /tmp/kyverno /usr/local/bin/kyverno
+          kyverno version
+
+      - name: install cue
+        run: |
+          set -euo pipefail
+          curl -sSfL -o /tmp/cue.tar.gz \
+            "https://github.com/cue-lang/cue/releases/download/${CUE_VERSION}/cue_${CUE_VERSION}_linux_amd64.tar.gz"
+          echo "${CUE_SHA256}  /tmp/cue.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/cue.tar.gz -C /tmp cue
+          sudo mv /tmp/cue /usr/local/bin/cue
+          cue version
+
+      - name: install the published vectors package at the pinned hash
+        run: |
+          set -euo pipefail
+          echo "$VECTORS_PACKAGE --hash=sha256:$VECTORS_WHEEL_SHA256" > "$RUNNER_TEMP/vectors.lock"
+          # Only the corpus files are read and nothing from the package is
+          # imported, so the wheel's own interpreter floor does not apply here.
+          python3 -m pip install --quiet --disable-pip-version-check --no-deps --require-hashes \
+            --only-binary=:all: --ignore-requires-python --target "$RUNNER_TEMP/vectors-pkg" \
+            -r "$RUNNER_TEMP/vectors.lock"
+          corpus="$RUNNER_TEMP/vectors-pkg/agent_evidence_vectors/corpora"
+          got="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["corpusDigest"])' "$corpus/vectors/MANIFEST.json")"
+          if [ "$got" != "$VECTORS_CORPUS_DIGEST" ]; then
+            echo "$VECTORS_PACKAGE ships corpus digest $got, not the pinned $VECTORS_CORPUS_DIGEST" >&2
+            exit 1
+          fi
+          ln -s "$corpus" "$RUNNER_TEMP/vectors"
+          echo "$VECTORS_PACKAGE ships corpus $got, as pinned"
+      - name: the vectors these rails will run on are that corpus
+        run: |
+          set -euo pipefail
+          python3 scripts/gen_condition_registry.py --check --corpus "$RUNNER_TEMP/vectors"
+          python3 rego/gen_corpus_vectors.py --check --corpus "$RUNNER_TEMP/vectors"
+
+      # The measurement, live. Every rail is run over every vector in the
+      # projection and each answer is compared against the rego oracle's. This
+      # overwrites profiles/ in the working tree on purpose: the diff afterwards
+      # is what says the committed maps are the measurement rather than a claim
+      # about it.
+      - name: measure every rail over every vector
+        run: python3 scripts/gen_profile_map.py --jobs 4
+
+      - name: the committed maps are what the measurement produces
+        run: |
+          set -euo pipefail
+          if ! git diff --exit-code -- profiles/; then
+            echo "" >&2
+            echo "The profile maps on disk are not what a live run of these rails" >&2
+            echo "produces against the pinned corpus. Regenerate them with" >&2
+            echo "scripts/gen_profile_map.py and commit the result." >&2
+            exit 1
+          fi
+
+      # The gate the whole repository exists to pass: a rail may not declare that
+      # it enforces an obligation while the measurement above shows it answering
+      # differently from the oracle on a vector citing that obligation.
+      - name: no rail enforces an obligation it fails a vector of
+        run: python3 scripts/profile-map-gate.py
+
+      - name: the rendered registry still matches the measured maps
+        run: python3 scripts/gen_profile_registry.py --check
+
+  python-package:
+    name: python package (digest-check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python }}
+      - name: the Python distribution license matches the repository license
+        run: python scripts/python-license-gate.py
+      - name: install the package and the test tools
+        run: python -m pip install pytest==8.4.2 pytest-cov==6.0.0 -e python
+      - name: tests, every warning an error, every file at full coverage
+        working-directory: python
+        run: python -m pytest -p no:cacheprovider --cov=agent_evidence_admission --cov-report=term-missing --cov-fail-under=95
+      - name: the built wheel installs and runs the command it declares
+        run: |
+          python -m pip install build==1.2.2
+          python -m build python --outdir "$RUNNER_TEMP/dist"
+          python scripts/python-license-gate.py --dist "$RUNNER_TEMP/dist"
+          python -m venv "$RUNNER_TEMP/clean"
+          "$RUNNER_TEMP/clean/bin/pip" install "$RUNNER_TEMP"/dist/*.whl
+          "$RUNNER_TEMP/clean/bin/agent-evidence-admission" --version
