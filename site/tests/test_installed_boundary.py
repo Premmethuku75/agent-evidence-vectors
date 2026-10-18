@@ -18,6 +18,7 @@ from hypothesis import strategies as st
 
 from tools.check_installed_boundary import IDENTITY, encode
 from tools.check_lab import artifact_path, validate_register
+from imported_commits import here
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = "1bdfce81e3afff4ec1c18afdfe3c7d423b693198"
@@ -99,7 +100,7 @@ class TestInstalledBoundary:
             self,
         ) -> None:
             before = subprocess.check_output(
-                ["git", "show", BASELINE + ":data/lab-register.json"], cwd=ROOT
+                ["git", "show", here(BASELINE) + ":./data/lab-register.json"], cwd=ROOT
             )
             after = (ROOT / "data/lab-register.json").read_bytes()
             ending = b"\n  ]\n}\n"
@@ -114,7 +115,7 @@ class TestInstalledBoundary:
                         [
                             "git",
                             "show",
-                            BASELINE + ":" + path.relative_to(ROOT).as_posix(),
+                            here(BASELINE) + ":./" + path.relative_to(ROOT).as_posix(),
                         ],
                         cwd=ROOT,
                     )

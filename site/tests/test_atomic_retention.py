@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from tools.check_lab import artifact_path, validate_register
+from imported_commits import here
 
 ROOT = Path(__file__).resolve().parents[1]
 IDENTITY = "atomic-delegation-2026-10-02"
@@ -106,7 +107,7 @@ def test_unmeasured_server_boundary_cannot_disappear(selected: tuple[dict, Path]
 
 def test_all_fifteen_baseline_records_and_artifact_bytes_are_preserved() -> None:
     baseline = json.loads(subprocess.check_output(
-        ["git", "show", BASELINE + ":data/lab-register.json"], cwd=ROOT))
+        ["git", "show", here(BASELINE) + ":./data/lab-register.json"], cwd=ROOT))
     current = json.loads((ROOT / "data/lab-register.json").read_text())
     assert len(baseline["records"]) == 15
     assert current["records"][:15] == baseline["records"]
@@ -114,5 +115,5 @@ def test_all_fifteen_baseline_records_and_artifact_bytes_are_preserved() -> None
         for item in record["artifacts"]:
             path = artifact_path(ROOT, item["path"])
             original = subprocess.check_output(
-                ["git", "show", BASELINE + ":" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
+                ["git", "show", here(BASELINE) + ":./" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
             assert path.read_bytes() == original

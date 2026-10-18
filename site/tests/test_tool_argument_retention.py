@@ -13,6 +13,7 @@ from typing import Any
 import pytest
 from hypothesis import given, strategies as st
 
+from imported_commits import here
 from tools.check_lab import artifact_path, validate_register
 from tools.check_tool_argument_retention import (
     BASELINE, HASHES, IDENTITY, UNMEASURED, archive_members, digest, encode,
@@ -80,7 +81,7 @@ class TestToolArgumentRetention:
                        and row["plannedAbstentions"] == 8 for row in report["quality"])
 
         def test_eighteen_prior_records_and_all_original_bytes_preserved(self) -> None:
-            before = subprocess.check_output(["git", "show", BASELINE + ":data/lab-register.json"], cwd=ROOT)
+            before = subprocess.check_output(["git", "show", here(BASELINE) + ":./data/lab-register.json"], cwd=ROOT)
             current = (ROOT / "data/lab-register.json").read_bytes()
             previous = json.loads(before)["records"]
             assert len(previous) == 18 and json.loads(current)["records"][:18] == previous
@@ -88,7 +89,7 @@ class TestToolArgumentRetention:
             for record in previous:
                 for artifact in record["artifacts"]:
                     path = artifact_path(ROOT, artifact["path"])
-                    original = subprocess.check_output(["git", "show", BASELINE + ":" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
+                    original = subprocess.check_output(["git", "show", here(BASELINE) + ":./" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
                     assert path.read_bytes() == original
 
         def test_parseable_length_finish_is_not_strict_correctness(self) -> None:

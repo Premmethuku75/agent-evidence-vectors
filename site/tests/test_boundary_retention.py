@@ -19,6 +19,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 from tools.check_boundary_retention import IDENTITY, REPORT_SHA256, validate_boundary_retention
 from tools.check_lab import artifact_path, validate_register
 from tools.derive_boundary_findings import derive_findings, encode
+from imported_commits import here
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = "422a7241f8351f167fe407fe2bfe9aab5f079a6d"
@@ -96,7 +97,7 @@ class TestBoundaryRetention:
 
         def test_all_fourteen_original_records_and_artifacts_preserved(self) -> None:
             before = json.loads(subprocess.check_output(
-                ["git", "show", BASELINE + ":data/lab-register.json"], cwd=ROOT))
+                ["git", "show", here(BASELINE) + ":./data/lab-register.json"], cwd=ROOT))
             after = json.loads((ROOT / "data/lab-register.json").read_bytes())
             assert len(before["records"]) == 14
             assert after["records"][:14] == before["records"]
@@ -104,7 +105,7 @@ class TestBoundaryRetention:
                 for artifact in record["artifacts"]:
                     path = artifact_path(ROOT, artifact["path"])
                     previous = subprocess.check_output(
-                        ["git", "show", BASELINE + ":" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
+                        ["git", "show", here(BASELINE) + ":./" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
                     assert path.read_bytes() == previous
 
     class TestFailingCases:

@@ -11,6 +11,7 @@ from typing import Any
 
 import pytest
 
+from imported_commits import here
 from tools.check_lab import artifact_path, validate_register
 from tools.check_vocabulary_retention import (
     BASELINE, HASHES, IDENTITY, READER, RETENTION, SOURCE, claim_results, encode,
@@ -72,7 +73,7 @@ def test_original_packet_and_installed_hold(retained) -> None:
 
 
 def test_seventeen_prior_literal_records_and_every_artifact_byte_preserved() -> None:
-    before = subprocess.check_output(["git", "show", BASELINE + ":data/lab-register.json"], cwd=ROOT)
+    before = subprocess.check_output(["git", "show", here(BASELINE) + ":./data/lab-register.json"], cwd=ROOT)
     previous = json.loads(before)["records"]
     current = json.loads((ROOT / "data/lab-register.json").read_bytes())["records"]
     assert len(previous) == 17 and current[:17] == previous
@@ -80,7 +81,7 @@ def test_seventeen_prior_literal_records_and_every_artifact_byte_preserved() -> 
     for record in previous:
         for artifact in record["artifacts"]:
             path = artifact_path(ROOT, artifact["path"])
-            original = subprocess.check_output(["git", "show", BASELINE + ":" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
+            original = subprocess.check_output(["git", "show", here(BASELINE) + ":./" + path.relative_to(ROOT).as_posix()], cwd=ROOT)
             assert path.read_bytes() == original
 
 
