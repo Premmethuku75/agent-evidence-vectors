@@ -115,7 +115,7 @@ def fetch(url: str) -> tuple[str, str]:
     target = alt or url
     headers = {"User-Agent": UA, "Accept": "text/html,application/json;q=0.9,*/*;q=0.8"}
     token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in target:
+    if token and urlparse(target).hostname == "api.github.com":
         headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(target, headers=headers)
     try:

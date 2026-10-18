@@ -25,6 +25,7 @@ import sys
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 UA = "agent-evidence-atlas-claim-check (https://github.com/probityai/agent-evidence-atlas)"
@@ -33,7 +34,7 @@ UA = "agent-evidence-atlas-claim-check (https://github.com/probityai/agent-evide
 def get_json(url: str) -> dict:
     headers = {"User-Agent": UA, "Accept": "application/json"}
     token = os.environ.get("GITHUB_TOKEN")
-    if token and "api.github.com" in url:
+    if token and urlparse(url).hostname == "api.github.com":
         headers["Authorization"] = f"Bearer {token}"
     with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as r:
         return json.load(r)
