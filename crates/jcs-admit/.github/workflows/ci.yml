@@ -1,0 +1,153 @@
+name: ci
+
+# Builds, lints and tests the crate on three dependency graphs:
+#   test    the committed Cargo.lock on stable, with rustfmt, clippy and rustdoc
+#           holding every warning as an error;
+#   msrv    the committed Cargo.lock on the rust-version in Cargo.toml;
+#   floors  every dependency resolved to the lowest version its requirement
+#           allows (-Z minimal-versions), on the rust-version. This is the job
+#           that proves the floors in Cargo.toml are enough, so a dependent is
+#           never made to upgrade for this crate's sake.
+
+# Every branch push runs it, so a head is proven before it is merged or published.
+on:
+  # Bot-token merges suppress push events; allow the native jobs on exact main.
+  workflow_dispatch:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  MSRV: "1.74"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install stable with rustfmt and clippy
+        run: |
+          rustup toolchain install stable --profile minimal -c rustfmt -c clippy
+          rustup default stable
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo doc --locked --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - run: cargo test --locked
+
+  msrv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install "$MSRV" --profile minimal
+      - run: cargo "+$MSRV" test --locked
+
+  floors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install nightly "$MSRV" --profile minimal
+      - name: resolve every dependency to its lowest allowed version
+        run: |
+          cargo +nightly generate-lockfile -Z minimal-versions
+          grep -A1 -E '^name = "(serde|serde_json|serde_json_canonicalizer)"$' Cargo.lock
+      - run: cargo "+$MSRV" test --locked
+
+  aps-canonical-bytes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: python3 interop/aps-canonical-bytes/check.py
+
+  rfc8785-py:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: check out the pinned Python canonicalizer
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: trailofbits/rfc8785.py
+          ref: 655cbe02b8761208e3f4cc49e879ab1e328a7dca
+          path: interop/rfc8785-py/source
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: python interop/rfc8785-py/check.py --verify-source
+      - run: python -m pip install "pytest>=8,<10"
+      - name: run the Python canonicalizer's native tests
+        run: python -m pytest interop/rfc8785-py/source/test
+        env:
+          PYTHONPATH: interop/rfc8785-py/source/src
+      - name: run the qualification's failure controls
+        run: python -m unittest discover -s interop/rfc8785-py -p test_check.py
+      - name: compare independent bytes and native raw refusals
+        run: python interop/rfc8785-py/check.py
+      - name: retain the exact corpus, source and native report
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: rfc8785-py-${{ matrix.python }}-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            interop/rfc8785-py/MANIFEST.json
+            interop/rfc8785-py/controls.json
+            interop/rfc8785-py/check.py
+            interop/rfc8785-py/test_check.py
+            interop/rfc8785-py/report.json
+            interop/rfc8785-py/source/src/rfc8785
+            interop/rfc8785-py/source/test
+            interop/rfc8785-py/source/pyproject.toml
+            interop/rfc8785-py/source/LICENSE
+            tests/rfc8785_python_boundary.rs
+            tests/vectors/rfc8785
+            tests/vectors/cross-rail
+
+
+  # Replays the RFC 8785 target of the a2a-jcs-v01 corpus, as shipped in a pinned
+  # agent-evidence-vectors release, against `admit` through examples/a2a_jcs.rs,
+  # using the published GitHub Action the way any other canonicalizer would.
+  a2a-jcs-vectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: cargo build --locked --example a2a_jcs
+      - name: replay the published a2a-jcs-v01 corpus, rfc8785 target
+        uses: probityai/agent-evidence-vectors@33d545104ff2f8c124cff465c96c013eeb809156 # v0.18.1
+        env:
+          A2A_JCS_TARGET: rfc8785
+        with:
+          corpus: vectors-a2a-jcs-v01
+          verifier: target/debug/examples/a2a_jcs
