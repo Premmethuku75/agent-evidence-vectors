@@ -70,6 +70,18 @@ def checked_report(suite, packet, root):
     return reader.report(value, sha, packet)
 
 
+def _commit_here(revision: str) -> str:
+    """The commit in this checkout that holds a source-repository commit (IMPORTED-COMMITS.tsv)."""
+    imported = reader.ROOT / "IMPORTED-COMMITS.tsv"
+    if imported.exists():
+        for line in imported.read_text().splitlines():
+            if line and not line.startswith("#"):
+                source, here = line.split()
+                if source == revision:
+                    return here
+    return revision
+
+
 def test_closed_schema_and_source_bound_task_inventory(suite):
     schema, _ = reader.read_json(reader.SCHEMA)
     Draft202012Validator.check_schema(schema)
@@ -78,8 +90,9 @@ def test_closed_schema_and_source_bound_task_inventory(suite):
     assert {c for task in value["tasks"] for c in task["expected"]["component_ids"]} == {
         "atlas", "vocabulary", "vectors", "observer", "verify", "admission", "jcs-admit", "dsse"}
     reference = value["reference_catalog"]
-    revision = reference["url"].split("/blob/", 1)[1].split("/", 1)[0]
-    raw = subprocess.check_output(["git", "-C", str(reader.ROOT), "show", revision + ":data/catalog.json"])
+    revision = _commit_here(reference["url"].split("/blob/", 1)[1].split("/", 1)[0])
+    prefix = subprocess.check_output(["git", "-C", str(reader.ROOT), "rev-parse", "--show-prefix"], text=True).strip()
+    raw = subprocess.check_output(["git", "-C", str(reader.ROOT), "show", f"{revision}:{prefix}data/catalog.json"])
     assert reader.digest(raw) == reference["sha256"]
     assert len(raw) == reference["bytes"]
     catalog = json.loads(raw)
