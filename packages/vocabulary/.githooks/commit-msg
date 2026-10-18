@@ -934,6 +934,11 @@ def selftest() -> int:
     return 0
 
 
+IMPORT_SUBJECT = re.compile(
+    r"^chore\([^)]+\): import [A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+ with its history$"
+)
+
+
 def check_range(rev_range: str) -> int:
     """Lint every commit message in a revision range (used by CI)."""
     extra = load_extra_patterns()
@@ -947,6 +952,20 @@ def check_range(rev_range: str) -> int:
     argv = ["git", "rev-list", rev_range]
     if baseline is not None:
         argv.append(f"^{baseline}")
+    # History imported from another repository (the merge
+    # scripts/consolidation/repo_import.py writes, and every commit behind its
+    # second parent) was linted, or not, where it was first published; this
+    # gate holds what is written here. The import merge's own subject is the
+    # tool's fixed form.
+    merges = subprocess.run(argv + ["--merges"], capture_output=True, text=True, check=False)
+    imports = []
+    for merge in merges.stdout.split() if merges.returncode == 0 else []:
+        subject = subprocess.run(
+            ["git", "show", "-s", "--format=%s", merge], capture_output=True, text=True, check=False
+        ).stdout.strip()
+        if IMPORT_SUBJECT.match(subject):
+            imports.append(merge)
+            argv.append(f"^{merge}^2")
     listed = subprocess.run(
         argv,
         capture_output=True,
@@ -960,7 +979,9 @@ def check_range(rev_range: str) -> int:
             file=sys.stderr,
         )
         return 2
-    revisions = listed.stdout.split()
+    revisions = [r for r in listed.stdout.split() if r not in imports]
+    if imports:
+        print(f"commit-msg: {len(imports)} import merge(s) and the history behind them are not linted")
     bad = 0
     for revision in revisions:
         shown = subprocess.run(

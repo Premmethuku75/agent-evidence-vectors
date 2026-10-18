@@ -234,7 +234,7 @@ jobs:
           "$RUNNER_TEMP/package-consumer/bin/python" "$GITHUB_WORKSPACE/packages/vocabulary/scripts/check-installed.py" > "$GITHUB_WORKSPACE/packages/vocabulary/sdist-consumer.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: python-distributions
+          name: vocabulary-python-distributions
           path: |
             packages/vocabulary/dist/
             packages/vocabulary/SHA256SUMS
