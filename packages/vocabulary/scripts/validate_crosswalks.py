@@ -158,7 +158,7 @@ def check_source_path_url(source_path, filename, term_name, warnings):
     try:
         req = urllib.request.Request(source_path, method="HEAD")
         urllib.request.urlopen(req, timeout=10)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 -- any failure of the HEAD probe is reported as a warning
         warnings.append(
             f"{filename}: term '{term_name}' source_path '{source_path}' did not "
             f"resolve on a HEAD request ({e}) -- human reviewer must confirm before merge."

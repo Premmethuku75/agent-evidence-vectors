@@ -1,9 +1,9 @@
 """Static checks for the data-only wheel and its setuptools source archive."""
 
+import tarfile
 from collections import Counter
 from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
-import tarfile
 
 from packaging.utils import canonicalize_name
 from packaging.version import Version

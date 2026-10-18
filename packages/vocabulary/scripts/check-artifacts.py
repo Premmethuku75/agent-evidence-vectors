@@ -5,13 +5,12 @@ import base64
 import csv
 import hashlib
 import io
-from pathlib import Path, PurePosixPath
 import stat
 import tomllib
+from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
 
 import yaml
-
 from distribution_checks import check_source_archive, check_wheel_metadata
 
 

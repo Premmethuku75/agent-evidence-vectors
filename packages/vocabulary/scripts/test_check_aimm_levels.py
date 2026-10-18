@@ -4,7 +4,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import check_aimm_levels as c  # noqa: E402
+import check_aimm_levels as c
 
 PIN = "<!-- pins: vectors=v9.9.9 admission=" + "a" * 40 + " -->\n"
 

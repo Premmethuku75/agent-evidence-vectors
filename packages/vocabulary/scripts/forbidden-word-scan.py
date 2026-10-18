@@ -35,7 +35,7 @@ from pathlib import Path
 # import, for the reason its own comment gives.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _decoding import GUARD_MATERIAL, GUARD_SPANS, views  # noqa: E402
+from _decoding import GUARD_MATERIAL, GUARD_SPANS, views
 
 HOOK_DIR = Path(__file__).resolve().parent.parent / ".githooks"
 SIDECAR = HOOK_DIR / "commit-msg.forbidden-words"
@@ -217,7 +217,7 @@ def labels(
     reported: set[str] = set()
     for haystack, lengths in ((line.lower(), nocase_lengths), (line, cased_lengths)):
         for width in lengths:
-            for start in range(0, len(haystack) - width + 1):
+            for start in range(len(haystack) - width + 1):
                 digest = hashlib.sha256(
                     (salt + haystack[start : start + width]).encode("utf-8")
                 ).hexdigest()

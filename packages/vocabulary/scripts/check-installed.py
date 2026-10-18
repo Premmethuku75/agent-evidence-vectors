@@ -1,8 +1,8 @@
 """Read the installed released registry without using a source checkout."""
 
 import hashlib
-from importlib import metadata, resources
 import json
+from importlib import metadata, resources
 from pathlib import Path
 
 import agent_evidence_vocabulary

@@ -82,8 +82,8 @@ def self_test(terms: dict[str, tuple[str, set[str]]]) -> list[str]:
 
 def main(argv: list[str]) -> int:
     try:
-        import yaml
         import agent_evidence_vectors
+        import yaml
     except ImportError as exc:
         print(f"check could not run: {exc}", file=sys.stderr)
         return 2

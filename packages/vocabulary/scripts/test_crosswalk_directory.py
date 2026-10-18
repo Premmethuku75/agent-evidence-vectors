@@ -44,7 +44,7 @@ def _load():
 
 def _errors(validator, directory: Path) -> list[str]:
     errors: list[str] = []
-    crosswalks, sidecars = validator.classify_directory(directory, errors)
+    _crosswalks, sidecars = validator.classify_directory(directory, errors)
     for path in sidecars:
         validator.check_sidecar(path, errors)
     validator.check_template_version(directory / "TEMPLATE.yaml", errors)
