@@ -6,8 +6,13 @@
 # `cargo publish` packages exactly what it packaged in its old repository. A
 # crate becomes a member of this workspace only in a change that also moves its
 # lock file and its supply-chain audits to the root.
+#
+# Cargo run inside a crate still reads this file to learn whether the crate is a
+# member, so it must parse on every crate's declared rust-version. jcs-admit
+# declares 1.74, and resolver "3" needs 1.84, so the resolver stays "2". With no
+# members, the setting decides nothing else.
 
 [workspace]
-resolver = "3"
+resolver = "2"
 members = []
 exclude = ["crates"]
