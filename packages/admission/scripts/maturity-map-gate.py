@@ -58,7 +58,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 PAGE = "docs/AUTOMATED-GOVERNANCE-MATURITY-MODEL.md"
-WORKFLOW = ".github/workflows/ci.yml"
+WORKFLOW = "../../.github/workflows/package-admission.yml"
 
 # The model's four categories in its own order, each with the id prefix the page
 # uses and the number of items the model carries at the pinned commit.
@@ -116,6 +116,15 @@ def tracked_files() -> set[str]:
     try:
         out = subprocess.run(
             ["git", "ls-files"], cwd=HERE, check=True, capture_output=True, text=True
+        ).stdout
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise CannotCheck(f"git ls-files failed: {exc}") from exc
+    # The pins live in the repository-root workflow, which `git ls-files` run
+    # from the package lists as ../../.github/workflows/<name>.
+    try:
+        out += subprocess.run(
+            ["git", "ls-files", "--", ":/.github/workflows"],
+            cwd=HERE, check=True, capture_output=True, text=True,
         ).stdout
     except (OSError, subprocess.CalledProcessError) as exc:
         raise CannotCheck(f"git ls-files failed: {exc}") from exc

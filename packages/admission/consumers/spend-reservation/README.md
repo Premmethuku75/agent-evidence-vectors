@@ -26,7 +26,7 @@ Retries need a new attempt; changing arguments does not reset the budget.
 
 ## Run the local qualification
 
-The [workflow](../../.github/workflows/spend-reservation.yml) installs the API
+The [workflow](../../../../.github/workflows/package-admission.yml) installs the API
 and pinned Observer, checks their source bytes before import, and retains the
 original outputs. Twenty controls include two actual processes racing for one
 budget. Seven local scenarios bind reserve, dispatch, settle and refund records

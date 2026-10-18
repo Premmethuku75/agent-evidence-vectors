@@ -70,7 +70,7 @@ somewhere else would be a claim about different bytes.
 ## The corpus these rails are measured against
 
 Not lifted, and not vendored wholesale. `rego/corpus_vectors.json` is a mechanical
-projection of the published conformance corpus, pinned in `.github/workflows/ci.yml`
+projection of the published conformance corpus, pinned in the repository-root `.github/workflows/package-admission.yml`
 to the tag `v0.10.1` of
 [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors)
 at commit `93deb470a6d44bfa53cdc2ebfd4fc725e2a21e2b`, corpus digest

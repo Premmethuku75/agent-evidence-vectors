@@ -21,8 +21,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Source = "https://github.com/probityai/agent-evidence-admission"
-Documentation = "https://github.com/probityai/agent-evidence-admission/blob/main/python/README.md"
+Source = "https://github.com/probityai/agent-evidence/tree/main/packages/admission"
+Documentation = "https://github.com/probityai/agent-evidence/blob/main/packages/admission/python/README.md"
 
 [project.scripts]
 agent-evidence-admission = "agent_evidence_admission.cli:main"

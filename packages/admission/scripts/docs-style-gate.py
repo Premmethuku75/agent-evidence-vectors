@@ -334,7 +334,14 @@ def history_objects() -> list[str]:
     is still in the repository, and a listing that quietly narrowed to the refs
     would report the part it looked at as the whole.
     """
-    if (HERE / ".git" / "shallow").exists():
+    try:
+        shallow = subprocess.run(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=HERE, check=True, capture_output=True, text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        cannot(f"git rev-parse failed: {exc}")
+    if shallow != "false":
         cannot("this clone is shallow, so most of the history is not here to read")
     try:
         out = subprocess.run(
@@ -377,7 +384,9 @@ def check_history() -> int:
             failures += 1
     try:
         messages = subprocess.run(
-            ["git", "log", "--all", "--format=%H%n%B%n%an %ae%n%cn %ce"],
+            # Every commit that touches this package. The package lives in a
+            # repository with other areas, whose commits their own gates hold.
+            ["git", "log", "--all", "--format=%H%n%B%n%an %ae%n%cn %ce", "--", "."],
             cwd=HERE,
             check=True,
             capture_output=True,

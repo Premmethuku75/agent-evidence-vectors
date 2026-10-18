@@ -39,7 +39,7 @@ All 128 attempts finished. All outputs meet their format and schema. Quality sti
 
 ## Place the gate in another project
 
-Copy this reviewed consumer directory and its checked-in selection into the receiving project's repository. Adapt [the complete job](../../.github/workflows/policy-vocabulary-consumer.yml) to the host's CI. Put the `evaluate --purpose publication` command before the report publication step. Let its nonzero exit stop publication. Use `--purpose model-quality` before an admission step; the selected original must stop that step.
+Copy this reviewed consumer directory and its checked-in selection into the receiving project's repository. Adapt [the complete job](../../../../.github/workflows/package-admission.yml) to the host's CI. Put the `evaluate --purpose publication` command before the report publication step. Let its nonzero exit stop publication. Use `--purpose model-quality` before an admission step; the selected original must stop that step.
 
 The packet's convenience pins do not change the host's selection. The authenticated archive is held in one bounded buffer before extraction. Paths, member population and regular files are checked. Reader execution uses a fresh private copy of selected installed sources. Candidate helpers, cached bytecode and Python startup files cannot choose the reader code. The source hashes do not authenticate the host's Python binary or operating system.
 

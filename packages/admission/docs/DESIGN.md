@@ -52,7 +52,7 @@ Continuous integration spends it on every push.
 | `docs/CONSUMER-POLICY.md` | The eleven consumer pins, what each one decides, and what an absent value means. Nine of the eleven rules these rails enforce are facts about your deployment rather than about the statement. |
 | `docs/AUTOMATED-GOVERNANCE-MATURITY-MODEL.md` | Each item of the CNCF Automated Governance Maturity Model, quoted, with the file here that serves it or a plain statement that nothing here does. The rails are the policy enforcement points its Enforcement category describes. |
 | `PROVENANCE.md` | Per lifted file: where it came from, at which commit, and the SHA-256 of the source bytes. |
-| `.github/workflows/ci.yml` | The pins: the corpus tag and its commit, and each engine version with the digest of its release asset. |
+| the repository-root `.github/workflows/package-admission.yml` | The pins: the corpus tag and its commit, and each engine version with the digest of its release asset. |
 
 ## Why the rails are published
 
@@ -176,7 +176,7 @@ what stops the declaration list becoming a place to file inconvenient results.
 
 ## Continuous integration
 
-Every job in `.github/workflows/ci.yml` runs on every push. `hygiene` checks that no tracked file names a host outside a
+Every job in the repository-root `.github/workflows/package-admission.yml` runs on every push. `hygiene` checks that no tracked file names a host outside a
 short allowlist, that no prose in the tree or anywhere in the history carries an
 authorship mark or a form the style guide rules out, that the two rendered documents
 match the data they render from, and that the maturity-model page cites only files that

@@ -132,4 +132,4 @@ python3 conformance/run_verifier_isolation_conformance.py
 python3 scripts/gen_profile_registry.py --check
 ```
 
-The driver needs `opa`, `kyverno` and `cue` on the path, at the versions `.github/workflows/ci.yml` pins.
+The driver needs `opa`, `kyverno` and `cue` on the path, at the versions the repository-root `.github/workflows/package-admission.yml` pins.

@@ -1,4 +1,4 @@
-name: history-identity-audit
+name: package-admission-history
 
 # The push-range scan gates what is about to land. This reads what already has:
 # every commit origin/main reaches, first to tip, with the same rules and the
@@ -13,6 +13,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: packages/admission
 
 jobs:
   audit:
