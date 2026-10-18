@@ -1,0 +1,200 @@
+# Every check below needs no credential beyond the job's own token, so all of
+# them belong on every push and none on a schedule. Each step says what it holds
+# the repository to; two of them read a live service on purpose and say so.
+#
+# Hermetic is a claim worth making precisely. The validator CAN reach the network:
+# it resolves an https source_path on an emitted claim with a live HEAD request,
+# which is correct when a reviewer is checking a real filing. The header here once
+# called both its gates hermetic while every run did exactly that, because the
+# contribution guide's example carries such a path and the test that runs the
+# example handed it straight through. Nobody wrote a network call into CI; one
+# arrived through an example.
+#
+# So the example test now sets VALIDATE_CROSSWALKS_OFFLINE, and the validator
+# records each skipped resolution as a warning naming what went unchecked. CI is
+# hermetic because it is made so and says where, never because nothing in it
+# could reach out.
+
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-crosswalks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Vulnerability scan (requirements.txt against OSV)
+        # A green pipeline with no dependency scan says nothing about the
+        # dependency. This resolves the pinned requirement against the OSV
+        # database on every push and pull request and fails the job on any
+        # advisory -- the same policy the scan uses in the author's other
+        # repositories, so all of them agree. osv-scanner is a Go binary (not
+        # on PyPI), so fetch the pinned release asset for the linux-amd64
+        # runner. There is nothing to install it from.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download v2.3.8 --repo google/osv-scanner \
+            --pattern osv-scanner_linux_amd64 --output ./osv-scanner --clobber
+          chmod +x ./osv-scanner
+          ./osv-scanner scan source --lockfile=requirements.txt
+
+      - run: python3 scripts/validate_crosswalks.py
+
+      - name: Run the contribution guide's own worked example through the validator
+        run: |
+          # CONTRIBUTING.md shows a filer a complete crosswalk and tells them to
+          # build one like it. That is a claim about what happens when the
+          # instructions are followed, and until 2026-08-30 nobody had followed
+          # them: the example was missing three required top-level keys, so a
+          # filer copying it got three errors on their first push. It also wrote
+          # `system` as a block, which the validator did not reject until the
+          # scalar check landed the same day.
+          #
+          # Two adversarial review rounds over four vendors read that file and
+          # none found it. Reading a guide and running it are different checks.
+          python3 scripts/test_contributing_example.py
+
+      - name: Hold the validator to the registry's definition of recomputed
+        run: |
+          # The registry defines evidence: recomputed as agreement on every
+          # accepted member of a pinned corpus, stated as a count. This runs one
+          # valid claim and one claim per way the count or the corpus can be
+          # wrong through the real validator, and fails unless each refusal
+          # names the field that is wrong. Offline by construction.
+          python3 scripts/test_recomputed_state.py
+
+      - name: Hold the registry and the validator to record_lifecycle
+        run: |
+          # Every revision_reason code carries a definition, and the validator
+          # accepts the term under its own section and refuses it elsewhere.
+          python3 scripts/test_record_lifecycle.py
+
+      - name: Hold the registry, the validator and the predicate page to change_admission
+        run: |
+          # The agent-change-admission predicate page lives at the URL signed
+          # decisions carry as their predicate type, and its gate table and wire
+          # fields must agree with the change_admission terms. Offline.
+          python3 scripts/test_change_admission.py
+
+      - name: Hold the registry, the validator and the guide to done_verification
+        run: |
+          # Each of the eight done_verification terms carries the check a
+          # verifier applies, the guide names every term and every check, and
+          # the three crosswalks filed for the section validate. Offline.
+          python3 scripts/test_done_verification.py
+
+      - name: Hold the validator to reading every file in crosswalk/
+        run: |
+          # Every file in crosswalk/ is a crosswalk, a sidecar of one, or the
+          # template, and the template targets the current registry version. This
+          # builds a wrong directory per case and requires each to be refused by
+          # name. Offline by construction.
+          python3 scripts/test_crosswalk_directory.py
+
+      - name: Hold the registry to the attribution lines it carries
+        run: |
+          # The registry is CC0 and owes nobody attribution, so the validator
+          # reads term names and never the keys under them. A credit we gave in
+          # public would vanish from a term with nothing turning red. This
+          # requires each recorded credit on its own term, by name. Offline.
+          python3 scripts/test_attribution.py
+
+      - name: Hold the OpenCRE links to the shape OpenCRE imports
+        run: |
+          # OpenCRE's importer reads every opencre.org CRE URL in vocabulary.yaml,
+          # so each one must be a declared link on a term, in the one shape the
+          # importer reads, and docs/OPENCRE.md must list the same links. The test
+          # builds one wrong registry per way a link can be malformed and requires
+          # each refusal by name. The check then asks opencre.org that every
+          # linked CRE exists, a network call made on purpose: only the live
+          # catalogue can say whether an id is real. Exit 2 there means the
+          # catalogue could not be asked, which fails the job and is never a pass.
+          python3 scripts/test_check_opencre_links.py
+          python3 scripts/check_opencre_links.py --live
+
+      - name: Hold the AIMM levels page to its pinned releases
+        run: |
+          # docs/aimm-levels.md names vector families, cases and admission
+          # policies at a pinned tag and commit. The offline test holds the
+          # parser; the check then reads both trees from the GitHub API, which
+          # is a network call made on purpose: the claim is about a published
+          # tree, and only that tree can settle it.
+          python3 scripts/test_check_aimm_levels.py
+          python3 scripts/check_aimm_levels.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Reject ruled-out constructions in tracked prose
+        run: |
+          # Three phrasings this project does not publish. Separate from the
+          # forbidden-string scan below, and separate on purpose: that scan
+          # hashes fixed-length windows and its declared lengths cannot match an
+          # eleven-character phrase, so the rule was written down, a guard
+          # existed, and the two never touched. One of the three shipped into
+          # vocabulary.yaml on 2026-08-30 inside the very commit rewriting that
+          # passage.
+          #
+          # Exit 2 means the subject set could not be built and nothing was
+          # checked, which is a broken run and never a clean one.
+          python3 scripts/lint_ruled_out_phrases.py
+
+      - name: Reject forbidden strings in tracked files
+        run: |
+          # Product names and internal-only markers, held as salted digests in
+          # .githooks/commit-msg.forbidden-words and shared with the commit-msg
+          # hook so the message surface and the content surface cannot drift
+          # apart. Nothing readable is in the tree and nothing is echoed when a
+          # match is found: printing it would reproduce the string into this log.
+          #
+          # This repository is product-neutral by design. The guard was installed
+          # BEFORE publication, never after, because the cost of arriving late is
+          # a name in a history that is already public: removing one then means
+          # rewriting every commit from that point on, and the rewrite still
+          # leaves the old objects fetchable by anyone who kept a commit id.
+          #
+          # Exit 2 means the rule list did not load, which is a failure: a guard
+          # that could not read its rules has verified nothing.
+          python3 scripts/forbidden-word-scan.py
+          status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::error::A tracked file contains a forbidden string. Product names and drafting notes belong in the private research tree."
+            exit 1
+          elif [ "$status" -ne 0 ]; then
+            echo "::error::The forbidden-string rule list failed to load; nothing was verified."
+            exit 1
+          fi
+
+  published-corpus-values:
+    # The closed values this registry defines, held against the corpora that
+    # the published agent-evidence-vectors package ships, installed from PyPI
+    # by version and wheel hash the way any consumer would get them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Install the published corpora
+        run: |
+          echo "agent-evidence-vectors==0.18.1 --hash=sha256:3953c8ab3c48f3e8b6d1779c2eafacb997f0336555ea0e1e6a83056fe2c5755f" > "$RUNNER_TEMP/corpora.lock"
+          pip install --no-deps --require-hashes -r "$RUNNER_TEMP/corpora.lock"
+      - name: Hold the check to refusing an undefined value
+        run: python3 scripts/check_published_corpus_values.py --self-test
+      - name: Hold the published corpora to the registry's closed values
+        run: python3 scripts/check_published_corpus_values.py

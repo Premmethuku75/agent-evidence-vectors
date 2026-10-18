@@ -1,0 +1,114 @@
+# OpenSSF Scorecard -- scores this repository's own supply-chain hygiene
+# (branch protection, review discipline, pinned dependencies, workflow
+# permissions) and uploads the result to the repository's code-scanning view.
+#
+# Three things here depend on the repository being public: the analysis itself,
+# which fails with "ListCommits: Resource not accessible by integration"; the
+# SARIF upload to code scanning, which needs GitHub Advanced Security on a
+# private repository; and publishing to the OpenSSF API, which the action refuses
+# for a private one.
+#
+# All three were once handled by hand, and the analysis was missed, so this was
+# red on every push and every weekly schedule from 2026-08-12 until the gate
+# below was added. Two permanently red checks on a four-workflow repository is
+# most of its signal saying nothing, and a red that means nothing trains a reader
+# to ignore the ones that do.
+#
+# Every one of the three now reads the same live visibility answer: fetched once
+# from the API, printed, and treated as a hard error when it cannot be read,
+# because a check that cannot tell whether it should run has established nothing.
+# Nothing here is left to change by hand when visibility flips. The artifact
+# upload below keeps the result readable either way.
+#
+# A registry that grades other people's evidence should be willing to have its
+# own review discipline graded by a tool it does not control. GOVERNANCE.md's
+# merge-discipline rules are exactly what Scorecard's Branch-Protection,
+# Code-Review and Dangerous-Workflow checks measure.
+
+name: scorecard
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "27 4 * * 1"
+  push:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  # Deliberately duplicated from codeql.yml, not factored into a reusable
+  # workflow. This is a read of one API field, not a rule: there is nothing here
+  # for the two copies to disagree about, and an indirection would cost more to
+  # follow than the six lines it saved.
+  visibility:
+    name: Can Scorecard run here
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      public: ${{ steps.read.outputs.public }}
+    steps:
+      - id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          private="$(gh api "repos/${{ github.repository }}" --jq .private)"
+          case "$private" in
+            false)
+              echo "public=true" >> "$GITHUB_OUTPUT"
+              echo "repository is public; Scorecard runs."
+              ;;
+            true)
+              echo "public=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::Repository is private, so Scorecard cannot read its commit history and this analysis is SUSPENDED. It re-arms automatically when visibility changes. Nothing is claimed here about this repository's supply-chain hygiene, and in particular its branch protection is NOT being graded while this is suspended."
+              ;;
+            *)
+              echo "::error::Could not read repository visibility (got '$private'). Refusing to guess: a check that cannot tell whether it should run has established nothing."
+              exit 1
+              ;;
+          esac
+
+  analysis:
+    name: Scorecard analysis
+    needs: visibility
+    if: needs.visibility.outputs.public == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      # Needed to upload the SARIF result to code scanning.
+      security-events: write
+      # Needed to publish results and get a badge, once the repository is public.
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Reads the same live visibility answer that gates this job, so nothing
+          # here is left to change by hand when the repository is published.
+          # Publishing to the OpenSSF API needs a public repository, which is the
+          # exact condition the gate already established, and a hardcoded false
+          # would silently keep the badge off forever afterwards.
+          publish_results: ${{ needs.visibility.outputs.public == 'true' }}
+
+      - name: Upload the raw SARIF as an artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload the SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: results.sarif
