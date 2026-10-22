@@ -73,12 +73,8 @@ pub fn identifier(member: &Map<String, Value>) -> Result<String, String> {
         member.get("resolves").cloned().unwrap_or(Value::Null),
     );
     let value = Value::Object(obj);
-    if let Some(f) = json::first_float(&value) {
-        return Err(format!(
-            "corpora: {f} is a JSON float, and this encoder refuses one rather than guess whether CPython's repr and Go's strconv agree on it"
-        ));
-    }
-    let bytes = json::canonical(&value)?;
+    let bytes = json::canonical(&value)
+        .map_err(|refused| format!("the member has no RFC 8785 form: {refused}"))?;
     Ok(format!("v{}", &sha256_hex(&bytes)[..16]))
 }
 
@@ -168,7 +164,10 @@ pub fn run(dir: &Path) -> (String, i32) {
     out.lines.push(format!("  reject: {n_reject}"));
 
     let mut seen = BTreeSet::new();
-    let mut digest_input: Vec<u8> = Vec::new();
+    // The corpus digest is over the member files in identifier order, which is
+    // not necessarily the order the manifest lists them in. A stable sort, as
+    // the other two readers use, so duplicate identifiers keep manifest order.
+    let mut member_files: Vec<(String, Vec<u8>)> = Vec::new();
     for e in &entries {
         let id = s(e.get("id")).unwrap_or("").to_string();
         let mut fails = Vec::new();
@@ -179,8 +178,8 @@ pub fn run(dir: &Path) -> (String, i32) {
         match fs::read(dir.join(file)) {
             Err(_) => fails.push("the manifest names a vector file that does not exist".into()),
             Ok(bytes) => {
-                digest_input.extend_from_slice(&bytes);
                 member(e, &bytes, spec_version, &req_ids, &mut fails);
+                member_files.push((id.clone(), bytes));
             }
         }
         if !fails.is_empty() {
@@ -190,6 +189,11 @@ pub fn run(dir: &Path) -> (String, i32) {
         }
     }
 
+    member_files.sort_by(|a, b| a.0.cmp(&b.0));
+    let digest_input: Vec<u8> = member_files
+        .into_iter()
+        .flat_map(|(_, bytes)| bytes)
+        .collect();
     corpus_checks(
         dir,
         &manifest,
@@ -246,6 +250,17 @@ fn member(
     if s(expected.and_then(|x| x.get("verdict"))) != kind {
         fails.push("expects a verdict that is not its kind".into());
     }
+    let stated = expected.and_then(|x| x.get("cause"));
+    if let Some(cause) = stated {
+        let named = cause.as_str().unwrap_or("");
+        if s(expected.and_then(|x| x.get("verdict"))) != Some("reject")
+            || !report::CAUSE_CODES.contains(&named)
+        {
+            fails.push(format!(
+                "expects the cause {named}, which only a reject member names, from the closed set"
+            ));
+        }
+    }
     if kind == Some("reject") && rejects.len() != 1 {
         fails.push("is a reject member that does not name exactly one row".into());
     }
@@ -300,6 +315,14 @@ fn member(
                     list(&got),
                     list(&rejects)
                 ));
+            } else if let (Some(Value::String(stated)), "report") = (stated, subject_type) {
+                let named = report::check_set_cause(doc.get("subject").unwrap_or(&Value::Null));
+                if named != Some(stated.as_str()) {
+                    fails.push(format!(
+                        "the validator names the cause {} and the manifest expects {stated}",
+                        named.unwrap_or("none")
+                    ));
+                }
             }
         }
     }

@@ -13,7 +13,9 @@ import json
 import shutil
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "packaging"))
@@ -65,10 +67,13 @@ def main() -> int:
     if first["id"] not in failing(judged) or "corpusDigest" not in " ".join(judged.findings):
         errors.append("an edited record kept its identifier or the corpus digest")
 
-    for mutate, expect in (
+    errors.extend(float_cases(manifest))
+
+    mutations: list[tuple[Callable[[dict[str, Any]], None], str]] = [
         (lambda r: r["threats"][7].__setitem__("testedBy", []), "MCPTM-8 names no requirement"),
         (lambda r: r["requirements"][11].__setitem__("id", "MCPVS-13"), "not minted as 1..12"),
-    ):
+    ]
+    for mutate, expect in mutations:
         broken = copy_corpus()
         registry = json.loads((broken / "REGISTRY.json").read_text())
         mutate(registry)
@@ -86,6 +91,45 @@ def main() -> int:
         "edits, unmapped threats and renumbering are refused"
     )
     return 0
+
+
+def float_cases(manifest: dict[str, Any]) -> list[str]:
+    """A float inside a digested record is refused, as the Go reader refuses it.
+
+    The Go reader digests through corpora/pyjson.go, which refuses a number token
+    with a fraction or an exponent. This reader used to digest the float with
+    repr, so the two parted on any record that carried one. Here a float in a
+    record must cost it its identifier, and a float inside a stream the
+    tamper-evidence rule hashes must be named, token as written, in the reason.
+    """
+    errors: list[str] = []
+    edited = copy_corpus()
+    first = manifest["vectors"][0]
+    path = edited / first["record"]
+    path.write_text(path.read_text().replace('"observation": {', '"observation": {"x": 2.50, ', 1))
+    record = mcpowasp.load_record(path.read_bytes())
+    try:
+        mcpowasp.identify(first["kind"], first["conditions"], record)
+        errors.append("a record carrying a float was given an identifier")
+    except mcpowasp.FloatRefused as exc:
+        if "2.50 is a JSON float" not in str(exc):
+            errors.append(f"the float refusal does not name the token as written: {exc}")
+    if first["id"] not in failing(mcpowasp.judge(edited)):
+        errors.append("a record carrying a float kept its identifier")
+
+    streamed = copy_corpus()
+    entry = next(e for e in manifest["vectors"]
+                 if e["conditions"] == ["MCPVS-9"] and e["kind"] == "accept")
+    path = streamed / entry["record"]
+    record = json.loads(path.read_text())
+    record["observation"]["stream"][0]["cost"] = "@@FLOAT@@"
+    text = json.dumps(record, indent=2, sort_keys=True).replace('"@@FLOAT@@"', "1e-7")
+    path.write_text(text + "\n")
+    judged = mcpowasp.judge(streamed)
+    found = " | ".join(f for m in judged.members if m.id == entry["id"] for f in m.findings)
+    if "the record stream cannot be hashed: corpora: 1e-7 is a JSON float" not in found:
+        errors.append(f"a float inside the hashed stream was not refused by name: {found}")
+    return errors
 
 
 if __name__ == "__main__":

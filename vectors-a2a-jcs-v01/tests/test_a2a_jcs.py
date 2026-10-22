@@ -122,6 +122,30 @@ def test_numbers_serialize_as_ecmascript_does(value: float, text: str) -> None:
     assert a2ajcs.canonicalize(value) == text.encode()
 
 
+def test_a_verifier_reads_each_number_token_as_the_vector_wrote_it() -> None:
+    """The integer -0 reaches the verifier as -0, not as Python's reading of it, 0."""
+    body = b'{"id": "X", "input": {"n": -0, "e": 1E1, "f": [1.0, "-0"]}}'
+    text = a2ajcs.input_text(a2ajcs.read_vector(body))
+    assert text == '{"n": -0, "e": 1E1, "f": [1.0, "-0"]}'
+    assert a2ajcs.reference_answer("rfc8785", text) == ("bytes", b'{"e":10,"f":[1,"-0"],"n":0}')
+
+
+def test_every_vendored_input_reaches_the_verifier_unchanged() -> None:
+    """Each accept vector's input text parses back to the value the file holds."""
+    _, vectors, findings = a2ajcs.load(CORPUS)
+    assert findings == []
+    for vector in vectors:
+        if "input_raw" in vector:
+            continue
+        original = json.loads((CORPUS / _path_of(vector["id"])).read_bytes())["input"]
+        assert json.loads(a2ajcs.input_text(vector)) == original, vector["id"]
+
+
+def _path_of(vector_id: str) -> str:
+    manifest = json.loads((CORPUS / "MANIFEST.json").read_text())
+    return next(e["path"] for e in manifest["vectors"] if e["path"].endswith(f"/{vector_id}.json"))
+
+
 def test_the_rail_lists_the_corpus(tmp_path: Path) -> None:
     out = rail("--list-corpora", cwd=tmp_path)
     assert out.returncode == 0

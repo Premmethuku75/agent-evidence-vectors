@@ -45,8 +45,51 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+class FloatRefused(ValueError):
+    """A float inside a digested record, refused in the Go reader's words.
+
+    corpora/mcpowasp.go digests through pythonCompactJSON, which refuses a
+    number token with a fraction or an exponent rather than guess whether
+    CPython's repr and Go's strconv agree on it. This reader used to digest the
+    float with repr, so the two readers parted on any record that carried one:
+    one recomputed the identifier and the other refused it.
+    """
+
+
+class _FloatToken(float):
+    """A float that keeps the token it was parsed from, so a refusal names it."""
+
+    token: str
+
+    def __new__(cls, text: str) -> _FloatToken:
+        made = super().__new__(cls, text)
+        made.token = text
+        return made
+
+
+def load_record(raw: bytes | str) -> Any:
+    """Parse a record as the Go reader holds it: each float keeps its token."""
+    return json.loads(raw, parse_float=_FloatToken)
+
+
+def _refuse_floats(value: Any) -> None:
+    if isinstance(value, float):
+        token = getattr(value, "token", repr(value))
+        raise FloatRefused(
+            f"corpora: {token} is a JSON float, and this encoder refuses one rather than "
+            "guess whether CPython's repr and Go's strconv agree on it"
+        )
+    if isinstance(value, dict):
+        for item in value.values():
+            _refuse_floats(item)
+    elif isinstance(value, list):
+        for item in value:
+            _refuse_floats(item)
+
+
 def compact(value: Any) -> bytes:
-    """The one canonical form this corpus hashes: sorted keys, no spaces."""
+    """The one canonical form this corpus hashes: sorted keys, no spaces, no float."""
+    _refuse_floats(value)
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
@@ -218,7 +261,10 @@ def rule_tamper_evident(o: dict[str, Any]) -> str | None:
     stream = o.get("stream")
     if not isinstance(stream, list) or not stream:
         return "no record stream was observed"
-    broken = chain_break(stream)
+    try:
+        broken = chain_break(stream)
+    except FloatRefused as exc:
+        return f"the record stream cannot be hashed: {exc}"
     if broken is None:
         return "the stream is intact, so the deletion test was not run"
     if o.get("headHolder") in (None, "", "client"):
@@ -379,11 +425,15 @@ def _judge_member(root: Path, entry: dict[str, Any], member: Member) -> tuple[by
         member.findings.append("the manifest names a record file that does not exist")
         return b"", None
     raw = path.read_bytes()
-    record = json.loads(raw)
+    record = load_record(raw)
     conditions = entry.get("conditions", [])
     if conditions != [record.get("requirement")]:
         member.findings.append("cites a condition other than the requirement its record tests")
-    if identify(entry["kind"], conditions, record) != entry["id"]:
+    try:
+        identifier: str | None = identify(entry["kind"], conditions, record)
+    except FloatRefused:
+        identifier = None
+    if identifier != entry["id"]:
         member.findings.append("identifier does not recompute from the member's own bytes")
     got, reason = verdict(record)
     if got != entry["kind"]:

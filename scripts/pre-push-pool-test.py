@@ -70,7 +70,11 @@ if len(sys.argv) == 1:
     out = root / '.build/fixture'; out.mkdir(parents=True)
 else:
     assert sys.argv[1] == '--evidence-dir' and len(sys.argv) == 5
-    out = pathlib.Path(sys.argv[2]); out.mkdir()
+    out = pathlib.Path(sys.argv[2])
+    if out.resolve().is_relative_to(root):
+        print('FAULT: evidence-dir must be outside the input checkout')
+        sys.exit(1)
+    out.mkdir()
 result = {'ran': 1, 'failed': 0, 'not_run': ['hosting is not exercised by this transport fixture']}
 tags = git('for-each-ref','--format=%(refname) %(objectname)','refs/tags')
 source = {'head':git('rev-parse','HEAD'), 'tree':git('rev-parse','HEAD^{tree}'),
@@ -127,7 +131,7 @@ class Controls(unittest.TestCase):
         self.gate.write_text(FIXTURE_GATE)
         shutil.copyfile(HERE / "pre-push-pool.py", self.root / "scripts/pre-push-pool.py")
         shutil.copyfile(HERE.parent / ".githooks/pre-push", self.root / ".githooks/pre-push")
-        for name in ("commit-msg.permitted-paths", "commit-msg.forbidden-words"):
+        for name in ("commit-msg", "commit-msg.permitted-paths", "commit-msg.forbidden-words"):
             shutil.copyfile(HERE.parent / ".githooks" / name, self.root / ".githooks" / name)
         # The real history scanner remains active in the actual hook tests.
         for name in (
@@ -271,6 +275,24 @@ class Controls(unittest.TestCase):
                 member_bytes(archive, "capture/native/actual-bytes.sig"), bytes(range(64))
             )
 
+    def test_native_capture_stays_outside_a_checkout_that_holds_tmpdir(self):
+        # box_run.sh points TMPDIR into the job's own checkout. Every pool run
+        # made after that change refused with the gate's own words, because the
+        # capture followed TMPDIR into the checkout the gate judges.
+        inside = self.root / ".box-tmp"
+        inside.mkdir()
+        request = self.request()
+        with patch("tempfile.tempdir", str(inside)):
+            code, receipt = self.native(request)
+        self.assertEqual(code, 0)
+        self.assertEqual(receipt["gateExit"], 0)
+        with tarfile.open(receipt["archive"]) as archive:
+            self.assertNotIn(
+                b"evidence-dir must be outside", member_bytes(archive, "capture/gate.stdout")
+            )
+        self.assertEqual(list(inside.iterdir()), [])
+        self.assertEqual(list(self.root.parent.glob("aev-pool-native-*")), [])
+
     def test_wrong_source_coordinates_never_start_gate(self):
         for field in (
             "head",
@@ -348,6 +370,35 @@ class Controls(unittest.TestCase):
         self.assertEqual(
             BRIDGE.require_packet(destination, request["branchAuthority"]), source.authority
         )
+
+    def test_without_a_gh_login_the_public_endpoint_is_read_with_no_credential(self):
+        # A gate box holds no GitHub token, and gh refuses every call without a login (exit 4).
+        self.executable(
+            "gh",
+            "#!/bin/sh\necho 'To get started with GitHub CLI, please run:  gh auth login' >&2\n"
+            '[ "$1" = auth ] && exit 1\nexit 4\n',
+        )
+        public = "https://api.github.com/repos/example/transport"
+        self.executable(
+            "curl",
+            "#!/bin/sh\nfor a; do last=$a; case $a in *uthorization*) exit 9;; esac; done\n"
+            f'[ "$last" = {public} ] || exit 8\n'
+            'echo \'{"full_name":"example/transport","default_branch":"trunk"}\'\n',
+        )
+        request = self.request()
+        argv = request["branchAuthority"]["primary"]["repository"]["argv"]
+        self.assertEqual(argv[0], "curl")
+        self.assertEqual(argv[-1], public)
+        self.assertEqual(
+            BRIDGE.require_packet(self.root, request["branchAuthority"])["default_branch"], "trunk"
+        )
+
+    def test_a_metadata_command_outside_the_two_accepted_ones_refuses(self):
+        request = self.request()
+        record = request["branchAuthority"]["primary"]["repository"]
+        record["argv"] = ["curl", "--fail", "https://api.example.invalid/repos/example/transport"]
+        with self.assertRaisesRegex(ValueError, "differs from its contract"):
+            BRIDGE.require_packet(self.root, request["branchAuthority"])
 
     def test_transport_restores_only_the_captured_arbitrary_default_ref(self):
         request = self.request()

@@ -503,12 +503,6 @@ fn evidence_rows(
     {
         add("W3C-R-019");
     }
-    // Section 2: an object whose moved is not contained in compared is rejected.
-    if let Some(m) = &moved {
-        if m.iter().any(|x| !compared.contains(x)) {
-            add("W3C-R-016");
-        }
-    }
     // Row 14 (form): moved asserted on an object that neither carries both
     // observations nor references them with digests.
     if moved.as_ref().is_some_and(|m| !m.is_empty()) {
@@ -528,8 +522,19 @@ fn evidence_rows(
             add("W3C-R-026");
         }
     }
-    // Section 2: moved is recomputed, not declared. Each comparable slot of the
-    // compared set is in moved exactly when it differs.
+    // Section 2: moved is recomputed, not declared, and an object whose moved
+    // is not contained in its declared compared set is rejected. The moved
+    // held against compared is the recomputed one: a declaration of the
+    // recompute-opaque error list carries no rejection (section 2.1).
+    if let Some(rec) = recomputed {
+        if rec
+            .iter()
+            .any(|x| !compared.iter().any(|c| c.as_str() == *x))
+        {
+            add("W3C-R-016");
+        }
+    }
+    // Each comparable slot of the compared set is in moved exactly when it differs.
     if let (Some(rec), Some(m)) = (recomputed, &moved) {
         for slot in ["verdict", "fired-rule list"] {
             if compared.iter().any(|c| c == slot)
@@ -560,18 +565,83 @@ fn evidence_rows(
     }
 }
 
-fn leaves(checks: &[&Map<String, Value>]) -> Result<Vec<Vec<u8>>, String> {
+/// The jcs-sha256 bytes of every check, or the first refusal.
+fn leaves(checks: &[&Map<String, Value>]) -> Result<Vec<Vec<u8>>, json::Refusal> {
     checks
         .iter()
-        .map(|c| json::canonical(&Value::Object((*c).clone())))
+        .map(|c| json::jcs_sha256(&Value::Object((*c).clone())))
         .collect()
 }
 
-/// Section 3.1: the count bound and the shape declared from the closed set,
-/// then (reading table) the digest recomputed.
-fn set_binding_ok(set: &Map<String, Value>) -> bool {
+/// The closed set of digest encodings a set binding may declare, proposed on
+/// the list (2026Oct/0038). A binding that declares none is digested under
+/// jcs-sha256.
+pub const DIGEST_ENCODINGS: [&str; 1] = ["jcs-sha256"];
+/// A root over the check set that does not recompute.
+pub const DIGESTS_DIFFER: &str = "digests-differ";
+/// A declared digest encoding outside the closed set.
+pub const UNSUPPORTED_ENCODING: &str = "unsupported-digest-encoding";
+/// The causes a member's expected cause may name.
+pub const CAUSE_CODES: [&str; 4] = [
+    DIGESTS_DIFFER,
+    json::NON_INTEGER,
+    json::OUTSIDE_SAFE_RANGE,
+    UNSUPPORTED_ENCODING,
+];
+
+/// An encoding the binding declares that is not in the closed set; a binding
+/// that declares none declares nothing to refuse.
+fn declares_unsupported_encoding(set: &Map<String, Value>) -> bool {
+    match set.get("digest-encoding") {
+        None => false,
+        Some(Value::String(name)) => !DIGEST_ENCODINGS.contains(&name.as_str()),
+        Some(_) => true,
+    }
+}
+
+/// Section 3.1: the count bound and the shape declared from the closed set.
+fn binds_count_and_shape(set: &Map<String, Value>) -> bool {
     count(set.get("leaf-count")).is_some()
         && s(set.get("tree-shape")).is_some_and(|t| tree::SHAPES.contains(&t))
+}
+
+/// Section 3.1 and the proposed closed set of digest encodings.
+fn set_binding_ok(set: &Map<String, Value>) -> bool {
+    binds_count_and_shape(set) && !declares_unsupported_encoding(set)
+}
+
+/// The row the check-set binding is rejected under and the cause it names,
+/// None when the binding holds. The cause is a code from CAUSE_CODES, or None
+/// for a binding refused in words no member names.
+fn check_set_finding(
+    report: &Map<String, Value>,
+    checks: &[&Map<String, Value>],
+) -> Option<(&'static str, Option<&'static str>)> {
+    // A report MUST declare which tree shape its digest over the set uses, so a
+    // report with no check-set, or a set with no digest, declares nothing.
+    let Some(set) = report.get("check-set").and_then(Value::as_object) else {
+        return Some(("W3C-R-015", None));
+    };
+    if !binds_count_and_shape(set) || s(set.get("sha256")).is_none() {
+        return Some(("W3C-R-015", None));
+    }
+    if declares_unsupported_encoding(set) {
+        return Some(("W3C-R-015", Some(UNSUPPORTED_ENCODING)));
+    }
+    if count(set.get("leaf-count")) != Some(checks.len() as i64) {
+        return Some(("W3C-R-015", None));
+    }
+    let shape = s(set.get("tree-shape")).unwrap_or("");
+    match leaves(checks) {
+        Err(refused) => Some(("W3C-R-020", Some(refused.cause))),
+        Ok(l) => {
+            if tree::root(shape, &l).as_deref() != s(set.get("sha256")) {
+                Some(("W3C-R-020", Some(DIGESTS_DIFFER)))
+            } else {
+                None
+            }
+        }
+    }
 }
 
 fn check_set_rows(
@@ -579,23 +649,41 @@ fn check_set_rows(
     checks: &[&Map<String, Value>],
     rows: &mut BTreeSet<String>,
 ) {
-    // A report MUST declare which tree shape its digest over the set uses, so a
-    // report with no check-set, or a set with no digest, declares nothing.
-    let Some(set) = report.get("check-set").and_then(Value::as_object) else {
-        rows.insert("W3C-R-015".into());
-        return;
-    };
-    if !set_binding_ok(set)
-        || s(set.get("sha256")).is_none()
-        || count(set.get("leaf-count")) != Some(checks.len() as i64)
-    {
-        rows.insert("W3C-R-015".into());
-        return;
+    if let Some((row, _)) = check_set_finding(report, checks) {
+        rows.insert(row.into());
     }
-    let shape = s(set.get("tree-shape")).unwrap_or("");
-    let root = leaves(checks).ok().and_then(|l| tree::root(shape, &l));
-    if root.as_deref() != s(set.get("sha256")) {
-        rows.insert("W3C-R-020".into());
+}
+
+/// The cause a rejection from a well-shaped report's check-set binding names,
+/// None when it names none. The corpus reader compares it with a member's
+/// expected cause: a float and a root that does not recompute both land under
+/// W3C-R-020, and only the cause tells them apart.
+pub fn check_set_cause(subject: &Value) -> Option<&'static str> {
+    let report = subject.as_object()?;
+    let empty = Vec::new();
+    let checks: Vec<&Map<String, Value>> = report
+        .get("checks")
+        .and_then(Value::as_array)
+        .unwrap_or(&empty)
+        .iter()
+        .filter_map(Value::as_object)
+        .collect();
+    check_set_finding(report, &checks).and_then(|(_, cause)| cause)
+}
+
+/// Whether a section 5.4 filling (a control or a prior run) declares a
+/// checker and constraint set other than the run's. Read only where both
+/// declare one: v0.1 fixes no slot for the run's binding (section 5.5, O7),
+/// so a missing binding on either side is not a difference.
+fn binding_differs(bound: Option<&Value>, report: &Map<String, Value>) -> bool {
+    let filling = bound.and_then(Value::as_object);
+    let run = report.get("fixed").and_then(Value::as_object);
+    match (filling, run) {
+        (Some(f), Some(r)) => {
+            f.get("checker") != r.get("checker")
+                || f.get("constraint-set") != r.get("constraint-set")
+        }
+        _ => false,
     }
 }
 
@@ -683,16 +771,8 @@ fn roll_up_rows(
                         add("W3C-R-013");
                     }
                     // The control runs under the same checker and constraints.
-                    let cf = control
-                        .and_then(|c| c.get("fixed"))
-                        .and_then(Value::as_object);
-                    let rf = report.get("fixed").and_then(Value::as_object);
-                    if let (Some(cf), Some(rf)) = (cf, rf) {
-                        if cf.get("checker") != rf.get("checker")
-                            || cf.get("constraint-set") != rf.get("constraint-set")
-                        {
-                            add("W3C-R-029");
-                        }
+                    if binding_differs(control.and_then(|c| c.get("fixed")), report) {
+                        add("W3C-R-029");
                     }
                 }
                 "prior-discriminating-run" => {
@@ -710,6 +790,11 @@ fn roll_up_rows(
                         .is_some_and(set_binding_ok)
                     {
                         add("W3C-R-015");
+                    }
+                    // The reference lets the reader establish the same checker
+                    // and constraints as the checks it supports.
+                    if binding_differs(nc.get("fixed"), report) {
+                        add("W3C-R-033");
                     }
                 }
                 _ => {}

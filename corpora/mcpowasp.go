@@ -286,7 +286,7 @@ func moTruthy(v any) bool {
 	case bool:
 		return t
 	case json.Number:
-		return t.String() != "0"
+		return !jsonNumberIsZero(t)
 	case []any:
 		return len(t) > 0
 	case map[string]any:

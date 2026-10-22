@@ -35,6 +35,8 @@ import importlib.util
 import json
 import os
 import pathlib
+import re
+import subprocess
 import sys
 import tempfile
 from collections.abc import Callable, Iterator
@@ -297,7 +299,7 @@ def an_unsupplied_context_is_empty_as_it_is_on_a_runner() -> None:
 
 def the_action_mirror_produces_the_declared_outputs() -> None:
     """The mirror runs the action's own summary script, not a copy of its sums."""
-    local = GATE.local_equivalent("./", {"verifier": "./aee-verify -json"})  # type: ignore[attr-defined]
+    local = GATE.local_equivalent("./", {"verifier": "./aee-verify -validity-only -json"})  # type: ignore[attr-defined]
     assert local.run is not None, local.reason
     assert "scripts/action-summary.py" in local.run, (
         "the mirror does not run the action's summary script, so its outputs "
@@ -350,7 +352,7 @@ def continue_on_error_is_honoured_end_to_end() -> None:
 
 def the_action_mirror_fails_on_a_non_pass_verdict() -> None:
     """The action fails a job on the exit status OR on the summary verdict; so must its mirror."""
-    local = GATE.local_equivalent("./", {"verifier": "./aee-verify -json"})  # type: ignore[attr-defined]
+    local = GATE.local_equivalent("./", {"verifier": "./aee-verify -validity-only -json"})  # type: ignore[attr-defined]
     assert local.run is not None, local.reason
     assert "result=pass" in local.run, (
         "the mirror exits on the harness status alone, so a report that does not "
@@ -531,6 +533,20 @@ def job_owned_outputs_require_runner_context() -> None:
             proc = GATE.run_step(block, {"PATH": "/usr/bin:/bin", **extra})  # type: ignore[attr-defined]
             assert proc.returncode != 0, "missing runner context passed"
             assert "RUNNER_TEMP is required" in proc.stderr, proc.stderr
+
+
+def action_vectors_input_replaces_the_corpus() -> None:
+    """The mirror replays the directory the vectors input names, as the action does."""
+    named = GATE.own_action(  # type: ignore[attr-defined]
+        {"verifier": "v", "corpus": "vectors", "vectors": "dir with space"}
+    )
+    assert named.run is not None
+    assert "--vectors 'dir with space'" in named.run, named.run
+    assert "--corpus" not in named.run, named.run
+    assert "CORPUS='dir with space'" in named.run, named.run
+    plain = GATE.own_action({"verifier": "v"})  # type: ignore[attr-defined]
+    assert plain.run is not None
+    assert "--corpus vectors" in plain.run and "--vectors" not in plain.run, plain.run
 
 
 def action_report_path_reaches_the_summary_and_outputs() -> None:
@@ -1068,6 +1084,68 @@ def current_default_metadata_selects_the_actual_commit_lint_range() -> None:
         assert "linting refs/remotes/origin/trunk..HEAD" in output, output
         assert "published legacy subject" not in output, output
         assert fixture_git(root, "symbolic-ref", "refs/remotes/origin/HEAD").endswith("/stale")
+
+
+def dependabot_commits_are_left_out_and_every_other_commit_is_linted() -> None:
+    """A Dependabot branch lints its human commits and leaves out the bot's own."""
+    doc = GATE.load_yaml(HERE.parent / ".github/workflows/commit-message-lint.yml")  # type: ignore[attr-defined]
+    block = next(
+        step.run
+        for step in GATE.steps_of(doc, pathlib.Path("lint.yml"))  # type: ignore[attr-defined]
+        if step.name == "Lint the commit messages this event introduces"
+    )
+    bot = ("dependabot[bot]", "49699333+dependabot[bot]@users.noreply.github.com")
+    long_bump = "build(deps): bump google.golang.org/grpc from 1.66.3 to 1.83.2 in /witnessattestor"
+
+    def run(root: pathlib.Path, **env: str) -> subprocess.CompletedProcess[str]:
+        full = {**os.environ, "PR_BASE": "", "PUSH_BEFORE": "", "PR_AUTHOR": "", "PUSH_ACTOR": ""}
+        full.update(DEFAULT_BRANCH="main", **env)
+        return subprocess.run(
+            ["bash", "-c", block], cwd=root, env=full, capture_output=True, text=True, check=False
+        )
+
+    def commit(root: pathlib.Path, name: str, author: tuple[str, str], subject: str) -> None:
+        (root / name).write_text(name + "\n")
+        fixture_git(root, "add", name)
+        fixture_git(
+            root, "-c", f"user.name={author[0]}", "-c", f"user.email={author[1]}",
+            "commit", "-qm", subject,
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = pathlib.Path(tmp) / "source"
+        root.mkdir()
+        fixture_git(root, "init", "-q", "-b", "main")
+        hooks = root / ".githooks"
+        hooks.mkdir()
+        for name in ("commit-msg", "commit-msg.permitted-paths", "commit-msg.forbidden-words"):
+            target = hooks / name
+            target.write_bytes((HERE.parent / ".githooks" / name).read_bytes())
+            target.chmod((HERE.parent / ".githooks" / name).stat().st_mode & 0o777)
+        commit(root, "base", ("Fixture", "fixture@example.test"), "chore: start the fixture")
+        fixture_git(root, "update-ref", "refs/remotes/origin/main", "HEAD")
+        base = fixture_git(root, "rev-parse", "HEAD")
+        fixture_git(root, "checkout", "-q", "-b", "dependabot/go_modules/grpc")
+        commit(root, "bump", bot, long_bump)
+        ref = "refs/heads/dependabot/go_modules/grpc"
+
+        # The bot's own long subject passes on its pull request and its own push.
+        pr = run(root, PR_BASE=base, PR_AUTHOR=bot[0])
+        assert pr.returncode == 0, pr.stdout + pr.stderr
+        assert "left out:" in pr.stdout and "written by Dependabot" in pr.stdout, pr.stdout
+        push = run(root, PUSH_REF=ref, PUSH_ACTOR=bot[0])
+        assert push.returncode == 0, push.stdout + push.stderr
+
+        # The same commit is still refused where Dependabot is not the author of the event.
+        human_pr = run(root, PR_BASE=base, PR_AUTHOR="someone")
+        assert human_pr.returncode != 0, human_pr.stdout
+        human_push = run(root, PUSH_REF=ref, PUSH_ACTOR="someone")
+        assert human_push.returncode != 0, human_push.stdout
+
+        # A human commit added to the bot's branch is still linted.
+        commit(root, "extra", ("Fixture", "fixture@example.test"), "test: " + "too long " * 10)
+        mixed = run(root, PR_BASE=base, PR_AUTHOR=bot[0])
+        assert mixed.returncode != 0, mixed.stdout + mixed.stderr
 
 
 def changing_a_job_default_ref_stops_later_history_consumers() -> None:
@@ -1700,6 +1778,75 @@ def bounded_expression_literals_and_comparisons_match_actions() -> None:
         assert problem and value == "", (expression, value, problem)
 
 
+def every_pull_request_field_a_workflow_reads_is_absent_on_a_push() -> None:
+    """A push carries no pull_request and the mirror has no actor: both read as empty.
+
+    The runner evaluates `github.event.pull_request.<field>` to an empty string
+    on a push. The mirror knows that only for the fields LOCAL_ABSENT lists, and
+    any other one is an unknown context, which faults the step. PR_AUTHOR read
+    `github.event.pull_request.user.login` from 2026-10-13, nothing listed it,
+    and every local gate since then failed a step the remote ran.
+    """
+    used: set[str] = set()
+    for workflow in sorted((HERE.parent / ".github/workflows").glob("*.yml")):
+        used.update(
+            re.findall(
+                r"github\.event\.pull_request\.[A-Za-z0-9_.]+|github\.actor\b",
+                workflow.read_text(),
+            )
+        )
+    assert used, "no workflow reads a pull_request field, so this case reads nothing"
+    missing = sorted(used - set(GATE.LOCAL_ABSENT))  # type: ignore[attr-defined]
+    assert not missing, f"push contexts with no local value: {missing}"
+
+
+def a_step_partial_clone_can_fetch_its_blobs() -> None:
+    """A step's own partial clone checks out, as it does on the runner.
+
+    pip clones a `git+https` requirement with `--filter=blob:none`. Steps used to
+    inherit the gate's GIT_NO_LAZY_FETCH, so that checkout could not fetch its
+    blobs and the agmi workflow failed here while passing on the remote. The
+    control asserts the gate's own binding still refuses, so the case cannot
+    pass by never making a partial clone.
+    """
+    with _scratch() as scratch:
+        root = pathlib.Path(scratch)
+        source, clone = root / "source", root / "clone"
+        base = {
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+            "HOME": str(root),
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@example.invalid",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@example.invalid",
+        }
+
+        def git(*args: str, env: dict[str, str] | None = None) -> int:
+            return subprocess.run(  # noqa: S603 -- fixed git arguments in a scratch directory
+                ["git", *args],  # noqa: S607
+                env=env or base,
+                capture_output=True,
+                check=False,
+            ).returncode
+
+        assert git("init", "-q", str(source)) == 0
+        (source / "f.txt").write_text("payload\n", encoding="utf-8")
+        assert git("-C", str(source), "add", "f.txt") == 0
+        assert git("-C", str(source), "commit", "-q", "-m", "c") == 0
+        assert git("-C", str(source), "config", "uploadpack.allowFilter", "true") == 0
+        url = source.as_uri()
+        assert git("clone", "-q", "--filter=blob:none", "--no-checkout", url, str(clone)) == 0
+
+        checkout = ("-C", str(clone), "checkout", "-q", "HEAD", "--", ".")
+        gate_env = GATE.git_environment(base=base)  # type: ignore[attr-defined]
+        refused = git(*checkout, env=gate_env)
+        assert refused != 0, "control: the gate's own binding did not refuse a lazy fetch"
+        step_env = GATE.step_git_environment(base)  # type: ignore[attr-defined]
+        step = git(*checkout, env=step_env)
+    assert step == 0, f"a step's partial clone could not fetch its blobs (exit {step})"
+
+
 def setup_python_owns_uv_selection_despite_ambient_pin() -> None:
     """A real seeded setup interpreter must govern uv, even with a conflicting ambient pin."""
     workflow = (
@@ -1819,12 +1966,17 @@ def main() -> int:
         current_default_metadata_selects_the_actual_commit_lint_range,
     )
     check(
+        "dependabot commits are left out, every other commit is linted",
+        dependabot_commits_are_left_out_and_every_other_commit_is_linted,
+    )
+    check(
         "changed job default refs stop later history consumers",
         changing_a_job_default_ref_stops_later_history_consumers,
     )
     check("runner variables carry within a job", github_env_and_runner_temp_carry_within_a_job)
     check("corpus binaries belong to their job", corpus_harness_outputs_are_owned_by_the_job)
     check("job outputs require runner context", job_owned_outputs_require_runner_context)
+    check("the vectors input replaces the corpus", action_vectors_input_replaces_the_corpus)
     check(
         "the action report reaches its consumers",
         action_report_path_reaches_the_summary_and_outputs,
@@ -1957,6 +2109,16 @@ def main() -> int:
     check(
         "bounded expression literals follow Actions",
         bounded_expression_literals_and_comparisons_match_actions,
+    )
+
+    check(
+        "every pull_request field a workflow reads is absent on a push",
+        every_pull_request_field_a_workflow_reads_is_absent_on_a_push,
+    )
+
+    check(
+        "a step's partial clone fetches its blobs",
+        a_step_partial_clone_can_fetch_its_blobs,
     )
 
     check(

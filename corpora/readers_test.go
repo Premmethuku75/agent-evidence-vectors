@@ -43,6 +43,7 @@ var corpusCases = []corpusCase{
 	{dir: "vectors-mcp-record-contract", memberFileKey: "record"},
 	{dir: "vectors-mcp-response-phase", memberFileKey: "file"},
 	{dir: "vectors-artifact-binding", memberFileKey: "manifest"},
+	{dir: "vectors-dependency-selection", memberFileKey: "manifest"},
 	// One ACI member is a whole deployment serialised into one file, so the
 	// key is "file" as for a statement and the bytes flipped are a manifest the
 	// deployment publishes.
@@ -62,6 +63,15 @@ var corpusCases = []corpusCase{
 	// A member of the OWASP MCP verification corpus is one acceptance-test
 	// observation in one record file.
 	{dir: "vectors-mcp-owasp", memberFileKey: "record"},
+	// A member of the agent-decision corpus is one DSSE envelope in one file,
+	// with its disclosed arguments, where it has any, in a second.
+	{dir: "vectors-agent-decision", memberFileKey: "file"},
+	// A member of the W3C intake corpus is one intake record in one file; the
+	// fixture trees some members are judged under sit beside it in trees/.
+	{dir: "vectors-w3c-intake", memberFileKey: "file"},
+	// A member of the admission corpus is a statement and a consumer policy;
+	// the policy is the half no other member shares, so its bytes are flipped.
+	{dir: "vectors-admission", memberFileKey: "policy"},
 }
 
 func corpusPath(dir string) string { return filepath.Join("..", dir) }

@@ -21,10 +21,15 @@ store resolves a reference to other bytes (the reading table's mismatch line),
 a member whose fixed slot restates the domain (the domain-once row), a member
 whose check-set names a tree shape outside the closed set, a pass carrying the
 confinement cause (two rows at once), a control rebound to another constraint
-set, and the reference emitter's published run with a wrong digest and with a
-report the validator would reject. Four more give a member a field of the wrong
+set, a prior run rebound to another checker, and the reference emitter's
+published run with a wrong digest and with a report the validator would
+reject. Four more give a member a field of the wrong
 JSON type: robots exclusion rules as an integer, step_count as a string, a
-cache ledger's tokens as a string, and a delta's changes as a string.
+cache ledger's tokens as a string, and a delta's changes as a string. One more
+states a cause a member's rejection does not name. The last lists the
+manifest's members in reverse order, which changes nothing a reader judges: the
+corpus digest is over the member files in identifier order, so all three must
+accept that copy as they accept the committed corpus.
 
 Usage: python3 scripts/w3c-rails-parity-test.py
 Exit 0 when every case prints identically on all three rails; 1 otherwise.
@@ -156,27 +161,36 @@ def confinement_on_pass(corpus: Path) -> None:
     edit_member(corpus, edit)
 
 
-def rebound_control(corpus: Path) -> None:
-    """A bound control moved to another constraint set than the run's (rule 29)."""
-    def edit(document: dict[str, Any]) -> None:
-        control = document["subject"]["roll-up"]["negative-capable"]["control"]
-        control["fixed"]["constraint-set"] = "cs-3"
-
-    def bound(document: dict[str, Any]) -> bool:
-        return "fixed" in document["subject"]
-
+def rebind(corpus: Path, family: str, edit: Callable[[dict[str, Any]], None]) -> None:
+    """Edit the first accept member of a binding family whose run declares a binding."""
     manifest = manifest_of(corpus)
     for entry in manifest["vectors"]:
-        if entry["family"] != "w3c-f-29" or entry["kind"] != "accept":
+        if entry["family"] != family or entry["kind"] != "accept":
             continue
         path = corpus / entry["file"]
         document = json.loads(path.read_text(encoding="utf-8"))
-        if bound(document):
-            edit(document)
+        if "fixed" in document["subject"]:
+            edit(document["subject"]["roll-up"]["negative-capable"])
             path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n",
                             encoding="utf-8")
             return
-    raise SystemExit("no bound control member to rebind")
+    raise SystemExit(f"no bound {family} member to rebind")
+
+
+def rebound_control(corpus: Path) -> None:
+    """A bound control moved to another constraint set than the run's (rule 29)."""
+    def edit(field: dict[str, Any]) -> None:
+        field["control"]["fixed"]["constraint-set"] = "cs-3"
+
+    rebind(corpus, "w3c-f-29", edit)
+
+
+def rebound_prior(corpus: Path) -> None:
+    """A bound prior run moved to another checker than the run's (rule 33)."""
+    def edit(field: dict[str, Any]) -> None:
+        field["fixed"]["checker"] = "checker-3"
+
+    rebind(corpus, "w3c-f-33", edit)
 
 
 def edit_subject(corpus: Path, subject_type: str, edit: Callable[[dict[str, Any]], None]) -> None:
@@ -223,6 +237,35 @@ def string_delta_changes(corpus: Path) -> None:
     edit_member(corpus, edit, with_evidence=True)
 
 
+def wrong_cause(corpus: Path) -> None:
+    """A member stating a cause its rejection does not name.
+
+    The declared-encoding reject member is refused under W3C-R-015 for an
+    encoding outside the closed set. Its manifest entry and file are edited, as
+    text so no number token is respelled, to state digests-differ instead: each
+    reader still rejects it under W3C-R-015 and must say that the cause it names
+    is not the cause stated.
+    """
+    manifest = manifest_of(corpus)
+    entry = next(e for e in manifest["vectors"]
+                 if e["expected"].get("cause") == "unsupported-digest-encoding")
+    entry["expected"]["cause"] = "digests-differ"
+    write_manifest(corpus, manifest)
+    path = corpus / entry["file"]
+    text = path.read_text(encoding="utf-8")
+    old = '"cause": "unsupported-digest-encoding"'
+    if text.count(old) != 1:
+        raise SystemExit(f"FAIL wrong-cause: {path.name} does not state its cause once")
+    path.write_text(text.replace(old, '"cause": "digests-differ"'), encoding="utf-8")
+
+
+def reordered_manifest(corpus: Path) -> None:
+    """The manifest lists its members in reverse identifier order."""
+    manifest = manifest_of(corpus)
+    manifest["vectors"].reverse()
+    write_manifest(corpus, manifest)
+
+
 def emitter_run_digest(corpus: Path) -> None:
     manifest = manifest_of(corpus)
     manifest["referenceEmitterRuns"][0]["sha256"] = "0" * 64
@@ -255,13 +298,20 @@ CASES: list[tuple[str, Callable[[Path], None] | None]] = [
     ("unregistered-shape", unregistered_shape),
     ("confinement-on-pass", confinement_on_pass),
     ("rebound-control", rebound_control),
+    ("rebound-prior", rebound_prior),
     ("robots-integer", robots_integer),
     ("string-step-count", string_step_count),
     ("string-ledger-tokens", string_ledger_tokens),
     ("string-delta-changes", string_delta_changes),
+    ("wrong-cause", wrong_cause),
     ("emitter-run-digest", emitter_run_digest),
     ("emitter-run-rejected", emitter_run_rejected),
+    ("reordered-manifest", reordered_manifest),
 ]
+
+#: Cases whose mutation changes nothing a reader judges: every rail must accept
+#: them, where every other mutation must be noticed.
+ACCEPTED = {"reordered-manifest"}
 
 #: What a case's output must say beyond a changed identifier, so a case whose
 #: mutation both rails let through as well-formed cannot pass on agreement.
@@ -270,6 +320,7 @@ EXPECT: dict[str, str] = {
     "string-step-count": "step_count",
     "string-ledger-tokens": "ARM-R-014",
     "string-delta-changes": "delta.changes",
+    "wrong-cause": "names the cause unsupported-digest-encoding",
 }
 
 
@@ -324,7 +375,10 @@ def main() -> int:
                 f"{mark} {name}: exit go={go_status} py={py_status} rs={rs_status}, "
                 f"{findings} finding line(s)"
             )
-            if mutate is not None and go_status == 0:
+            if name in ACCEPTED and go_status != 0:
+                print(f"FAIL {name}: a copy that changes nothing a reader judges was refused")
+                failures += 1
+            elif mutate is not None and name not in ACCEPTED and go_status == 0:
                 print(f"FAIL {name}: the mutation was not noticed, so the case asserted nothing")
                 failures += 1
             want = EXPECT.get(name)

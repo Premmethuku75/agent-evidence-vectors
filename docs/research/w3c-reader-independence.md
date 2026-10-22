@@ -70,7 +70,12 @@ from those bytes by recomputation, not from code:
   record's RFC 8785 bytes. It reproduces every committed `flat` digest. The
   `rfc6962` and `RFC9162_SHA256` roots are the RFC 6962 section 2.1 Merkle
   Tree Hash, from the RFC;
-- `corpusDigest`: SHA-256 over the member files' bytes in manifest order.
+- `corpusDigest`: SHA-256 over the member files' bytes in identifier order.
+  (Corrected 2026-10-11: this line said manifest order, and the Rust reader
+  hashed in that order. Every committed manifest lists its members in
+  identifier order, so the two readings agreed on every corpus; the Rust reader
+  now sorts by identifier as the Go and Python readers do, and the parity test
+  judges a manifest listed in reverse.)
 
 ### Dependencies
 
@@ -106,6 +111,7 @@ nothing for it to read.
 | negative capability: silence refused, shown-by-run needs a fail, a control must fail over the declared checks (`W3C-R-013`) | 0087 section 5.4 |
 | a prior run binds surviving check identity (`W3C-R-014`) and its set (`W3C-R-015`) | 0087 section 5.4, last two conditions |
 | control bound to the run's checker and constraint set (`W3C-R-029`) | 0087 section 5.4, second condition; appendix on open item O7 |
+| prior run bound to the run's checker and constraint set (`W3C-R-033`) | 0087 section 5.4, third condition and change log entry 12; appendix on open item O7 |
 | coverage block fields (`W3C-R-022`) | message 0001 |
 | `ARM-R-001` to `ARM-R-022` | the run-metrics draft, at the section the appendix lists per row |
 | `LCD-R-001` to `LCD-R-011` | the context-discovery draft, at the section the appendix lists per row |

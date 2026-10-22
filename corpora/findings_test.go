@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -163,6 +164,7 @@ func TestEveryFindingIsReachable(t *testing.T) {
 	cases = append(cases, w3cFindings()...)
 	cases = append(cases, mcpFindings()...)
 	cases = append(cases, bindingFindings()...)
+	cases = append(cases, dependencySelectionFindings()...)
 	cases = append(cases, agentActionFindings()...)
 	cases = append(cases, agentActionChainFindings()...)
 	cases = append(cases, aeeFindings()...)
@@ -172,6 +174,7 @@ func TestEveryFindingIsReachable(t *testing.T) {
 	cases = append(cases, aiGenerationFindings()...)
 	cases = append(cases, receiptSignatureFindings()...)
 	cases = append(cases, auditRecordFindings()...)
+	cases = append(cases, admissionFindings()...)
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			dir := stage(t, tc.dir)
@@ -465,6 +468,25 @@ func acsFindings() []findingCase {
 				setDeep(t, row, -1.0, "expected", "codeValue")
 			})
 		}, "carries a code value the registry does not pair with that name"},
+		{"acs/forbids-code-and-names-one", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) {
+				row := firstRowWhere(t, m, func(r map[string]any) bool {
+					expected, _ := r["expected"].(map[string]any)
+					return expected["code"] != nil
+				})
+				setDeep(t, row, true, "expected", "forbidsRegistryCode")
+			})
+		}, "names a registry code and forbids one"},
+		{"acs/forbids-code-off-deny", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) {
+				setDeep(t, firstRowWhere(t, m, kindIs("accept")), true, "expected", "forbidsRegistryCode")
+			})
+		}, "forbids a registry code on a verdict other than deny"},
+		{"acs/forbids-code-false", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) {
+				setDeep(t, firstRowWhere(t, m, kindIs("reject")), false, "expected", "forbidsRegistryCode")
+			})
+		}, "carries forbidsRegistryCode false"},
 		{"acs/accept-not-allow", dir, func(t *testing.T, d string) {
 			editManifest(t, d, func(m map[string]any) {
 				setDeep(t, firstRowWhere(t, m, kindIs("accept")), "deny", "expected", "verdict")
@@ -790,6 +812,25 @@ func bindingFindings() []findingCase {
 				row := firstRowWhere(t, m, kindIs("accept"))
 				writeFile(t, d, row["signature"].(string), strings.Repeat("00", 64))
 			})
+		}, "the reference verifier answered"},
+	}
+}
+
+// dependencySelectionFindings proves the two consumer-held inputs this corpus
+// adds are load-bearing: without the in-force pin the skill-not-in-force member
+// answers verified, and a profile the reader does not know is refused rather
+// than judged against an empty role list.
+func dependencySelectionFindings() []findingCase {
+	const dir = "vectors-dependency-selection"
+	return []findingCase{
+		{"depsel/in-force-dropped", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) { delete(m, "inForce") })
+		}, "the reference verifier answered \"verified\""},
+		{"depsel/unknown-profile", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) { m["profile"] = "no-such-profile/v1" })
+		}, "which this reader does not know"},
+		{"depsel/harbor-profile", dir, func(t *testing.T, d string) {
+			editManifest(t, d, func(m map[string]any) { m["profile"] = "harbor/single-step/v1" })
 		}, "the reference verifier answered"},
 	}
 }
@@ -1417,6 +1458,9 @@ func oeUnnameTheBlob(t *testing.T, d string) {
 	}
 }
 
+// blobDigestMember is a read row's blob digest as canonical JSON spells it.
+var blobDigestMember = regexp.MustCompile(`"blobDigest":"[0-9a-f]{64}"`)
+
 // oeRenameBlobIn points every read row in one member at a different blob, and
 // reports whether it changed anything.
 func oeRenameBlobIn(t *testing.T, path string) bool {
@@ -1434,30 +1478,13 @@ func oeRenameBlobIn(t *testing.T, path string) bool {
 	if err != nil {
 		return false
 	}
-	var statement map[string]any
-	if err := json.Unmarshal(payload, &statement); err != nil {
+	// Rewrite on the bytes, not through a JSON round trip: a member this decoder
+	// cannot parse (a NaN token, say) would otherwise keep naming the blob and
+	// hide the finding this case exists to provoke.
+	if !blobDigestMember.Match(payload) {
 		return false
 	}
-	predicate, _ := statement["predicate"].(map[string]any)
-	reads, _ := predicate["reads"].([]any)
-	changed := false
-	for _, item := range reads {
-		read, _ := item.(map[string]any)
-		if read == nil {
-			continue
-		}
-		if _, has := read["blobDigest"]; has {
-			read["blobDigest"] = strings.Repeat("b", 64)
-			changed = true
-		}
-	}
-	if !changed {
-		return false
-	}
-	body, err := json.Marshal(statement)
-	if err != nil {
-		t.Fatal(err)
-	}
+	body := blobDigestMember.ReplaceAll(payload, []byte(`"blobDigest":"`+strings.Repeat("b", 64)+`"`))
 	envelope["payload"] = base64.StdEncoding.EncodeToString(body)
 	out, err := json.Marshal(envelope)
 	if err != nil {

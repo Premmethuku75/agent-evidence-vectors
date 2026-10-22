@@ -62,7 +62,15 @@ fn report_mode(path: &Path, against: &[PathBuf]) -> (String, i32) {
         report::Judgement::Rows(rows) => {
             ok = false;
             let rows: Vec<String> = rows.into_iter().collect();
-            lines.push(format!("FAIL rows: rejected under [{}]", rows.join(", ")));
+            // The cause tells a number outside the jcs-sha256 profile from a
+            // root that does not recompute: both are rejected under W3C-R-020.
+            let cause = report::check_set_cause(&doc)
+                .map(|c| format!(", cause {c}"))
+                .unwrap_or_default();
+            lines.push(format!(
+                "FAIL rows: rejected under [{}]{cause}",
+                rows.join(", ")
+            ));
         }
     }
     match report::measure_set(&doc) {
