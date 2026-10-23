@@ -1428,6 +1428,22 @@ FROZEN: tuple[Frozen, ...] = (
         'the line must match that wheel and not the corpus on main; the release that moves the '
         'pin re-records it.',
     ),
+    # ---- settings and arithmetic that are not counts of anything in a corpus.
+    Frozen(
+        'interop/govops-capability-id/pyproject.toml',
+        "the ruff line width of the govops-capability-id reader",
+        'line-length = 140',
+        'A formatter setting in an interop reader\'s project file. It is a line width, not a '
+        'count, and met the acs-core corpus total by coincidence when that corpus reached 140.',
+    ),
+    Frozen(
+        'scripts/pre-push-identity-scan-test.py',
+        "the decode budget a nested member costs in the identity scan's test",
+        '70 members need 140',
+        'Arithmetic about the identity scan\'s decode cap: each nested member costs two '
+        'decodes. It is not a corpus count, and met the acs-core corpus total by coincidence '
+        'when that corpus reached 140.',
+    ),
     # ---- an outside implementer's reported results, recorded as posted.
     Frozen(
         'RUNS.md',
