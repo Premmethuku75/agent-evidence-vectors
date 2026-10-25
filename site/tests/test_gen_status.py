@@ -131,4 +131,37 @@ def test_start_entry_must_name_an_open_cell():
 def test_committed_page_matches_its_data():
     register = json.loads((ROOT / "data/lab-register.json").read_text(encoding="utf-8"))
     cells = tomllib.loads((ROOT / "data/open-cells.toml").read_text(encoding="utf-8"))
-    assert (ROOT / "src/status.md").read_text(encoding="utf-8") == gen.render(register, cells)
+    filed = tomllib.loads((ROOT / "data/filed-runs.toml").read_text(encoding="utf-8"))
+    assert (ROOT / "src/status.md").read_text(encoding="utf-8") == gen.render(register, cells, filed)
+
+
+def filed_run(**changes):
+    run = {key: f"{key} text" for key in gen.RUN_KEYS}
+    run.update(changes)
+    return run
+
+
+def test_filed_runs_are_listed_and_not_counted():
+    register = {"records": [record("p-run", ["pass"], {"runner": "Probity CI"})]}
+    page = gen.render(register, open_cells(), {"run": [filed_run(id="x-run", link="https://example.org/1")]})
+    assert "## Runs filed against cells and cases" in page
+    assert "[`x-run`](https://example.org/1)" in page
+    assert page.count("| records | 1 |") == 1
+
+
+def test_no_filed_runs_leaves_no_section():
+    page = gen.render({"records": [record("p-run", ["pass"], {"runner": "Probity CI"})]}, open_cells())
+    assert "Runs filed against" not in page
+
+
+@pytest.mark.parametrize("bad", [{"open": ""}, {"extra": "x"}])
+def test_filed_run_with_a_missing_empty_or_extra_field_is_refused(bad):
+    run = filed_run(**bad)
+    with pytest.raises(ValueError):
+        gen.render({"records": [record("p-run", ["pass"], {"runner": "Probity CI"})]}, open_cells(), {"run": [run]})
+
+
+def test_repeated_filed_run_id_is_refused():
+    with pytest.raises(ValueError):
+        gen.render({"records": [record("p-run", ["pass"], {"runner": "Probity CI"})]}, open_cells(),
+                   {"run": [filed_run(id="a"), filed_run(id="a")]})
