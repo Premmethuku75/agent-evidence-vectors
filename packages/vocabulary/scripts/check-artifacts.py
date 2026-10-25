@@ -27,8 +27,8 @@ def check(wheel: Path, sdist: Path, source_root: Path | None = None) -> None:
             and project["license-files"] == ["LICENSE", "LICENSE-CC0"], "released registry grants")
     data = (root / "vocabulary.yaml").read_bytes()
     require(yaml.safe_load(data)["meta"]["version"] == project["version"], "registry and package version")
-    require(hashlib.sha256(data).hexdigest() == "4a5fdc8397c2fd82ee5795f50d2ad00203dd8d5a122bf77c5d0d0edb67d35760",
-            "released v0.6.0 registry digest")
+    require(hashlib.sha256(data).hexdigest() == "b0d69754d54a647d18758ab7e46c2d51430be41c07d3f1906e8c56fe45bd37e9",
+            "released v0.7.0 registry digest")
     source = {"agent_evidence_vocabulary/__init__.py": root / "__init__.py",
               "agent_evidence_vocabulary/vocabulary.yaml": root / "vocabulary.yaml"}
     with ZipFile(wheel) as archive:

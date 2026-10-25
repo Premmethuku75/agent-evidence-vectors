@@ -38,6 +38,15 @@ evidence_dimensions:
     source_path: https://api.babyblueviper.com/ledger/274
     notes: "Field: freshness_beacon and freshness_beacon_hash, inside proof_event.content (the signed JSON string). Current records fold a Bitcoin block (height, hash, block_time) into the signed content, so the signature cannot predate that block: a proven floor on the signing time. Same mechanism as beacon_anchored with a different beacon and no enum value on the wire. Present on current records (e.g. 274), absent on older ones (e.g. 236), which are therefore asserted. Bitcoin block_time can differ from wall time by up to about two hours, so the floor carries that tolerance."
 
+  commitment_anchor:
+    match: partial
+    evidence: emitted
+    source_path: https://api.babyblueviper.com/ledger/274
+    notes: "Field: ots_anchor (also under commitment_proof.ots_anchor) on the ledger entry: mechanism opentimestamps-bitcoin-pow, digest = the verdict's signed event id, proof at https://api.babyblueviper.com/ledger/274/ots. The digest recomputes from the record under the NIP-01 event-id rule, so a verifier reaches anchored from the public record and the proof."
+    divergences:
+      - "A different spelling (ots_anchor, not commitment_anchor), and no anchored/asserted value on the wire: an entry without ots_anchor is asserted."
+      - "No anchor_time_rule on the wire, so the record is read under the default, header_time_plus_tolerance; the recommended later_median ceiling is not emitted."
+
 posture_and_coverage:
   does_not_assert:
     match: partial

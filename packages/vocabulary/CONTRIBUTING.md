@@ -8,10 +8,11 @@ they honestly don't."
 
 ## Before you file
 
-Read the registry file in full, and read every status key while you are in there. At version 0.6.0
+Read the registry file in full, and read every status key while you are in there. At version 0.7.0
 each one says proposed, which means the term carries a review_by date and still needs one
 independently-maintained issuer that is not us before promotion. Nothing here is canonical yet: the
-eight crosswalks on file promote nothing. One is a verifier's, and a verifier emits no value. The
+nine crosswalks on file have promoted nothing. One is a verifier's, and a verifier emits no value.
+One is filed by the maintainer of invinoveritas for that system, whose fields match only in part. The
 other seven are marked `third_party_authored: true`, mapping a pinned implementation, proposed
 field sets, published specifications, vendor documentation and a proposed predicate that this project
 does not maintain, and a filing made from outside
@@ -54,7 +55,7 @@ instructions.
 system: your-system-name
 system_url: https://example.invalid/your/system
 crosswalk_version: "0.1.0"
-vocabulary_version_targeted: "0.6.0"
+vocabulary_version_targeted: "0.7.0"
 
 maintainer:
   github: your-github-handle

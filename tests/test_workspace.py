@@ -1,6 +1,7 @@
 """Tests for scripts/workspace.py: area discovery, change mapping and release tags."""
 
 import importlib.util
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -94,7 +95,12 @@ def test_a_bad_tag_is_refused(repo: Path, tag: str, message: str) -> None:
 
 
 def test_the_vocabulary_python_tag_resolves_in_this_repository() -> None:
-    got = workspace.release_target("agent-evidence-vocabulary-python-v0.6.0")
+    # Read the version the manifest carries now: a pinned release here broke
+    # this test on every vocabulary release, because a tag naming any other
+    # version is refused by design.
+    manifest = Path(__file__).resolve().parents[1] / "packages" / "vocabulary" / "pyproject.toml"
+    version = tomllib.loads(manifest.read_text(encoding="utf-8"))["project"]["version"]
+    got = workspace.release_target(f"agent-evidence-vocabulary-python-v{version}")
     assert got["name"] == "agent-evidence-vocabulary" and got["registry"] == "pypi"
     assert got["prefix"] == "agent-evidence-vocabulary-python"
 

@@ -19,11 +19,11 @@
 #
 # Precedent for this shape: IANA JWT claim registry, JSON-LD @context registries.
 #
-# version: "0.6.0"
+# version: "0.7.0"
 # status: "draft - open for review"
 
 meta:
-  version: "0.6.0"
+  version: "0.7.0"
   status: "draft - open for review"
   spec_anchor: "spec/predicates/adversarial-execution-evidence.md"
   spec_anchor_repo: "https://github.com/probityai/agent-evidence-vectors"
@@ -123,6 +123,13 @@ meta:
     third_party_authored: true and declare evidence: asserted, so none promotes
     a term and none is offered as promoting one. The v0.5.0 tag does not carry
     the section.
+    Version 0.7.0 adds commitment_anchor and its required companion
+    anchor_time_rule to evidence_dimensions, both proposed. commitment_anchor
+    names a proven ceiling on when a record existed, the mirror of the floor
+    issuance_time_basis names. It lists invinoveritas as an issuer: its public
+    ledger emits the anchor as ots_anchor, a partial match filed by its own
+    maintainer. Neither term is promoted, because no record yet carries
+    anchor_time_rule on the wire. The v0.6.0 tag does not carry either term.
   opencre_links: >
     A term whose definition states a requirement that one of OpenCRE's Common
     Requirements organizes carries an opencre list. Each item names the CRE by
@@ -322,6 +329,57 @@ evidence_dimensions:
     source_path: "predicate.observationRecords[].payload (arming pre-image)"
     issuers_in_production: []
     promotion_trigger: "An independent implementation that is not us, with a real beacon binding."
+
+  commitment_anchor:
+    status: proposed
+    review_by: "2027-02-24"
+    values: [anchored, asserted]
+    definition: >
+      Whether the latest possible time a record existed (its CEILING) is PROVEN
+      by an external anchor over a digest that recomputes from the record, or
+      merely ASSERTED by the issuer. The mirror of issuance_time_basis: that
+      term proves a floor on signing time, this one proves a ceiling on
+      existence. A ceiling is proven only under the anchor_time_rule the record
+      states, because the same proof yields different ceilings under different
+      rules (a Bitcoin anchor under header_time_plus_tolerance and under
+      later_median). anchored therefore requires anchor_time_rule; a record
+      that is anchored without one is read under the rule's stated default and
+      a verifier SHOULD report which rule a verdict used. The anchored digest
+      MUST recompute from the record under a named deterministic procedure, or
+      the record has no anchor for this term. asserted MUST NOT be read as a
+      ceiling at all. A proven ceiling establishes that the bytes existed no
+      later than that time, and nothing about who made them or whether their
+      content is true.
+    source_path: "record.commitment_anchor {mechanism, digest, digest_rule, anchor_time_rule, ...}"
+    issuers_in_production: [invinoveritas]
+    promotion_trigger: "An independent implementation that is not us emits a real anchor with anchor_time_rule on the wire."
+    source: >
+      OBS-06 corpus, babyblueviper1/preaction-governance-conformance at 5ae6344
+      (examples/commitment-anchor-obs06: README, check.py, vectors.json, a real
+      .ots). Read blind by two readers on probityai/agent-evidence#32 at
+      bd70521 and 17bb5ad, an implementation that is not the author's reading
+      the text.
+
+  anchor_time_rule:
+    status: proposed
+    review_by: "2027-02-24"
+    values: [header_time_plus_tolerance, later_median, height]
+    definition: >
+      The rule by which a commitment_anchor's ceiling is derived, and the
+      required companion of commitment_anchor: anchored, header_time_plus_tolerance
+      means ceiling = anchor_time + anchor_time_tolerance_s (right where the clock
+      states its own accuracy, as an RFC 3161 TSA does; for Bitcoin only a
+      convention, since nothing caps how far a header time may lag). later_median
+      means ceiling = the median time of the 11 blocks after the anchor block, on
+      the stated assumption that a majority of those timestamps are honest.
+      height means the outcome is ordered by the same chain, and precedence holds
+      only if the anchor height is strictly below the outcome height, with no
+      time compared. Absent means header_time_plus_tolerance, for records written
+      before the field existed. A rule whose inputs are missing establishes
+      nothing.
+    source_path: "record.commitment_anchor.anchor_time_rule"
+    issuers_in_production: []
+    promotion_trigger: "An independent implementation that is not us emits anchor_time_rule on a real record."
 
   attestation_tier:
     status: proposed

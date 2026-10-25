@@ -41,6 +41,8 @@ and linked standards of the same 522 CREs.
 | `evidence_dimensions.witness_scope` | a label for whose account a record is; segregation of duties (284-521) is an anti-fraud authorization control |
 | `evidence_dimensions.field_evidence_partition` | no requirement splits one signed object's fields by which signer backs each |
 | `evidence_dimensions.issuance_time_basis` | the time requirements (770-362, NIST AU-8) trust the system clock, the opposite of an issuer-independent time floor |
+| `evidence_dimensions.commitment_anchor` | the time requirements (770-362, NIST AU-8) trust the system clock, and none bounds when a record existed by an external anchor over its digest |
+| `evidence_dimensions.anchor_time_rule` | no requirement names the rule by which an anchoring ceiling is derived |
 | `evidence_dimensions.attestation_tier` | no requirement separates a subject the signer re-derived from one it signed as supplied |
 | `evidence_dimensions.origin_kind` | no requirement names which party assembled a record |
 | `evidence_dimensions.independence_basis` | no requirement records whether a guarantee was shown by sources independent of the party it is about |
