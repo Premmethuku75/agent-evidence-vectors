@@ -148,12 +148,8 @@ func arConsumptionShape(consumption map[string]any) error {
 // held is a new operation even when its request digest is a held entry's (CS11,
 // CS12).
 func arRuleConsumption(s *arState) error {
-	for _, item := range arList(s.pred, "evaluation.inputs") {
-		entry, _ := item.(map[string]any)
-		if _, carries := entry["consumption"]; arConsumptionChecks["misplaced"] && carries &&
-			entry["input"] != arConsumptionInput {
-			return arRefuse("consumption-misplaced")
-		}
+	if arConsumptionMisplaced(s.pred) {
+		return arRefuse("consumption-misplaced")
 	}
 	decision := arObj(s.pred, "decision")
 	if raw, present := decision["operationKey"]; present {
@@ -168,18 +164,7 @@ func arRuleConsumption(s *arState) error {
 	if err := arConsumptionShape(consumption); err != nil {
 		return err
 	}
-	held, _ := consumption["held"].([]any)
-	seen := map[string]bool{}
-	var sum int64
-	repeated := false
-	for _, item := range held {
-		entry, _ := item.(map[string]any)
-		key, _ := entry["operationKey"].(string)
-		repeated = repeated || seen[key]
-		seen[key] = true
-		amount, _ := arInt(entry["amount"])
-		sum += amount
-	}
+	sum, repeated := arHeldTotals(consumption)
 	if arConsumptionChecks["distinct-keys"] && repeated {
 		return arRefuse("consumption-held-key-repeated")
 	}
@@ -197,6 +182,37 @@ func arRuleConsumption(s *arState) error {
 		}
 	}
 	return nil
+}
+
+// arConsumptionMisplaced reports an input other than the consumption input that
+// carries a consumption block.
+func arConsumptionMisplaced(pred map[string]any) bool {
+	for _, item := range arList(pred, "evaluation.inputs") {
+		entry, _ := item.(map[string]any)
+		if _, carries := entry["consumption"]; arConsumptionChecks["misplaced"] && carries &&
+			entry["input"] != arConsumptionInput {
+			return true
+		}
+	}
+	return false
+}
+
+// arHeldTotals returns the sum of the held amounts and whether any held
+// operation key appears twice.
+func arHeldTotals(consumption map[string]any) (int64, bool) {
+	held, _ := consumption["held"].([]any)
+	seen := map[string]bool{}
+	var sum int64
+	repeated := false
+	for _, item := range held {
+		entry, _ := item.(map[string]any)
+		key, _ := entry["operationKey"].(string)
+		repeated = repeated || seen[key]
+		seen[key] = true
+		amount, _ := arInt(entry["amount"])
+		sum += amount
+	}
+	return sum, repeated
 }
 
 // --------------------------------------------------------------------------
