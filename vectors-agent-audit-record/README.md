@@ -10,15 +10,19 @@ sentences of Section 5.4 that Appendix B has no row for; each carries
 `draftSection` and continues the identifier series beside it (`FR13b`, `FR16`,
 `FR17a` to `FR17c`, `FR18`, `EV14`). The last members are rows of revision 01
 of the draft: `TI6`, `V4`, `V5`, `FR14` and `FR15`, then `CS1` to `CS17`, which
-bind consumption state with an operation key; each carries `draftRevision` and
-the identifier -01 prints. [`INDEX.md`](INDEX.md) lists every member beside its
+bind consumption state with an operation key, then the rows written for
+revision 02: `A21` (an `api-key` agent authentication), `SQ1` to `SQ5` (the
+`sequence` member and record identity) and `R10` to `R16` (OpenTimestamps
+anchors and the delegation root). Each carries `draftRevision` and the
+identifier the draft prints. [`INDEX.md`](INDEX.md) lists every member beside its
 file.
 
 ## Which revision this tests
 
 | Release | Draft revision the corpus tests | Members |
 | --- | --- | --- |
-| v0.27.0 and later | `draft-gilda-audit-agent-audit-record-00`, and 22 rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 22 rows of -01 |
+| v0.28.0 and later | `draft-gilda-audit-agent-audit-record-02` | the 99 Appendix B rows of -00, 7 Section 5.4 members, 22 rows of -01 and 13 rows of -02 (141 members) |
+| v0.27.0 | `draft-gilda-audit-agent-audit-record-00`, and 22 rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 22 rows of -01 |
 | v0.26.0 to v0.26.2 | `draft-gilda-audit-agent-audit-record-00`, and five rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 5 rows of -01 |
 | v0.17.0 to v0.25.0 | `draft-gilda-wimse-agent-audit-record-02` | 68 at v0.18.1, 71 at v0.25.0 |
 
@@ -29,10 +33,10 @@ revision and is not a conformance claim for -00. To test -00, pin v0.26.0 or
 later. Every member keeps its Appendix B identifier; the file identifiers are
 digests of member bytes and moved where a member gained its inputs.
 [`ID-MAP.json`](ID-MAP.json) maps each `draftId` to its file identifier at
-v0.18.1, v0.25.0, v0.26.0 and v0.27.0 and says what changed.
+v0.18.1, v0.25.0, v0.26.0, v0.27.0 and v0.28.0 and says what changed.
 
 Each member is a DSSE envelope whose payload is an in-toto Statement carrying one
-agent audit record, except `R1` to `R9`: each of those is a retained record, a
+agent audit record, except `R1` to `R16`: each of those is a retained record, a
 JSON object carrying the `envelope` beside its `retention` entry (Section 4.7).
 What a conforming verifier must reach is in the manifest, never in the file, so
 a member cannot be scored without being read.
@@ -42,7 +46,7 @@ a member cannot be scored without being read.
 ```sh
 # The reference reader, from the published package. Prints one line per
 # failing member and exits 0 when every member behaves as the manifest says.
-uvx agent-evidence-vectors==0.26.0 --corpus vectors-agent-audit-record
+uvx agent-evidence-vectors==0.28.0 --corpus vectors-agent-audit-record
 
 # From a checkout: rebuild every member (byte-identical on every machine),
 # then judge the committed bytes, verify every signature with a second
@@ -62,7 +66,7 @@ observer public key from `keys.observer.publicKey`, then score each verdict:
   takes `valid`. `N1` had two readings under revision 02; -00 gives it one,
   `valid`, because the anchor in `correlation.externalAnchor` dates nothing by
   itself;
-- a retained member (`R1` to `R9`) is scored twice: the envelope's verdict
+- a retained member (`R1` to `R16`) is scored twice: the envelope's verdict
   against `expected.verdict`, and your dating check against `expected.dating`
   (below).
 
@@ -283,8 +287,8 @@ on the request digest fails `CS10` and `CS12`, and dropping the set check fails
 
 ## Retained records and the dating check: Section 4.7
 
-A signature says who signed a record and nothing about when. `R1` to `R9` are
-the record `A1` beside the retention entry a retaining party keeps for it. The
+A signature says who signed a record and nothing about when. `R1` to `R16` are
+the record `A1` (or, for `R13` to `R15`, `A1` carrying `delegation.rootDigest`) beside the retention entry a retaining party keeps for it. The
 envelope is valid in every one, and what each row tests is the dating check of
 Section 4.7.1, which the manifest carries in `expected.dating` beside the
 verdict and which never changes it:
@@ -314,8 +318,43 @@ verifier already holds. The manifest publishes those heads under
 timestamp; a head held this way, rather than by its signature, is what makes
 the anchor a hash commitment under Section 4.7.2, and the head's timestamp is
 the anchor's time. `envelopeDigest` is the SHA-256 of the RFC 8785 bytes of the
-envelope object as the file carries it. No member yet carries an `rfc3161` or
-`opentimestamps` anchor, and the reference reader dates nothing from either.
+envelope object as the file carries it.
+
+`R10` to `R12` and `R16` carry `opentimestamps` anchors. The proof is a
+DetachedTimestampFile over `envelopeDigest`, and it validates only against an
+80-byte Bitcoin block header the verifier already holds; the manifest pins
+those under `anchorTrust.blockHeaders` (`height`, `header`), and the anchor's
+time is the header's time field. Because a block time can trail the moment it
+commits to, a comparison of an OpenTimestamps time against `receivedAt` or
+`anchorWithin` allows 7200 seconds (`R10` inside it, `R11` one second past
+it). A pending attestation dates nothing, and an upgraded proof of the same
+digest dates the record at its block (`R12`); two OpenTimestamps anchors order
+by block height. `R16` runs the path through a Merkle tree the retaining party
+built itself, which still validates because only the header is trusted.
+
+`expected.dating.delegationRoot` is present on every retained member. A
+`delegation-root` element of the retention entry carries the key set whose
+digest the record's `delegation.rootDigest` names: equal digests establish the
+root (`R13`), an omitted element leaves it `not-established` and never a pass
+(`R14`), and an element whose digest differs is
+`entry-delegation-root-mismatch` (`R15`). `R1` to `R12` and `R16` carry no
+`rootDigest` and report `not-established`.
+
+## The sequence member and record identity: `SQ1` to `SQ5`
+
+`sequence` (`boundary`, `seq`) numbers the records of one series from 1.
+`SQ1` is the first record of a series; a member the draft does not define
+(`SQ2`) or a `seq` of 0 (`SQ3`) is malformed. `SQ4` and `SQ5` are files in
+`sets/`: a series holding 1 and 3 names 2 as issued and not received (`SQ4`,
+`expected.set.missing`), and two records with the same `boundary` and `seq` but
+different identities fail the set check (`SQ5`). A record's identity is the
+SHA-256 of its decoded DSSE payload bytes; Ed25519 is deterministic, so equal
+payloads under one key give equal envelopes, and a re-sent record is never
+counted as a conflict.
+
+`A21` is `A1` with `agent.authentication` of `api-key`: a bearer secret
+presented with the request that is not an OAuth access token. It is valid, and
+authentication sits outside the request digest.
 
 ## What the members are built from
 
