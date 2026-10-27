@@ -2303,7 +2303,9 @@ def define_consumption() -> None:
 SERIES = "urn:example:series:observer-1"
 
 
-def derived(name: str, parent: str, change: Callable[[dict[str, Any]], None]) -> Callable[[], Built]:
+def derived(
+    name: str, parent: str, change: Callable[[dict[str, Any]], None]
+) -> Callable[[], Built]:
     """A member built from its parent's predicate and kept as a parent itself."""
 
     def build() -> Built:

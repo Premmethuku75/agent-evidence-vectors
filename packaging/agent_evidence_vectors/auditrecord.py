@@ -1737,7 +1737,7 @@ def sequence_set_findings(predicates: list[dict[str, Any]], payloads: list[bytes
     (SQ5); a seq below the highest held, which no record holds, is named as
     issued and not received (SQ4)."""
     series: dict[str, dict[int, set[str]]] = {}
-    for pred, payload in zip(predicates, payloads):
+    for pred, payload in zip(predicates, payloads, strict=True):
         sequence = pred.get("sequence")
         if sequence is None:
             continue
@@ -1751,7 +1751,9 @@ def sequence_set_findings(predicates: list[dict[str, Any]], payloads: list[bytes
     if SEQUENCE_SET_CHECKS["gap"]:
         for boundary in sorted(series):
             held = series[boundary]
-            missing += [{"boundary": boundary, "seq": n} for n in range(1, max(held)) if n not in held]
+            missing += [
+                {"boundary": boundary, "seq": n} for n in range(1, max(held)) if n not in held
+            ]
     return SetReport("valid", [], missing)
 
 
@@ -1861,7 +1863,9 @@ def _set_findings(entry: dict[str, Any], raw: bytes, policy: Policy) -> list[str
             f"{label}: expected withinLimit {declared.get('withinLimit')}, got {limits}"
         )
     if joint.missing != declared.get("missing", []):
-        findings.append(f"{label}: expected missing {declared.get('missing', [])}, got {joint.missing}")
+        findings.append(
+            f"{label}: expected missing {declared.get('missing', [])}, got {joint.missing}"
+        )
     if (joint.verdict, joint.codes) != (declared["verdict"], declared["codes"]):
         findings.append(
             f"{label}: expected set {declared['verdict']} {declared['codes']}, "
