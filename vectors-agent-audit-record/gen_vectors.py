@@ -326,6 +326,7 @@ def envelope(payload: bytes) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 Built = dict[str, Any]
+ConsumptionRow = tuple[str, str, str | None, str, Callable[[], Built], str, list[str], bool | None]
 Member = dict[str, Any]
 MEMBERS: list[Member] = []
 PREDICATES: dict[str, dict[str, Any]] = {}
@@ -2073,8 +2074,7 @@ def _release_pair(name: str) -> Callable[[], Built]:
 
 
 def define_consumption() -> None:
-    Row = tuple[str, str, str | None, str, Callable[[], Built], str, list[str], bool | None]
-    rows: list[Row] = [
+    rows: list[ConsumptionRow] = [
         (
             "CS1",
             "cs1-within-limit-nothing-held",
