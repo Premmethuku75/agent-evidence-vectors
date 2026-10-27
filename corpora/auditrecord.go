@@ -435,6 +435,7 @@ func arRules(predicateType string) []arRule {
 		{"closed-vocabularies", arRuleVocabularies},
 		{"evaluation", arRuleEvaluation},
 		{"oversight", arRuleOversight},
+		{"sequence", arRuleSequence},
 		{"consumption", arRuleConsumption},
 		{"delegation", func(s *arState) error {
 			if arStr(s.pred, "delegation.subjectKind") == "none" && arStr(s.pred, "delegation.subject") != "none" {

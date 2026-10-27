@@ -717,6 +717,26 @@ def _rule_oversight(state: _State) -> None:
 # --------------------------------------------------------------------------
 
 
+#: The only members a sequence object carries, both required.
+SEQUENCE_MEMBERS = frozenset({"boundary", "seq"})
+
+
+def _rule_sequence(state: _State) -> None:
+    """The optional sequence member: exactly boundary, a string, and seq, a
+    positive integer (SQ1). Any other member (SQ2) or a seq below 1 (SQ3) is
+    refused."""
+    if "sequence" not in state.predicate:
+        return
+    sequence = state.predicate["sequence"]
+    if not isinstance(sequence, dict) or set(sequence) != SEQUENCE_MEMBERS:
+        raise Malformed("sequence-malformed")
+    seq = sequence["seq"]
+    if not isinstance(sequence["boundary"], str) or not sequence["boundary"]:
+        raise Malformed("sequence-malformed")
+    if isinstance(seq, bool) or not isinstance(seq, int) or seq < 1:
+        raise Malformed("sequence-malformed")
+
+
 def _is_count(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
@@ -1005,6 +1025,7 @@ RULES: list[tuple[str, Callable[[_State], None]]] = [
     ("closed-vocabularies", _rule_closed_vocabularies),
     ("evaluation", _rule_evaluation),
     ("oversight", _rule_oversight),
+    ("sequence", _rule_sequence),
     ("consumption", _rule_consumption),
     ("delegation", _rule_delegation),
     ("binding", _rule_binding),

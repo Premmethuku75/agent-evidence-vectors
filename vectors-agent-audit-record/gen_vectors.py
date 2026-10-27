@@ -2299,6 +2299,24 @@ def define_consumption() -> None:
 # ---------------------------------------------------------------------------
 
 
+SERIES = "urn:example:series:observer-1"
+
+
+def derived(name: str, parent: str, change: Callable[[dict[str, Any]], None]) -> Callable[[], Built]:
+    """A member built from its parent's predicate and kept as a parent itself."""
+
+    def build() -> Built:
+        pred = from_pred(parent)
+        change(pred)
+        return accept(name, pred)
+
+    return build
+
+
+def _sequence(seq: int, **extra: Any) -> Callable[[dict[str, Any]], None]:
+    return _set("sequence", {"boundary": SERIES, "seq": seq, **extra})
+
+
 def define_audit_next() -> None:
     member(
         "A21",
@@ -2309,6 +2327,36 @@ def define_audit_next() -> None:
         mutate("A1", _set("agent.authentication", "api-key")),
         "valid",
         tier="authoritative",
+        revision=REVISION_01,
+    )
+    member(
+        "SQ1",
+        "sq1-sequence-first-of-series",
+        "A1",
+        "A1 with sequence carrying a boundary and a seq of 1, the first record of its series",
+        derived("SQ1", "A1", _sequence(1)),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+    )
+    member(
+        "SQ2",
+        "sq2-sequence-undefined-member",
+        "SQ1",
+        "sequence carrying a count member this document does not define",
+        mutate("SQ1", _sequence(1, count=3)),
+        "malformed",
+        ["sequence-malformed"],
+        revision=REVISION_01,
+    )
+    member(
+        "SQ3",
+        "sq3-sequence-seq-zero",
+        "SQ1",
+        "sequence with a seq of 0",
+        mutate("SQ1", _sequence(0)),
+        "malformed",
+        ["sequence-malformed"],
         revision=REVISION_01,
     )
 
@@ -2671,7 +2719,7 @@ ORDER = (
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
     "TI6 V4 V5 FR14 FR15 "
     "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17 "
-    "A21"
+    "A21 SQ1 SQ2 SQ3"
 ).split()
 
 

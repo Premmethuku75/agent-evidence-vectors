@@ -33,3 +33,17 @@ func TestAuditRecordApiKeyIsForced(t *testing.T) {
 		t.Errorf("agent.authentication without api-key: failing %q, want A21", got)
 	}
 }
+
+// TestAuditRecordSequenceSentencesAreLoadBearing: tolerating a member sequence
+// does not define fails SQ2, and admitting a seq below 1 fails SQ3.
+func TestAuditRecordSequenceSentencesAreLoadBearing(t *testing.T) {
+	for name, want := range map[string]string{"members": "SQ2", "positive": "SQ3"} {
+		drop := func() func() {
+			arSequenceChecks[name] = false
+			return func() { arSequenceChecks[name] = true }
+		}
+		if got := arWeakened(t, drop); got != want {
+			t.Errorf("without the %s sentence: failing %q, want %q", name, got, want)
+		}
+	}
+}

@@ -452,6 +452,23 @@ def _set_checks(drop: str | None = None, by_request_digest: bool = False) -> Ite
         auditrecord.SET_RULES[:] = original
 
 
+def _sequence_reading(*, refuse_extra: bool = True, positive: bool = True) -> Rule:
+    """The sequence rule as a reader might take it: tolerating other members, or
+    any integer seq."""
+
+    def rule(state: Any) -> None:
+        sequence = state.predicate.get("sequence")
+        if sequence is None:
+            return
+        if refuse_extra and set(sequence) != auditrecord.SEQUENCE_MEMBERS:
+            raise auditrecord.Malformed("sequence-malformed")
+        seq = sequence["seq"]
+        if not isinstance(seq, int) or (positive and seq < 1):
+            raise auditrecord.Malformed("sequence-malformed")
+
+    return rule
+
+
 @contextlib.contextmanager
 def _swapped_rule(name: str, replacement: Rule) -> Iterator[None]:
     index = auditrecord.rule_names().index(name)
@@ -497,6 +514,16 @@ SECTION_READINGS: list[tuple[str, Callable[[], contextlib.AbstractContextManager
             auditrecord.VOCABULARIES["agent.authentication"] - {"api-key"},
         ),
         "A21",
+    ),
+    (
+        "a sequence member carrying an undefined member accepted",
+        lambda: _swapped_rule("sequence", _sequence_reading(refuse_extra=False)),
+        "SQ2",
+    ),
+    (
+        "a sequence seq of 0 accepted",
+        lambda: _swapped_rule("sequence", _sequence_reading(positive=False)),
+        "SQ3",
     ),
     (
         "oversight.act known only as check",
