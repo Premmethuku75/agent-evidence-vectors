@@ -1423,25 +1423,33 @@ FROZEN: tuple[Frozen, ...] = (
         'DISPOSITIONS.md',
         'the JSON nesting depth bound made normative at 128',
         'The bound was made normative at 128 with its counting',
-        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, or the shell exit status offset for a signal. It met the audit record corpus total of 128 by coincidence.',
+        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, '
+        'or the shell exit status offset for a signal. It met the audit record corpus '
+        'total of 128 by coincidence.',
     ),
     Frozen(
         'vectors/CHANGES.md',
         'the nesting depth bound the revision 5 fix names',
         'below: with the bound at 128, no vector fails that checker',
-        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, or the shell exit status offset for a signal. It met the audit record corpus total of 128 by coincidence.',
+        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, '
+        'or the shell exit status offset for a signal. It met the audit record corpus '
+        'total of 128 by coincidence.',
     ),
     Frozen(
         'vectors/CHANGES.md',
         'the nesting depth bound a normative change fixed',
         'JSON nesting depth is bounded at 128, with the counting',
-        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, or the shell exit status offset for a signal. It met the audit record corpus total of 128 by coincidence.',
+        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, '
+        'or the shell exit status offset for a signal. It met the audit record corpus '
+        'total of 128 by coincidence.',
     ),
     Frozen(
         'vectors-spoofed-tool-output/gen_vectors.py',
         'the shell exit status of a process killed by a signal',
         'the run was killed by a signal (128 plus',
-        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, or the shell exit status offset for a signal. It met the audit record corpus total of 128 by coincidence.',
+        'A protocol constant, not a count of any corpus: the I-JSON nesting depth bound, '
+        'or the shell exit status offset for a signal. It met the audit record corpus '
+        'total of 128 by coincidence.',
     ),
     # ---- a count from a past audit, recorded in the change history.
     Frozen(
