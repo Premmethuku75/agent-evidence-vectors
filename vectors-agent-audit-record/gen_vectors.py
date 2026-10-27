@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import base64
 import copy
+import datetime
 import hashlib
 import json
 import os
@@ -2514,10 +2515,10 @@ def log_anchor(
     }
 
 
-def _jwk_set(public: bytes) -> bytes:
+def _jwk_set(public: bytes, kid: str = OBSERVER_KEYID) -> bytes:
     key = {
         "crv": "Ed25519",
-        "kid": OBSERVER_KEYID,
+        "kid": kid,
         "kty": "OKP",
         "x": base64.urlsafe_b64encode(public).rstrip(b"=").decode(),
     }
@@ -2526,6 +2527,166 @@ def _jwk_set(public: bytes) -> bytes:
 
 def a1_envelope() -> dict[str, Any]:
     return envelope(signed(from_pred("A1"))["payload"])
+
+
+# --- OpenTimestamps anchors (Section 4.7.2, rows R10 to R12 and R16) ---------
+#
+# An opentimestamps anchor's proof is the base64 of a DetachedTimestampFile over
+# envelopeDigest: the magic, version 1, the sha256 file-hash op, the digest
+# bytes, then a timestamp tree of commitment operations ending in attestations.
+# A Bitcoin attestation names a block height, and the proof validates when the
+# message it attests is the Merkle root of the header at that height that the
+# manifest's anchorTrust.blockHeaders holds. Those are 80-byte headers of a test
+# chain, pinned bytes in this corpus so nothing is fetched at verify time; the
+# anchor's time is the header's time field.
+
+OTS_MAGIC = bytes.fromhex("004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294")
+OTS_BITCOIN = bytes.fromhex("0588960d73d71901")
+OTS_PENDING = bytes.fromhex("83dfe30d2ef90c8e")
+SHA256_OP: tuple[str, bytes] = ("sha256", b"")
+BLOCK_HEADERS: list[dict[str, Any]] = []
+ROOT_KEY = Ed25519PrivateKey.from_private_bytes(bytes.fromhex("00" * 31 + "55"))
+OTHER_ROOT_KEY = Ed25519PrivateKey.from_private_bytes(bytes.fromhex("00" * 31 + "66"))
+
+
+def varuint(n: int) -> bytes:
+    out = bytearray()
+    while True:
+        low, n = n & 0x7F, n >> 7
+        out.append(low | 0x80 if n else low)
+        if not n:
+            return bytes(out)
+
+
+def varbytes(data: bytes) -> bytes:
+    return varuint(len(data)) + data
+
+
+def ots_apply(message: bytes, ops: list[tuple[str, bytes]]) -> bytes:
+    for op, arg in ops:
+        if op == "sha256":
+            message = hashlib.sha256(message).digest()
+        elif op == "append":
+            message = message + arg
+        else:
+            message = arg + message
+    return message
+
+
+def _ots_chain(ops: list[tuple[str, bytes]], tag: bytes, payload: bytes) -> bytes:
+    codes = {"sha256": b"\x08", "append": b"\xf0", "prepend": b"\xf1"}
+    out = b""
+    for op, arg in ops:
+        out += codes[op] + (varbytes(arg) if op != "sha256" else b"")
+    return out + b"\x00" + tag + varbytes(payload)
+
+
+def ots_proof(
+    digest_bytes: bytes, branches: list[tuple[list[tuple[str, bytes]], bytes, bytes]]
+) -> str:
+    """A DetachedTimestampFile whose timestamp holds each branch as one chain of
+    operations from the digest to its attestation."""
+    body = b"".join(
+        (b"\xff" if i < len(branches) - 1 else b"") + _ots_chain(*branch)
+        for i, branch in enumerate(branches)
+    )
+    raw = OTS_MAGIC + varuint(1) + b"\x08" + digest_bytes + body
+    return base64.b64encode(raw).decode()
+
+
+def _unix(moment: str) -> int:
+    return int(
+        datetime.datetime.strptime(moment, "%Y-%m-%dT%H:%M:%SZ")
+        .replace(tzinfo=datetime.UTC)
+        .timestamp()
+    )
+
+
+def hold_block(height: int, merkle_root: bytes, timestamp: str) -> None:
+    """Pin the 80 bytes of a test block header carrying ``merkle_root``."""
+    header = (
+        (0x20000000).to_bytes(4, "little")
+        + bytes.fromhex(h(f"block/{height - 1}"))
+        + merkle_root
+        + _unix(timestamp).to_bytes(4, "little")
+        + bytes.fromhex("ffff001d")
+        + (height).to_bytes(4, "little")
+    )
+    BLOCK_HEADERS.append({"height": height, "header": header.hex()})
+
+
+def calendar_ops(label: str) -> list[tuple[str, bytes]]:
+    """A calendar's commitment: a nonce appended and hashed, then one sibling."""
+    return [
+        ("append", bytes.fromhex(h(f"ots/{label}/nonce"))[:16]),
+        SHA256_OP,
+        ("prepend", bytes.fromhex(h(f"ots/{label}/calendar-sibling"))),
+        SHA256_OP,
+    ]
+
+
+def block_ops(label: str, levels: int = 2) -> list[tuple[str, bytes]]:
+    """A transaction carrying the message, then its path up the block's Merkle tree."""
+    ops: list[tuple[str, bytes]] = [
+        ("prepend", bytes.fromhex(h(f"ots/{label}/tx-prefix"))[:24]),
+        ("append", bytes.fromhex(h(f"ots/{label}/tx-suffix"))[:12]),
+        SHA256_OP,
+        SHA256_OP,
+    ]
+    for level in range(levels):
+        side = "append" if level % 2 == 0 else "prepend"
+        ops += [(side, bytes.fromhex(h(f"ots/{label}/block-level-{level}"))), SHA256_OP, SHA256_OP]
+    return ops
+
+
+def ots_anchor(
+    label: str,
+    logged: bytes,
+    height: int,
+    timestamp: str,
+    *,
+    prefix: list[tuple[str, bytes]] | None = None,
+) -> dict[str, Any]:
+    """A complete opentimestamps anchor of origin retainer, and its held block."""
+    ops = (prefix if prefix is not None else calendar_ops(label)) + block_ops(label)
+    hold_block(height, ots_apply(logged, ops), timestamp)
+    return {
+        "kind": "opentimestamps",
+        "origin": "retainer",
+        "proof": ots_proof(logged, [(ops, OTS_BITCOIN, varuint(height))]),
+    }
+
+
+def ots_pending(label: str, logged: bytes) -> dict[str, Any]:
+    """A pending proof: the calendar's commitment and its promise, no block."""
+    uri = varbytes(b"https://calendar.example/" + label.encode())
+    return {
+        "kind": "opentimestamps",
+        "origin": "retainer",
+        "proof": ots_proof(logged, [(calendar_ops(label), OTS_PENDING, uri)]),
+    }
+
+
+ROOT_JWKS = _jwk_set(raw_public(ROOT_KEY), hashlib.sha256(raw_public(ROOT_KEY)).hexdigest()[:32])
+OTHER_ROOT_JWKS = _jwk_set(
+    raw_public(OTHER_ROOT_KEY), hashlib.sha256(raw_public(OTHER_ROOT_KEY)).hexdigest()[:32]
+)
+
+
+def rooted_envelope() -> dict[str, Any]:
+    """A1 for a decision that rested on a delegation chain: delegation.rootDigest
+    is the digest of the root key set the chain verifier held."""
+    pred = from_pred("A1")
+    pred["delegation"]["rootDigest"] = hashlib.sha256(ROOT_JWKS).hexdigest()
+    return envelope(signed(pred)["payload"])
+
+
+def root_element(material: bytes) -> dict[str, Any]:
+    return {
+        "for": "delegation-root",
+        "mediaType": "application/jwk-set+json",
+        "value": base64.b64encode(material).decode(),
+    }
 
 
 def envelope_digest(env: dict[str, Any]) -> str:
@@ -2554,13 +2715,17 @@ RETENTIONS: dict[str, dict[str, Any]] = {}
 
 
 def retained(
-    name: str, change: Callable[[dict[str, Any], bytes], None], parent: str | None = None
+    name: str,
+    change: Callable[[dict[str, Any], bytes], None],
+    parent: str | None = None,
+    make_envelope: Callable[[], dict[str, Any]] = a1_envelope,
 ) -> Callable[[], Built]:
-    """Build R<n>: A1's envelope beside a retention entry. A root member starts
-    from an empty entry; a member with a parent starts from that parent's."""
+    """Build R<n>: an envelope, A1's unless ``make_envelope`` names another,
+    beside a retention entry. A root member starts from an empty entry; a member
+    with a parent starts from that parent's."""
 
     def build() -> Built:
-        env = a1_envelope()
+        env = make_envelope()
         logged = bytes.fromhex(envelope_digest(env))
         if parent is None:
             entry_ = retention_entry(env, received=False)
@@ -2621,13 +2786,60 @@ def dating(
     entry_: str = "well-formed",
     code: str | None = None,
     receipt: str | None = None,
+    delegation_root: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """expected.dating. Every member reports the delegation root, and a record
+    with no delegation.rootDigest reports it not established."""
     out: dict[str, Any] = {"entry": entry_, "codes": [code] if code else []}
     if dated_at is not None:
         out["datedAt"] = dated_at
     if receipt is not None:
         out["receipt"] = receipt
+    out["delegationRoot"] = delegation_root or {"result": "not-established"}
     return out
+
+
+def _r10(entry_: dict[str, Any], logged: bytes) -> None:
+    entry_["anchors"][1] = ots_anchor("r10", logged, 880011, "2026-09-19T10:54:30Z")
+
+
+def _r11(entry_: dict[str, Any], logged: bytes) -> None:
+    entry_["anchors"][1] = ots_anchor("r11", logged, 880000, "2026-09-19T09:04:29Z")
+
+
+def _r12(entry_: dict[str, Any], logged: bytes) -> None:
+    entry_["anchorWithin"] = 3600
+    entry_["anchors"] = [
+        ots_pending("r12", logged),
+        ots_anchor("r12", logged, 880016, "2026-09-19T11:40:00Z"),
+    ]
+
+
+def _r16(entry_: dict[str, Any], logged: bytes) -> None:
+    """The retaining party's own Merkle tree over four envelope digests, its root
+    carried in a Bitcoin transaction, the transaction in a block."""
+    leaves = [logged] + [bytes.fromhex(h(f"r16/batch-{i}")) for i in range(1, 4)]
+    pair = hashlib.sha256(leaves[2] + leaves[3]).digest()
+    tree = [("append", leaves[1]), SHA256_OP, ("append", pair), SHA256_OP]
+    entry_["anchorWithin"] = 3600
+    entry_["anchors"] = [ots_anchor("r16", logged, 880015, "2026-09-19T11:30:00Z", prefix=tree)]
+
+
+def _r13(entry_: dict[str, Any], logged: bytes) -> None:
+    entry_["anchors"] = [log_anchor("r13", "retainer", "2026-09-19T11:05:00Z", 3, 1, logged)]
+    entry_["validationData"].append(root_element(ROOT_JWKS))
+
+
+def _r14(entry_: dict[str, Any], _logged: bytes) -> None:
+    entry_["validationData"] = [
+        v for v in entry_["validationData"] if v["for"] != "delegation-root"
+    ]
+
+
+def _r15(entry_: dict[str, Any], _logged: bytes) -> None:
+    for element in entry_["validationData"]:
+        if element["for"] == "delegation-root":
+            element["value"] = root_element(OTHER_ROOT_JWKS)["value"]
 
 
 def define_retained() -> None:
@@ -2746,6 +2958,92 @@ def define_retained() -> None:
             tier="authoritative",
             dating=expected_dating,
         )
+    established = {"result": "established", "algorithm": "Ed25519"}
+    later: list[tuple[str, str, str | None, str, Callable[[], Built], dict[str, Any]]] = [
+        (
+            "R10",
+            "r10-opentimestamps-retainer-anchor",
+            "R2",
+            "the retaining party's anchor is opentimestamps, its block header time 600 seconds "
+            "earlier than receivedAt: inside the 7200 seconds an opentimestamps time allows",
+            retained("R10", _r10, "R2"),
+            dating(dated_at="2026-09-19T10:54:30Z", receipt="asserted-consistent"),
+        ),
+        (
+            "R11",
+            "r11-opentimestamps-header-too-early",
+            "R10",
+            "the block header time earlier than receivedAt by 7201 seconds, more than the "
+            "7200 seconds an opentimestamps time allows",
+            retained("R11", _r11, "R10"),
+            dating(
+                dated_at="2026-09-19T09:04:29Z",
+                entry_="malformed",
+                code="entry-received-after-anchor",
+            ),
+        ),
+        (
+            "R12",
+            "r12-pending-then-upgraded-proof",
+            "R1",
+            "anchors holding a pending OpenTimestamps proof followed by its upgraded, complete "
+            "proof: dated at the upgraded proof's block time, the pending element dating nothing",
+            retained("R12", _r12, "R1"),
+            dating(dated_at="2026-09-19T11:40:00Z"),
+        ),
+        (
+            "R13",
+            "r13-delegation-root-established",
+            None,
+            "R1 for a record carrying delegation.rootDigest, with a delegation-root element "
+            "whose digest equals it: the root established, its algorithm read off the element",
+            retained("R13", _r13, make_envelope=rooted_envelope),
+            dating(dated_at="2026-09-19T11:05:00Z", delegation_root=established),
+        ),
+        (
+            "R14",
+            "r14-delegation-root-element-omitted",
+            "R13",
+            "the delegation-root element omitted: the root not established, never a pass",
+            retained("R14", _r14, "R13", make_envelope=rooted_envelope),
+            dating(dated_at="2026-09-19T11:05:00Z"),
+        ),
+        (
+            "R15",
+            "r15-delegation-root-digest-unequal",
+            "R13",
+            "the delegation-root element carries another key set, whose digest is unequal to "
+            "delegation.rootDigest",
+            retained("R15", _r15, "R13", make_envelope=rooted_envelope),
+            dating(
+                dated_at="2026-09-19T11:05:00Z",
+                entry_="malformed",
+                code="entry-delegation-root-mismatch",
+            ),
+        ),
+        (
+            "R16",
+            "r16-opentimestamps-through-own-tree",
+            "R1",
+            "the only anchor an opentimestamps proof whose path runs from envelopeDigest through "
+            "a Merkle tree the retaining party built and a Bitcoin transaction carrying its root "
+            "to the block header",
+            retained("R16", _r16, "R1"),
+            dating(dated_at="2026-09-19T11:30:00Z"),
+        ),
+    ]
+    for draft_id, slug, parent, row, build, expected_dating in later:
+        member(
+            draft_id,
+            slug,
+            parent,
+            row,
+            build,
+            "valid",
+            tier="authoritative",
+            dating=expected_dating,
+            revision=REVISION_01,
+        )
 
 
 #: Appendix B's order, then the members for rules it carries no row for. A
@@ -2760,7 +3058,8 @@ ORDER = (
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
     "TI6 V4 V5 FR14 FR15 "
     "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17 "
-    "A21 SQ1 SQ2 SQ3 SQ4 SQ5"
+    "A21 SQ1 SQ2 SQ3 SQ4 SQ5 "
+    "R10 R11 R12 R13 R14 R15 R16"
 ).split()
 
 
@@ -2895,6 +3194,15 @@ def emit() -> None:
                 "head's timestamp."
             ),
             "treeHeads": TREE_HEADS,
+            "blockHeaders": BLOCK_HEADERS,
+            "blockHeaderNote": (
+                "The 80-byte headers of a test chain, pinned here so an opentimestamps anchor "
+                "validates with nothing fetched: a verifier holds them independently, as "
+                "blocks of the chain with the most work. An opentimestamps anchor validates "
+                "when its proof recomputes from envelopeDigest to the Merkle root field of the "
+                "header at the height its Bitcoin attestation names; its time is the "
+                "header's time field, little-endian Unix seconds."
+            ),
         },
         "counts": counts,
         "note": (

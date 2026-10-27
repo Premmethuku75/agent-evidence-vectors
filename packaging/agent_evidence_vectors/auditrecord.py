@@ -53,13 +53,14 @@ import argparse
 import base64
 import dataclasses
 import datetime
+import functools
 import hashlib
 import importlib
 import json
 import os
 import sys
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 if __package__ in (None, ""):
@@ -1127,6 +1128,23 @@ def verify(raw: bytes, policy: Policy, *, disabled: str | None = None) -> Report
 # --------------------------------------------------------------------------
 
 ANCHOR_KINDS = frozenset({"rfc3161", "transparency-log", "opentimestamps"})
+#: A comparison using the time of an opentimestamps anchor allows this in place
+#: of the skew tolerance: the consensus bound on a header time (R10, R11).
+OTS_TOLERANCE = datetime.timedelta(seconds=7200)
+OTS_MAGIC = bytes.fromhex("004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294")
+OTS_BITCOIN = bytes.fromhex("0588960d73d71901")
+OTS_PENDING = bytes.fromhex("83dfe30d2ef90c8e")
+OTS_SHA256, OTS_APPEND, OTS_PREPEND = 0x08, 0xF0, 0xF1
+OTS_MAX_BYTES = 4096
+OTS_MAX_DEPTH = 256
+#: The algorithm a delegation root's key set names, read off its JWK members.
+JWK_ALGORITHMS = {
+    ("OKP", "Ed25519"): "Ed25519",
+    ("OKP", "Ed448"): "Ed448",
+    ("EC", "P-256"): "P-256",
+    ("EC", "P-384"): "P-384",
+    ("EC", "P-521"): "P-521",
+}
 ANCHOR_ORIGINS = frozenset({"retainer", "received"})
 INCLUSION_PROOF_V2 = 0x0106
 
@@ -1142,14 +1160,33 @@ class TreeHead:
     timestamp: str
 
 
+@dataclass(frozen=True)
+class BlockHeader:
+    """A Bitcoin block header a verifier holds independently, as a block of the
+    chain with the most work (Section 4.7.2): its height, the Merkle root it
+    carries in internal byte order, and its timestamp."""
+
+    height: int
+    merkle_root: bytes
+    timestamp: str
+
+
+#: What a verifier holds to validate anchors offline: tree heads and block headers.
+AnchorTrust = list[TreeHead | BlockHeader]
+
+NOT_ESTABLISHED: dict[str, Any] = {"result": "not-established"}
+
+
 @dataclass
 class Dating:
-    """The dating check's result, reported beside the record's verdict."""
+    """The dating check's result, reported beside the record's verdict. The
+    delegation root's result sits beside both and changes neither (R13 to R15)."""
 
     entry: str
     codes: list[str]
     dated_at: str | None = None
     receipt: str | None = None
+    delegation_root: dict[str, Any] = field(default_factory=lambda: dict(NOT_ESTABLISHED))
 
 
 class _Reader:
@@ -1168,6 +1205,24 @@ class _Reader:
 
     def uint(self, n: int) -> int:
         return int.from_bytes(self.take(n), "big")
+
+    def varuint(self) -> int:
+        """An OpenTimestamps unsigned LEB128 integer, at most 9 bytes."""
+        value, shift = 0, 0
+        while True:
+            byte = self.take(1)[0]
+            value |= (byte & 0x7F) << shift
+            if not byte & 0x80:
+                return value
+            shift += 7
+            if shift > 56:
+                raise ValueError("varuint too long")
+
+    def varbytes(self, limit: int = OTS_MAX_BYTES) -> bytes:
+        n = self.varuint()
+        if n > limit:
+            raise ValueError("varbytes too long")
+        return self.take(n)
 
 
 def _inclusion_proof(proof: bytes) -> tuple[bytes, int, int, list[bytes]]:
@@ -1213,24 +1268,106 @@ def inclusion_root(leaf: bytes, leaf_index: int, tree_size: int, path: list[byte
     return r if sn == 0 else None
 
 
-def anchor_time(
-    anchor: dict[str, Any], envelope_digest: bytes, heads: list[TreeHead]
-) -> str | None:
-    """The time an anchor establishes over ``envelope_digest``, or None when it
-    does not validate. Only a transparency-log anchor that recomputes to a held
-    tree head validates here; this reader holds no time-stamping authority path
-    and no OpenTimestamps commitment, so an anchor of either kind dates nothing."""
-    if anchor.get("kind") != "transparency-log":
+def _ots_timestamp(
+    reader: _Reader, message: bytes, out: list[tuple[bytes, bytes, bytes]], depth: int
+) -> None:
+    """One OpenTimestamps timestamp: items, each but the last preceded by 0xff."""
+    if depth > OTS_MAX_DEPTH:
+        raise ValueError("timestamp too deep")
+    while True:
+        tag = reader.take(1)[0]
+        more = tag == 0xFF
+        if more:
+            tag = reader.take(1)[0]
+        _ots_item(reader, tag, message, out, depth)
+        if not more:
+            return
+
+
+def _ots_item(
+    reader: _Reader, tag: int, message: bytes, out: list[tuple[bytes, bytes, bytes]], depth: int
+) -> None:
+    """An attestation (0x00, an 8-byte tag and its payload), or a commitment
+    operation applied to ``message`` followed by the timestamp of its result."""
+    if tag == 0x00:
+        kind = reader.take(8)
+        out.append((message, kind, reader.varbytes()))
+        return
+    if tag == OTS_SHA256:
+        result = hashlib.sha256(message).digest()
+    elif tag in (OTS_APPEND, OTS_PREPEND):
+        argument = reader.varbytes()
+        result = message + argument if tag == OTS_APPEND else argument + message
+    else:
+        raise ValueError("operation this reader does not define")
+    if len(result) > OTS_MAX_BYTES:
+        raise ValueError("message too long")
+    _ots_timestamp(reader, result, out, depth + 1)
+
+
+def ots_attestations(proof: bytes, envelope_digest: bytes) -> list[tuple[bytes, bytes, bytes]]:
+    """Decode a DetachedTimestampFile over ``envelope_digest``: every attestation
+    as (the message it attests, its tag, its payload)."""
+    reader = _Reader(proof)
+    if reader.take(len(OTS_MAGIC)) != OTS_MAGIC or reader.varuint() != 1:
+        raise ValueError("not an OpenTimestamps proof")
+    if reader.take(1)[0] != OTS_SHA256 or reader.take(32) != envelope_digest:
+        raise ValueError("the proof is over another digest")
+    out: list[tuple[bytes, bytes, bytes]] = []
+    _ots_timestamp(reader, envelope_digest, out, 0)
+    if reader.at != len(proof):
+        raise ValueError("trailing bytes")
+    return out
+
+
+def _ots_moment(proof: bytes, envelope_digest: bytes, trust: AnchorTrust) -> tuple[str, int] | None:
+    """The lowest held block a Bitcoin attestation's message is the Merkle root
+    of. A pending attestation validates nothing (R12)."""
+    found: list[tuple[int, str]] = []
+    for message, kind, payload in ots_attestations(proof, envelope_digest):
+        if kind != OTS_BITCOIN:
+            continue
+        payload_reader = _Reader(payload)
+        height = payload_reader.varuint()
+        if payload_reader.at != len(payload):
+            raise ValueError("trailing bytes in a Bitcoin attestation")
+        for held in trust:
+            if isinstance(held, BlockHeader) and held.height == height:
+                if held.merkle_root == message:
+                    found.append((height, held.timestamp))
+    if not found:
         return None
+    height, timestamp = min(found)
+    return timestamp, height
+
+
+def anchor_time(
+    anchor: dict[str, Any], envelope_digest: bytes, trust: AnchorTrust
+) -> tuple[str, int | None] | None:
+    """The time an anchor establishes over ``envelope_digest`` and, for an
+    opentimestamps anchor, the height of its block; None when it does not
+    validate. A transparency-log anchor validates when it recomputes to a held
+    tree head, an opentimestamps anchor when it recomputes to the Merkle root of
+    a held block header. This reader holds no time-stamping authority path, so
+    an rfc3161 anchor dates nothing."""
+    kind = anchor.get("kind")
     try:
         proof = base64.b64decode(anchor["proof"], validate=True)
+        if kind == "opentimestamps":
+            return _ots_moment(proof, envelope_digest, trust)
+        if kind != "transparency-log":
+            return None
         log_id, tree_size, leaf_index, path = _inclusion_proof(proof)
     except (KeyError, TypeError, ValueError):
         return None
     root = inclusion_root(envelope_digest, leaf_index, tree_size, path)
-    for head in heads:
-        if (head.log_id, head.tree_size, head.root_hash) == (log_id, tree_size, root):
-            return head.timestamp
+    for head in trust:
+        if isinstance(head, TreeHead) and (head.log_id, head.tree_size, head.root_hash) == (
+            log_id,
+            tree_size,
+            root,
+        ):
+            return head.timestamp, None
     return None
 
 
@@ -1262,9 +1399,16 @@ class _Retained:
     entry: dict[str, Any]
     issued_at: datetime.datetime
     computed_digest: str
-    heads: list[TreeHead]
+    heads: AnchorTrust
     received_at: datetime.datetime | None = None
     retention_time: datetime.datetime | None = None
+    retention_ots: bool = False
+    root_digest: str | None = None
+    delegation_root: dict[str, Any] = field(default_factory=lambda: dict(NOT_ESTABLISHED))
+
+    def tolerance(self) -> datetime.timedelta:
+        """The tolerance a comparison with the retention time allows."""
+        return OTS_TOLERANCE if self.retention_ots else SKEW_TOLERANCE
 
 
 def _dating_received_at(r: _Retained) -> None:
@@ -1297,7 +1441,7 @@ def _dating_received_after_anchor(r: _Retained) -> None:
     """receivedAt no later than the retention time by more than the skew tolerance (R3)."""
     if r.received_at is None or r.retention_time is None:
         return
-    if r.received_at > r.retention_time + SKEW_TOLERANCE:
+    if r.received_at > r.retention_time + r.tolerance():
         raise Malformed("entry-received-after-anchor")
 
 
@@ -1307,9 +1451,43 @@ def _dating_anchor_late(r: _Retained) -> None:
     if r.retention_time is None:
         return
     start = r.received_at if r.received_at is not None else r.issued_at
-    limit = datetime.timedelta(seconds=r.entry["anchorWithin"]) + SKEW_TOLERANCE
+    limit = datetime.timedelta(seconds=r.entry["anchorWithin"]) + r.tolerance()
     if r.retention_time > start + limit:
         raise Malformed("entry-anchor-late")
+
+
+def _jwk_algorithm(material: bytes) -> str:
+    keys = json.loads(material, object_pairs_hook=_no_duplicates)["keys"]
+    algorithms = {JWK_ALGORITHMS.get((k.get("kty"), k.get("crv"))) for k in keys}
+    if len(algorithms) != 1 or None in algorithms:
+        raise ValueError("no single algorithm")
+    return str(algorithms.pop())
+
+
+def _dating_delegation_root(r: _Retained) -> None:
+    """A delegation-root element whose digest equals delegation.rootDigest
+    establishes the root and names its algorithm (R13); none leaves it not
+    established, never a pass (R14); an unequal digest is malformed (R15)."""
+    elements = [
+        v
+        for v in r.entry.get("validationData") or []
+        if isinstance(v, dict) and v.get("for") == "delegation-root"
+    ]
+    if len(elements) > 1 or (elements and r.root_digest is None):
+        raise Malformed("entry-delegation-root-unexpected")
+    if not elements:
+        return
+    try:
+        material = base64.b64decode(elements[0]["value"], validate=True)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise Malformed("entry-delegation-root-unreadable") from exc
+    if hashlib.sha256(material).hexdigest() != r.root_digest:
+        raise Malformed("entry-delegation-root-mismatch")
+    try:
+        algorithm = _jwk_algorithm(material)
+    except (Malformed, KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise Malformed("entry-delegation-root-unreadable") from exc
+    r.delegation_root = {"result": "established", "algorithm": algorithm}
 
 
 DATING_RULES: list[tuple[str, Callable[[_Retained], None]]] = [
@@ -1319,33 +1497,52 @@ DATING_RULES: list[tuple[str, Callable[[_Retained], None]]] = [
     ("entry-received-before-issued", _dating_received_before_issued),
     ("entry-received-after-anchor", _dating_received_after_anchor),
     ("entry-anchor-late", _dating_anchor_late),
+    ("entry-delegation-root", _dating_delegation_root),
 ]
 #: Dating rules no Appendix B row reaches: no member carries an entry naming
 #: another envelope.
 DATING_UNREACHED = frozenset({"entry-envelope-digest"})
 
 
+@dataclass(frozen=True)
+class _Moment:
+    origin: str
+    time: str
+    height: int | None
+
+
+def _earlier(a: _Moment, b: _Moment) -> int:
+    """Two opentimestamps anchors compare by block height, any other pair by time."""
+    if a.height is not None and b.height is not None and a.height != b.height:
+        return -1 if a.height < b.height else 1
+    ta, tb = _instant(a.time), _instant(b.time)
+    return (ta > tb) - (ta < tb)
+
+
 def _anchor_times(
-    entry: dict[str, Any], digest_bytes: bytes, heads: list[TreeHead], *, disabled: str | None
-) -> list[tuple[str, str]]:
-    out: list[tuple[str, str]] = []
+    entry: dict[str, Any], digest_bytes: bytes, heads: AnchorTrust, *, disabled: str | None
+) -> list[_Moment]:
+    """Every anchor that validates, earliest first."""
+    out: list[_Moment] = []
     for anchor in entry["anchors"]:
+        moment: tuple[str, int | None] | None
         if disabled == "anchor-validation":
-            moment = heads[0].timestamp if heads else None
+            moment = (heads[0].timestamp, None) if heads else None
         else:
             moment = anchor_time(anchor, digest_bytes, heads)
         if moment is not None:
-            out.append((anchor["origin"], moment))
-    return out
+            out.append(_Moment(anchor["origin"], moment[0], moment[1]))
+    return sorted(out, key=functools.cmp_to_key(_earlier))
 
 
 def date_retained(
     envelope: dict[str, Any],
     entry: Any,
     issued_at: str,
-    heads: list[TreeHead],
+    heads: AnchorTrust,
     *,
     disabled: str | None = None,
+    root_digest: str | None = None,
 ) -> Dating:
     """The dating check of Section 4.7.1 over one envelope and its retention entry.
 
@@ -1357,16 +1554,20 @@ def date_retained(
     try:
         _retention_shape(entry)
         digest = hashlib.sha256(canonical_bytes(envelope)).hexdigest()
-        retained = _Retained(entry, _instant(issued_at), digest, heads)
+        retained = _Retained(entry, _instant(issued_at), digest, heads, root_digest=root_digest)
     except Malformed as exc:
         return Dating("malformed", [exc.code])
     times = _anchor_times(entry, bytes.fromhex(digest), heads, disabled=disabled)
-    moments = sorted(times, key=lambda t: _instant(t[1]))
+    moments = times
     if disabled == "earliest-anchor":
-        moments = [t for t in moments if t[0] == "retainer"] or moments
-    dated_at = moments[0][1] if moments else None
-    retainer = [_instant(m) for origin, m in times if origin == "retainer"]
-    retained.retention_time = min(retainer) if retainer else None
+        moments = [t for t in moments if t.origin == "retainer"] or moments
+    dated_at = moments[0].time if moments else None
+    retainer = [m for m in times if m.origin == "retainer"]
+    if retainer:
+        retained.retention_time = _instant(retainer[0].time)
+        retained.retention_ots = (
+            retainer[0].height is not None and disabled != "opentimestamps-tolerance"
+        )
     try:
         for name, rule in DATING_RULES:
             if name != disabled:
@@ -1376,24 +1577,40 @@ def date_retained(
     receipt = None
     if entry["received"]:
         receipt = "asserted-consistent" if retained.retention_time else "asserted-unchecked"
-    return Dating("well-formed", [], dated_at, receipt)
+    return Dating("well-formed", [], dated_at, receipt, retained.delegation_root)
 
 
-def tree_heads(manifest: dict[str, Any]) -> list[TreeHead]:
-    heads = (manifest.get("anchorTrust") or {}).get("treeHeads") or []
-    return [
+def tree_heads(manifest: dict[str, Any]) -> AnchorTrust:
+    """The tree heads, then the block headers, the manifest's anchorTrust holds."""
+    trust = manifest.get("anchorTrust") or {}
+    held: AnchorTrust = [
         TreeHead(
             bytes.fromhex(h["logId"]),
             int(h["treeSize"]),
             bytes.fromhex(h["rootHash"]),
             h["timestamp"],
         )
-        for h in heads
+        for h in trust.get("treeHeads") or []
     ]
+    held += [
+        block_header(int(b["height"]), bytes.fromhex(b["header"]))
+        for b in trust.get("blockHeaders") or []
+    ]
+    return held
+
+
+def block_header(height: int, header: bytes) -> BlockHeader:
+    """Read the Merkle root field, in internal byte order, and the time field,
+    little-endian Unix seconds, off the bytes of a Bitcoin block header."""
+    if len(header) != 80:
+        raise ValueError("a block header is 80 bytes")
+    seconds = int.from_bytes(header[68:72], "little")
+    moment = datetime.datetime.fromtimestamp(seconds, datetime.UTC)
+    return BlockHeader(height, header[36:68], moment.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
 
 def verify_retained(
-    raw: bytes, policy: Policy, heads: list[TreeHead], *, disabled: str | None = None
+    raw: bytes, policy: Policy, heads: AnchorTrust, *, disabled: str | None = None
 ) -> tuple[Report, Dating]:
     """Judge a retained record: the envelope's verdict, and the dating result."""
     try:
@@ -1405,14 +1622,23 @@ def verify_retained(
     report = verify(json.dumps(envelope).encode(), policy, disabled=disabled)
     try:
         _, payload = _envelope_payload(json.dumps(envelope).encode())
-        issued_at = parse_statement(payload)["predicate"]["issuedAt"]
-    except (Malformed, KeyError, TypeError):
+        pred = parse_statement(payload)["predicate"]
+        issued_at = pred["issuedAt"]
+        root_digest = (pred.get("delegation") or {}).get("rootDigest")
+    except (Malformed, KeyError, TypeError, AttributeError):
         return report, Dating("malformed", ["entry-record-unreadable"])
-    return report, date_retained(envelope, entry, issued_at, heads, disabled=disabled)
+    return report, date_retained(
+        envelope, entry, issued_at, heads, disabled=disabled, root_digest=root_digest
+    )
 
 
 def dating_rule_names() -> list[str]:
-    return ["anchor-validation", "earliest-anchor", *(n for n, _ in DATING_RULES)]
+    return [
+        "anchor-validation",
+        "earliest-anchor",
+        "opentimestamps-tolerance",
+        *(n for n, _ in DATING_RULES),
+    ]
 
 
 # --------------------------------------------------------------------------
@@ -1680,6 +1906,7 @@ def dating_dict(dated: Dating) -> dict[str, Any]:
         out["datedAt"] = dated.dated_at
     if dated.receipt is not None:
         out["receipt"] = dated.receipt
+    out["delegationRoot"] = dated.delegation_root
     return out
 
 
@@ -1716,7 +1943,7 @@ def aggregation_findings(entry: dict[str, Any], raw: bytes) -> list[str]:
 
 
 def _judge_member(
-    directory: str, entry: dict[str, Any], policy: Policy, heads: list[TreeHead]
+    directory: str, entry: dict[str, Any], policy: Policy, heads: AnchorTrust
 ) -> tuple[str, str, list[str]]:
     identifier, kind = str(entry.get("id", "")), str(entry.get("kind", ""))
     try:

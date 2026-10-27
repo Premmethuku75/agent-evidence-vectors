@@ -1030,7 +1030,8 @@ func arRuleFieldEvidence(s *arState) error {
 
 type arManifest struct {
 	AnchorTrust struct {
-		TreeHeads []arTreeHeadJSON `json:"treeHeads"`
+		TreeHeads    []arTreeHeadJSON    `json:"treeHeads"`
+		BlockHeaders []arBlockHeaderJSON `json:"blockHeaders"`
 	} `json:"anchorTrust"`
 	PredicateType string            `json:"predicateType"`
 	Counts        map[string]int    `json:"counts"`

@@ -4,6 +4,25 @@
     "envelope": "ed25519"
   },
   "anchorTrust": {
+    "blockHeaderNote": "The 80-byte headers of a test chain, pinned here so an opentimestamps anchor validates with nothing fetched: a verifier holds them independently, as blocks of the chain with the most work. An opentimestamps anchor validates when its proof recomputes from envelopeDigest to the Merkle root field of the header at the height its Bitcoin attestation names; its time is the header's time field, little-endian Unix seconds.",
+    "blockHeaders": [
+      {
+        "header": "0000002092e8c40330ee352992bfb85a78aba86dfb0ef20b95edb0f766cfa2d9e2b15fdd09ad5f10064aabadc6c444c1293b841f55460544ce9b1570a4c5299b44226826e669ae6affff001d8b6d0d00",
+        "height": 880011
+      },
+      {
+        "header": "000000206346fce10ea31e7fa51533d279cdb3e527b15da22e3732241a6932dedac51acc889fe76dc9db33c9d5377176e0a34938af98dea7a1ee11235a7d71ca8c75b3991d50ae6affff001d806d0d00",
+        "height": 880000
+      },
+      {
+        "header": "0000002029740b7e959391778dd42b3b7482bd1f1561e10774869591519532d6013d4d7dcd9bcff7ebc2952a006a96dc6afbb2ef2166a51091af77d0d06be078ed0a56019074ae6affff001d906d0d00",
+        "height": 880016
+      },
+      {
+        "header": "00000020176f245c72246041094d45f6a9fe368b8c598243a1ffa64ab2eca108510c0743dd096785a6a04061cd96f0e62dbb1089141633b1907cba322ce83fac3fbb48ab3872ae6affff001d8f6d0d00",
+        "height": 880015
+      }
+    ],
     "note": "The tree heads of the test transparency log every R member's anchors are in, as a verifier holds them by a means other than a signature: a checkpoint it already witnessed. A transparency-log anchor validates as a hash commitment when its proof, an RFC 9162 TransItem of type inclusion_proof_v2 over the leaf SHA-256(0x00 || envelopeDigest), recomputes to one of these for its logId and treeSize; its time is that head's timestamp.",
     "treeHeads": [
       {
@@ -47,12 +66,18 @@
         "rootHash": "9af2afb766b1290cc1bbdbe2d9bc9791c6d1cbe64b9b4e4f03d172e2af028ab2",
         "timestamp": "2026-09-19T11:05:00Z",
         "treeSize": 3
+      },
+      {
+        "logId": "2b0601040181fd590101",
+        "rootHash": "57c371673f17c02746c5dff0135211b2172fa42f137a5e8bad276a230f1f97e4",
+        "timestamp": "2026-09-19T11:05:00Z",
+        "treeSize": 3
       }
     ]
   },
-  "corpusDigest": "3f4503a5cf25abcb16a6ea678eee1910b19de6cd844bad89b29fe5de591635d2",
+  "corpusDigest": "6034a4d1aaf3db40daa944660881c7c75097d276f6a10ccfa3f35d78ccc70a66",
   "counts": {
-    "accept": 52,
+    "accept": 59,
     "indeterminate": 1,
     "reject": 81
   },
@@ -1460,6 +1485,9 @@
         "dating": {
           "codes": [],
           "datedAt": "2026-09-19T11:05:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "well-formed"
         },
         "derivedTier": "authoritative",
@@ -1478,6 +1506,9 @@
         "dating": {
           "codes": [],
           "datedAt": "2026-09-19T11:04:20Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "well-formed",
           "receipt": "asserted-consistent"
         },
@@ -1499,6 +1530,9 @@
             "entry-received-after-anchor"
           ],
           "datedAt": "2026-09-19T11:04:20Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "malformed"
         },
         "derivedTier": "authoritative",
@@ -1521,6 +1555,9 @@
             "entry-retainer-anchor-missing"
           ],
           "datedAt": "2026-09-19T11:04:20Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "malformed"
         },
         "derivedTier": "authoritative",
@@ -1541,6 +1578,9 @@
         "dating": {
           "codes": [],
           "datedAt": "2026-09-19T11:04:20Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "well-formed",
           "receipt": "asserted-consistent"
         },
@@ -1562,6 +1602,9 @@
             "entry-received-before-issued"
           ],
           "datedAt": "2026-09-19T11:04:20Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "malformed"
         },
         "derivedTier": "authoritative",
@@ -1584,6 +1627,9 @@
             "entry-anchor-late"
           ],
           "datedAt": "2026-09-19T11:14:12Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "malformed"
         },
         "derivedTier": "authoritative",
@@ -1603,6 +1649,9 @@
         "codes": [],
         "dating": {
           "codes": [],
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "well-formed"
         },
         "derivedTier": "authoritative",
@@ -1625,6 +1674,9 @@
             "entry-received-at-inconsistent"
           ],
           "datedAt": "2026-09-19T11:05:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
           "entry": "malformed"
         },
         "derivedTier": "authoritative",
@@ -2269,6 +2321,178 @@
       "parentDraftId": "SQ1",
       "row": "two records of one series with seq 1 and different envelope digests: each record valid, the set fails the check",
       "slug": "sq5-set-sequence-duplicate"
+    },
+    {
+      "draftId": "R10",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [],
+          "datedAt": "2026-09-19T10:54:30Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "well-formed",
+          "receipt": "asserted-consistent"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/ve38383b5fa8cfbe2.json",
+      "id": "ve38383b5fa8cfbe2",
+      "kind": "accept",
+      "parent": "v90581da25d334bc5",
+      "parentDraftId": "R2",
+      "row": "the retaining party's anchor is opentimestamps, its block header time 600 seconds earlier than receivedAt: inside the 7200 seconds an opentimestamps time allows",
+      "slug": "r10-opentimestamps-retainer-anchor"
+    },
+    {
+      "draftId": "R11",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [
+            "entry-received-after-anchor"
+          ],
+          "datedAt": "2026-09-19T09:04:29Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "malformed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/v601ab32149827ed3.json",
+      "id": "v601ab32149827ed3",
+      "kind": "accept",
+      "parent": "ve38383b5fa8cfbe2",
+      "parentDraftId": "R10",
+      "row": "the block header time earlier than receivedAt by 7201 seconds, more than the 7200 seconds an opentimestamps time allows",
+      "slug": "r11-opentimestamps-header-too-early"
+    },
+    {
+      "draftId": "R12",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [],
+          "datedAt": "2026-09-19T11:40:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "well-formed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/v56258aa08b3bdb60.json",
+      "id": "v56258aa08b3bdb60",
+      "kind": "accept",
+      "parent": "vcca72e0d016c5db3",
+      "parentDraftId": "R1",
+      "row": "anchors holding a pending OpenTimestamps proof followed by its upgraded, complete proof: dated at the upgraded proof's block time, the pending element dating nothing",
+      "slug": "r12-pending-then-upgraded-proof"
+    },
+    {
+      "draftId": "R13",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [],
+          "datedAt": "2026-09-19T11:05:00Z",
+          "delegationRoot": {
+            "algorithm": "Ed25519",
+            "result": "established"
+          },
+          "entry": "well-formed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/v5fdda90f44e68c91.json",
+      "id": "v5fdda90f44e68c91",
+      "kind": "accept",
+      "row": "R1 for a record carrying delegation.rootDigest, with a delegation-root element whose digest equals it: the root established, its algorithm read off the element",
+      "slug": "r13-delegation-root-established"
+    },
+    {
+      "draftId": "R14",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [],
+          "datedAt": "2026-09-19T11:05:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "well-formed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/v3bcc3efbad13217b.json",
+      "id": "v3bcc3efbad13217b",
+      "kind": "accept",
+      "parent": "v5fdda90f44e68c91",
+      "parentDraftId": "R13",
+      "row": "the delegation-root element omitted: the root not established, never a pass",
+      "slug": "r14-delegation-root-element-omitted"
+    },
+    {
+      "draftId": "R15",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [
+            "entry-delegation-root-mismatch"
+          ],
+          "datedAt": "2026-09-19T11:05:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "malformed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/vd41f53ed499a1780.json",
+      "id": "vd41f53ed499a1780",
+      "kind": "accept",
+      "parent": "v5fdda90f44e68c91",
+      "parentDraftId": "R13",
+      "row": "the delegation-root element carries another key set, whose digest is unequal to delegation.rootDigest",
+      "slug": "r15-delegation-root-digest-unequal"
+    },
+    {
+      "draftId": "R16",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "dating": {
+          "codes": [],
+          "datedAt": "2026-09-19T11:30:00Z",
+          "delegationRoot": {
+            "result": "not-established"
+          },
+          "entry": "well-formed"
+        },
+        "derivedTier": "authoritative",
+        "verdict": "valid"
+      },
+      "file": "retained/va737fb3f9f927f4b.json",
+      "id": "va737fb3f9f927f4b",
+      "kind": "accept",
+      "parent": "vcca72e0d016c5db3",
+      "parentDraftId": "R1",
+      "row": "the only anchor an opentimestamps proof whose path runs from envelopeDigest through a Merkle tree the retaining party built and a Bitcoin transaction carrying its root to the block header",
+      "slug": "r16-opentimestamps-through-own-tree"
     }
   ]
 }
