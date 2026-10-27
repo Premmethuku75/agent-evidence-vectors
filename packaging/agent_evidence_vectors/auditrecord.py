@@ -737,7 +737,7 @@ def held_for(consumption: dict[str, Any], decision: dict[str, Any]) -> dict[str,
     action, arguments and resource share one (CS11, CS12)."""
     for held in consumption["held"]:
         if held["operationKey"] == decision.get("operationKey"):
-            return held
+            return held if isinstance(held, dict) else None
     return None
 
 
