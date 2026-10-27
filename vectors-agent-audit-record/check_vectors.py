@@ -453,6 +453,32 @@ def _set_checks(drop: str | None = None, by_request_digest: bool = False) -> Ite
 
 
 @contextlib.contextmanager
+def _without_sequence_check(name: str) -> Iterator[None]:
+    auditrecord.SEQUENCE_SET_CHECKS[name] = False
+    try:
+        yield
+    finally:
+        auditrecord.SEQUENCE_SET_CHECKS[name] = True
+
+
+def _sequence_reading(*, refuse_extra: bool = True, positive: bool = True) -> Rule:
+    """The sequence rule as a reader might take it: tolerating other members, or
+    any integer seq."""
+
+    def rule(state: Any) -> None:
+        sequence = state.predicate.get("sequence")
+        if sequence is None:
+            return
+        if refuse_extra and set(sequence) != auditrecord.SEQUENCE_MEMBERS:
+            raise auditrecord.Malformed("sequence-malformed")
+        seq = sequence["seq"]
+        if not isinstance(seq, int) or (positive and seq < 1):
+            raise auditrecord.Malformed("sequence-malformed")
+
+    return rule
+
+
+@contextlib.contextmanager
 def _swapped_rule(name: str, replacement: Rule) -> Iterator[None]:
     index = auditrecord.rule_names().index(name)
     original = auditrecord.RULES[index]
@@ -489,6 +515,34 @@ SECTION_READINGS: list[tuple[str, Callable[[], contextlib.AbstractContextManager
         "unavailableInput known only as standing-source",
         lambda: _narrowed_inputs(frozenset({"standing-source"})),
         "A12,A13,A14,A18,A19,A20",
+    ),
+    (
+        "agent.authentication without api-key",
+        lambda: _narrowed_vocabulary(
+            "agent.authentication",
+            auditrecord.VOCABULARIES["agent.authentication"] - {"api-key"},
+        ),
+        "A21",
+    ),
+    (
+        "a sequence member carrying an undefined member accepted",
+        lambda: _swapped_rule("sequence", _sequence_reading(refuse_extra=False)),
+        "SQ2",
+    ),
+    (
+        "a sequence seq of 0 accepted",
+        lambda: _swapped_rule("sequence", _sequence_reading(positive=False)),
+        "SQ3",
+    ),
+    (
+        "two records at one place in a series accepted",
+        lambda: _without_sequence_check("duplicate"),
+        "SQ5",
+    ),
+    (
+        "a number missing below the highest held left unnamed",
+        lambda: _without_sequence_check("gap"),
+        "SQ4",
     ),
     (
         "oversight.act known only as check",
@@ -715,7 +769,8 @@ def _fails(entry: dict[str, object], policy: auditrecord.Policy) -> bool:
         return (
             any(r.verdict != expected["verdict"] for r in reports)
             or joint.verdict != declared["verdict"]
-            or limits != declared["withinLimit"]
+            or limits != declared.get("withinLimit", [None] * len(limits))
+            or joint.missing != declared.get("missing", [])
         )
     verdict = _verify(entry, policy).verdict
     if verdict not in auditrecord.conforming_verdicts(entry):

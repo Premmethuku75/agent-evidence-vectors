@@ -1512,6 +1512,7 @@ def define() -> None:
     define_retained()
     define_revision_01()
     define_consumption()
+    define_audit_next()
     rank = {draft_id: i for i, draft_id in enumerate(ORDER)}
     missing = [m["draftId"] for m in MEMBERS if m["draftId"] not in rank]
     if missing or len(rank) != len(MEMBERS):
@@ -2293,6 +2294,115 @@ def define_consumption() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Rows of revision 01 that follow the consumption rows: A21 (Section 5.2,
+# agent.authentication of api-key) and SQ1 to SQ5 (the sequence member).
+# ---------------------------------------------------------------------------
+
+
+SERIES = "urn:example:series:observer-1"
+
+
+def derived(name: str, parent: str, change: Callable[[dict[str, Any]], None]) -> Callable[[], Built]:
+    """A member built from its parent's predicate and kept as a parent itself."""
+
+    def build() -> Built:
+        pred = from_pred(parent)
+        change(pred)
+        return accept(name, pred)
+
+    return build
+
+
+def _sequence(seq: int, **extra: Any) -> Callable[[dict[str, Any]], None]:
+    return _set("sequence", {"boundary": SERIES, "seq": seq, **extra})
+
+
+def sequence_set(seqs: list[int]) -> Callable[[], Built]:
+    """A set member: SQ1, then one further record of its series per seq, each
+    its own record (recordId differs, so its commitment is sealed again)."""
+
+    def build() -> Built:
+        records = [from_pred("SQ1")]
+        for index, seq in enumerate(seqs):
+            pred = from_pred("SQ1")
+            pred["recordId"] = f"{RECORD_ID}:series-{index + 2}"
+            pred["sequence"]["seq"] = seq
+            seal_commitment(pred)
+            records.append(pred)
+        return {"set": [signed(pred)["payload"] for pred in records]}
+
+    return build
+
+
+def define_audit_next() -> None:
+    member(
+        "A21",
+        "a21-authentication-api-key",
+        "A1",
+        "A1 with agent.authentication of api-key, a bearer secret presented with the request "
+        "that is not an OAuth access token; authentication is outside the request digest",
+        mutate("A1", _set("agent.authentication", "api-key")),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+    )
+    member(
+        "SQ1",
+        "sq1-sequence-first-of-series",
+        "A1",
+        "A1 with sequence carrying a boundary and a seq of 1, the first record of its series",
+        derived("SQ1", "A1", _sequence(1)),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+    )
+    member(
+        "SQ2",
+        "sq2-sequence-undefined-member",
+        "SQ1",
+        "sequence carrying a count member this document does not define",
+        mutate("SQ1", _sequence(1, count=3)),
+        "malformed",
+        ["sequence-malformed"],
+        revision=REVISION_01,
+    )
+    member(
+        "SQ3",
+        "sq3-sequence-seq-zero",
+        "SQ1",
+        "sequence with a seq of 0",
+        mutate("SQ1", _sequence(0)),
+        "malformed",
+        ["sequence-malformed"],
+        revision=REVISION_01,
+    )
+    member(
+        "SQ4",
+        "sq4-set-sequence-gap",
+        "SQ1",
+        "records of one series with seq 1 and 3 held, seq 2 not held: each record valid, "
+        "the set names seq 2 as issued and not received",
+        sequence_set([3]),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+        joint={"verdict": "valid", "codes": [], "missing": [{"boundary": SERIES, "seq": 2}]},
+    )
+    member(
+        "SQ5",
+        "sq5-set-sequence-duplicate",
+        "SQ1",
+        "two records of one series with seq 1 and different envelope digests: each record "
+        "valid, the set fails the check",
+        sequence_set([1]),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+        joint={"verdict": "malformed", "codes": ["sequence-duplicate"]},
+    )
+
+
+# ---------------------------------------------------------------------------
 # Retained records (Section 4.7, rows R1 to R9).
 #
 # A retained record is A1's envelope beside the retention entry a retaining
@@ -2649,7 +2759,8 @@ ORDER = (
     "R1 R2 R3 R4 R5 R6 R7 R8 R9 "
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
     "TI6 V4 V5 FR14 FR15 "
-    "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17"
+    "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17 "
+    "A21 SQ1 SQ2 SQ3 SQ4 SQ5"
 ).split()
 
 
@@ -2863,7 +2974,12 @@ def write_index(manifest: dict[str, Any]) -> None:
             verdict += ", withinLimit " + str(v["expected"]["withinLimit"]).lower()
         if "set" in v["expected"]:
             joint = v["expected"]["set"]
-            verdict += f", the set {joint['verdict']} ({joint['codes'][0]})"
+            if joint["codes"]:
+                verdict += f", the set {joint['verdict']} ({joint['codes'][0]})"
+            else:
+                verdict += f", the set {joint['verdict']}"
+            for point in joint.get("missing", []):
+                verdict += f", seq {point['seq']} issued and not received"
         source = f"Section {v['draftSection']}" if "draftSection" in v else "Appendix B"
         lines.append(
             f"| `{v['draftId']}` | {source} | {parent} | {verdict} | "
