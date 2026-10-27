@@ -1059,9 +1059,10 @@ type arVector struct {
 		Dating      *arDating `json:"dating"`
 		WithinLimit *bool     `json:"withinLimit"`
 		Set         *struct {
-			Verdict     string   `json:"verdict"`
-			Codes       []string `json:"codes"`
-			WithinLimit []*bool  `json:"withinLimit"`
+			Verdict     string       `json:"verdict"`
+			Codes       []string     `json:"codes"`
+			WithinLimit []*bool      `json:"withinLimit"`
+			Missing     []arSeqPoint `json:"missing"`
 		} `json:"set"`
 	} `json:"expected"`
 	Readings []struct {

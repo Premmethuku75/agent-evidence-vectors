@@ -452,6 +452,15 @@ def _set_checks(drop: str | None = None, by_request_digest: bool = False) -> Ite
         auditrecord.SET_RULES[:] = original
 
 
+@contextlib.contextmanager
+def _without_sequence_check(name: str) -> Iterator[None]:
+    auditrecord.SEQUENCE_SET_CHECKS[name] = False
+    try:
+        yield
+    finally:
+        auditrecord.SEQUENCE_SET_CHECKS[name] = True
+
+
 def _sequence_reading(*, refuse_extra: bool = True, positive: bool = True) -> Rule:
     """The sequence rule as a reader might take it: tolerating other members, or
     any integer seq."""
@@ -524,6 +533,16 @@ SECTION_READINGS: list[tuple[str, Callable[[], contextlib.AbstractContextManager
         "a sequence seq of 0 accepted",
         lambda: _swapped_rule("sequence", _sequence_reading(positive=False)),
         "SQ3",
+    ),
+    (
+        "two records at one place in a series accepted",
+        lambda: _without_sequence_check("duplicate"),
+        "SQ5",
+    ),
+    (
+        "a number missing below the highest held left unnamed",
+        lambda: _without_sequence_check("gap"),
+        "SQ4",
     ),
     (
         "oversight.act known only as check",
@@ -750,7 +769,8 @@ def _fails(entry: dict[str, object], policy: auditrecord.Policy) -> bool:
         return (
             any(r.verdict != expected["verdict"] for r in reports)
             or joint.verdict != declared["verdict"]
-            or limits != declared["withinLimit"]
+            or limits != declared.get("withinLimit", [None] * len(limits))
+            or joint.missing != declared.get("missing", [])
         )
     verdict = _verify(entry, policy).verdict
     if verdict not in auditrecord.conforming_verdicts(entry):

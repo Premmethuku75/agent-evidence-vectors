@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import dataclasses
 import datetime
 import hashlib
 import importlib
@@ -1425,6 +1426,7 @@ class SetReport:
 
     verdict: str
     codes: list[str]
+    missing: list[dict[str, Any]] = dataclasses.field(default_factory=list)
 
 
 def _held_keys(pred: dict[str, Any]) -> set[str]:
@@ -1498,6 +1500,35 @@ def consumption_set_findings(
     return SetReport("valid", [])
 
 
+#: The two checks across the records of one sequence series; a test drops one.
+SEQUENCE_SET_CHECKS = {"duplicate": True, "gap": True}
+
+
+def sequence_set_findings(predicates: list[dict[str, Any]], payloads: list[bytes]) -> SetReport:
+    """Judge the records that carry sequence. Every record of a set verified
+    under the one observer key, so a series is the records with one boundary.
+    Two records at one seq with different payload digests fail the set
+    (SQ5); a seq below the highest held, which no record holds, is named as
+    issued and not received (SQ4)."""
+    series: dict[str, dict[int, set[str]]] = {}
+    for pred, payload in zip(predicates, payloads):
+        sequence = pred.get("sequence")
+        if sequence is None:
+            continue
+        digest = hashlib.sha256(payload).hexdigest()
+        series.setdefault(sequence["boundary"], {}).setdefault(sequence["seq"], set()).add(digest)
+    if SEQUENCE_SET_CHECKS["duplicate"] and any(
+        len(digests) > 1 for held in series.values() for digests in held.values()
+    ):
+        return SetReport("malformed", ["sequence-duplicate"])
+    missing = []
+    if SEQUENCE_SET_CHECKS["gap"]:
+        for boundary in sorted(series):
+            held = series[boundary]
+            missing += [{"boundary": boundary, "seq": n} for n in range(1, max(held)) if n not in held]
+    return SetReport("valid", [], missing)
+
+
 def set_records(raw: bytes) -> list[bytes]:
     """The envelopes a set member carries, each as bytes a verifier is handed."""
     bundle = json.loads(raw, object_pairs_hook=_no_duplicates)
@@ -1516,8 +1547,12 @@ def verify_set(
     reports = [verify(env, policy, disabled=disabled) for env in envelopes]
     if any(r.verdict != "valid" for r in reports):
         return reports, SetReport("malformed", ["set-record-malformed"])
-    predicates = [parse_statement(_envelope_payload(env)[1])["predicate"] for env in envelopes]
-    return reports, consumption_set_findings(predicates, disabled=disabled)
+    payloads = [_envelope_payload(env)[1] for env in envelopes]
+    predicates = [parse_statement(payload)["predicate"] for payload in payloads]
+    joint = consumption_set_findings(predicates, disabled=disabled)
+    if joint.verdict != "valid":
+        return reports, joint
+    return reports, sequence_set_findings(predicates, payloads)
 
 
 def set_rule_names() -> list[str]:
@@ -1595,10 +1630,12 @@ def _set_findings(entry: dict[str, Any], raw: bytes, policy: Policy) -> list[str
     limits = []
     for env in set_records(raw):
         limits.append(within_limit(json.loads(_envelope_payload(env)[1])["predicate"]))
-    if limits != declared.get("withinLimit"):
+    if limits != declared.get("withinLimit", [None] * len(limits)):
         findings.append(
             f"{label}: expected withinLimit {declared.get('withinLimit')}, got {limits}"
         )
+    if joint.missing != declared.get("missing", []):
+        findings.append(f"{label}: expected missing {declared.get('missing', [])}, got {joint.missing}")
     if (joint.verdict, joint.codes) != (declared["verdict"], declared["codes"]):
         findings.append(
             f"{label}: expected set {declared['verdict']} {declared['codes']}, "

@@ -2317,6 +2317,23 @@ def _sequence(seq: int, **extra: Any) -> Callable[[dict[str, Any]], None]:
     return _set("sequence", {"boundary": SERIES, "seq": seq, **extra})
 
 
+def sequence_set(seqs: list[int]) -> Callable[[], Built]:
+    """A set member: SQ1, then one further record of its series per seq, each
+    its own record (recordId differs, so its commitment is sealed again)."""
+
+    def build() -> Built:
+        records = [from_pred("SQ1")]
+        for index, seq in enumerate(seqs):
+            pred = from_pred("SQ1")
+            pred["recordId"] = f"{RECORD_ID}:series-{index + 2}"
+            pred["sequence"]["seq"] = seq
+            seal_commitment(pred)
+            records.append(pred)
+        return {"set": [signed(pred)["payload"] for pred in records]}
+
+    return build
+
+
 def define_audit_next() -> None:
     member(
         "A21",
@@ -2358,6 +2375,30 @@ def define_audit_next() -> None:
         "malformed",
         ["sequence-malformed"],
         revision=REVISION_01,
+    )
+    member(
+        "SQ4",
+        "sq4-set-sequence-gap",
+        "SQ1",
+        "records of one series with seq 1 and 3 held, seq 2 not held: each record valid, "
+        "the set names seq 2 as issued and not received",
+        sequence_set([3]),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+        joint={"verdict": "valid", "codes": [], "missing": [{"boundary": SERIES, "seq": 2}]},
+    )
+    member(
+        "SQ5",
+        "sq5-set-sequence-duplicate",
+        "SQ1",
+        "two records of one series with seq 1 and different envelope digests: each record "
+        "valid, the set fails the check",
+        sequence_set([1]),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+        joint={"verdict": "malformed", "codes": ["sequence-duplicate"]},
     )
 
 
@@ -2719,7 +2760,7 @@ ORDER = (
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
     "TI6 V4 V5 FR14 FR15 "
     "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17 "
-    "A21 SQ1 SQ2 SQ3"
+    "A21 SQ1 SQ2 SQ3 SQ4 SQ5"
 ).split()
 
 
@@ -2933,7 +2974,12 @@ def write_index(manifest: dict[str, Any]) -> None:
             verdict += ", withinLimit " + str(v["expected"]["withinLimit"]).lower()
         if "set" in v["expected"]:
             joint = v["expected"]["set"]
-            verdict += f", the set {joint['verdict']} ({joint['codes'][0]})"
+            if joint["codes"]:
+                verdict += f", the set {joint['verdict']} ({joint['codes'][0]})"
+            else:
+                verdict += f", the set {joint['verdict']}"
+            for point in joint.get("missing", []):
+                verdict += f", seq {point['seq']} issued and not received"
         source = f"Section {v['draftSection']}" if "draftSection" in v else "Appendix B"
         lines.append(
             f"| `{v['draftId']}` | {source} | {parent} | {verdict} | "

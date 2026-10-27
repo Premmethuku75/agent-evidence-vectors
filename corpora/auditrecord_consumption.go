@@ -207,6 +207,7 @@ func arRuleConsumption(s *arState) error {
 type arSetReport struct {
 	verdict string
 	codes   []string
+	missing []arSeqPoint
 }
 
 type arSetRule struct {
@@ -311,7 +312,7 @@ func arConsumptionSetFindings(predicates []map[string]any, disabled string) arSe
 		}
 		for _, group := range groups {
 			if rule.check(group) {
-				return arSetReport{"malformed", []string{rule.code}}
+				return arSetReport{verdict: "malformed", codes: []string{rule.code}}
 			}
 		}
 	}
@@ -336,15 +337,20 @@ func arSetRecords(raw []byte) ([][]byte, error) {
 	return envelopes, nil
 }
 
-// arEnvelopePredicate reads the predicate of an envelope already judged valid.
-func arEnvelopePredicate(envelope []byte) (map[string]any, error) {
+// arEnvelopePayload decodes the payload of an envelope.
+func arEnvelopePayload(envelope []byte) ([]byte, error) {
 	var parsed struct {
 		Payload string `json:"payload"`
 	}
 	if err := json.Unmarshal(envelope, &parsed); err != nil {
 		return nil, err
 	}
-	payload, err := base64.StdEncoding.DecodeString(parsed.Payload)
+	return base64.StdEncoding.DecodeString(parsed.Payload)
+}
+
+// arEnvelopePredicate reads the predicate of an envelope already judged valid.
+func arEnvelopePredicate(envelope []byte) (map[string]any, error) {
+	payload, err := arEnvelopePayload(envelope)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +376,7 @@ type arSetResult struct {
 func arVerifySet(raw []byte, predicateType, observerKey, disabled string) arSetResult {
 	envelopes, err := arSetRecords(raw)
 	if err != nil {
-		return arSetResult{joint: arSetReport{"malformed", []string{"set-unreadable"}}}
+		return arSetResult{joint: arSetReport{verdict: "malformed", codes: []string{"set-unreadable"}}}
 	}
 	var result arSetResult
 	for _, envelope := range envelopes {
@@ -378,19 +384,22 @@ func arVerifySet(raw []byte, predicateType, observerKey, disabled string) arSetR
 	}
 	for _, report := range result.reports {
 		if report.verdict != "valid" {
-			result.joint = arSetReport{"malformed", []string{"set-record-malformed"}}
+			result.joint = arSetReport{verdict: "malformed", codes: []string{"set-record-malformed"}}
 			return result
 		}
 	}
 	for _, envelope := range envelopes {
 		pred, err := arEnvelopePredicate(envelope)
 		if err != nil {
-			result.joint = arSetReport{"malformed", []string{"set-record-malformed"}}
+			result.joint = arSetReport{verdict: "malformed", codes: []string{"set-record-malformed"}}
 			return result
 		}
 		result.predicates = append(result.predicates, pred)
 	}
 	result.joint = arConsumptionSetFindings(result.predicates, disabled)
+	if result.joint.verdict == "valid" {
+		result.joint = arSequenceSetFindings(result.predicates, envelopes)
+	}
 	return result
 }
 
@@ -443,9 +452,17 @@ func arSetFindings(label string, manifest *arManifest, v arVector, body []byte) 
 		limits = append(limits, arWithinLimit(pred))
 	}
 	declared := v.Expected.Set
-	if len(result.predicates) > 0 && arLimitsText(limits) != arLimitsText(declared.WithinLimit) {
+	wantLimits := declared.WithinLimit
+	if wantLimits == nil {
+		wantLimits = make([]*bool, len(limits))
+	}
+	if arSeqText(result.joint.missing) != arSeqText(declared.Missing) {
+		findings = append(findings, fmt.Sprintf("%s: expected missing %s, got %s",
+			label, arSeqText(declared.Missing), arSeqText(result.joint.missing)))
+	}
+	if len(result.predicates) > 0 && arLimitsText(limits) != arLimitsText(wantLimits) {
 		findings = append(findings, fmt.Sprintf("%s: expected withinLimit %s, got %s",
-			label, arLimitsText(declared.WithinLimit), arLimitsText(limits)))
+			label, arLimitsText(wantLimits), arLimitsText(limits)))
 	}
 	if result.joint.verdict != declared.Verdict ||
 		strings.Join(result.joint.codes, ",") != strings.Join(declared.Codes, ",") {

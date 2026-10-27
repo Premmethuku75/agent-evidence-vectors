@@ -47,3 +47,17 @@ func TestAuditRecordSequenceSentencesAreLoadBearing(t *testing.T) {
 		}
 	}
 }
+
+// TestAuditRecordSequenceSetChecksAreLoadBearing: accepting two records at one
+// place in a series fails SQ5, and leaving a missing number unnamed fails SQ4.
+func TestAuditRecordSequenceSetChecksAreLoadBearing(t *testing.T) {
+	for name, want := range map[string]string{"duplicate": "SQ5", "gap": "SQ4"} {
+		drop := func() func() {
+			arSequenceSetChecks[name] = false
+			return func() { arSequenceSetChecks[name] = true }
+		}
+		if got := arWeakened(t, drop); got != want {
+			t.Errorf("without the %s check: failing %q, want %q", name, got, want)
+		}
+	}
+}

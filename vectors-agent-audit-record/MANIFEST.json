@@ -50,9 +50,9 @@
       }
     ]
   },
-  "corpusDigest": "9d069cb579328f13c2ce402fc9e9459b60ded9eb79122ff6bf73c7d63ef03456",
+  "corpusDigest": "3f4503a5cf25abcb16a6ea678eee1910b19de6cd844bad89b29fe5de591635d2",
   "counts": {
-    "accept": 50,
+    "accept": 52,
     "indeterminate": 1,
     "reject": 81
   },
@@ -2221,6 +2221,54 @@
       "parentDraftId": "SQ1",
       "row": "sequence with a seq of 0",
       "slug": "sq3-sequence-seq-zero"
+    },
+    {
+      "draftId": "SQ4",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "set": {
+          "codes": [],
+          "missing": [
+            {
+              "boundary": "urn:example:series:observer-1",
+              "seq": 2
+            }
+          ],
+          "verdict": "valid"
+        },
+        "verdict": "valid"
+      },
+      "file": "sets/vadd36be4ba786f38.json",
+      "id": "vadd36be4ba786f38",
+      "kind": "accept",
+      "parent": "v7afe1f39e8670c18",
+      "parentDraftId": "SQ1",
+      "row": "records of one series with seq 1 and 3 held, seq 2 not held: each record valid, the set names seq 2 as issued and not received",
+      "slug": "sq4-set-sequence-gap"
+    },
+    {
+      "draftId": "SQ5",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "set": {
+          "codes": [
+            "sequence-duplicate"
+          ],
+          "verdict": "malformed"
+        },
+        "verdict": "valid"
+      },
+      "file": "sets/va885bfbdaf7a4920.json",
+      "id": "va885bfbdaf7a4920",
+      "kind": "accept",
+      "parent": "v7afe1f39e8670c18",
+      "parentDraftId": "SQ1",
+      "row": "two records of one series with seq 1 and different envelope digests: each record valid, the set fails the check",
+      "slug": "sq5-set-sequence-duplicate"
     }
   ]
 }
