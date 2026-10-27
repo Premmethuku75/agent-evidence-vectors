@@ -1023,6 +1023,54 @@
       "v0.25.0": null,
       "v0.26.0": null,
       "v0.27.0": "vbc0faef3ecca56e2"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: agent.authentication of api-key",
+      "draftId": "A21",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "v9dfdb5fec24b90ee"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: the sequence member",
+      "draftId": "SQ1",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "v7afe1f39e8670c18"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: the sequence member",
+      "draftId": "SQ2",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "vca142e8033b749a4"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: the sequence member",
+      "draftId": "SQ3",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "v6f17a0294db29c43"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: the sequence member",
+      "draftId": "SQ4",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "vadd36be4ba786f38"
+    },
+    {
+      "change": "new: a row of revision 01 (draft-gilda-audit-agent-audit-record-01), carrying draftRevision: the sequence member",
+      "draftId": "SQ5",
+      "v0.18.1": null,
+      "v0.25.0": null,
+      "v0.26.0": null,
+      "v0.27.0": "va885bfbdaf7a4920"
     }
   ],
   "note": "Each member of vectors-agent-audit-record by its Appendix B identifier, with its file identifier at v0.18.1 and v0.25.0 (the last releases that tested draft-gilda-wimse-agent-audit-record-02), at v0.26.0 (the first that tests draft-gilda-audit-agent-audit-record-00) and at v0.27.0. A file identifier is a digest of the member bytes, so it moves whenever a member is regenerated; the draftId never moves once a release carries it. Five rows of draft-gilda-audit-agent-audit-record-01 are new at v0.26.0, and the five Section 5.4 proposals numbered FR14 to FR16 on main before any release moved to FR16 to FR18 so that FR14 and FR15 name the rows revision 01 prints. Seventeen rows of draft-gilda-audit-agent-audit-record-01 (CS1 to CS17) are new at v0.27.0, which binds consumption state with an operation key; every earlier member keeps its v0.26.0 file identifier. null means the member did not exist at that release.",
