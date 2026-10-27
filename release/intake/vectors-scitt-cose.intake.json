@@ -174,12 +174,12 @@
       {
         "path": "pyproject.toml",
         "serialization": "bytes",
-        "sha256": "ef752ffe025a0fe1c5f70da6176242e2d12499d70cc89ff9a641a4715529e8ff"
+        "sha256": "b776036f4a27668701476c0d2c9e731c92f1f6cc40dfc3e2de55ee3558480361"
       },
       {
         "path": "uv.lock",
         "serialization": "bytes",
-        "sha256": "4369538ecf1e53378826d880764da1907252fa7ce14f492aa2528782340390ad"
+        "sha256": "86a67e4b18c3186ee6aab8e6c4cd16f5acf7260d5d9b200102ad44f45a06409a"
       }
     ],
     "helpers": [],
