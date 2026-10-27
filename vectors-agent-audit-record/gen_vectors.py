@@ -1512,6 +1512,7 @@ def define() -> None:
     define_retained()
     define_revision_01()
     define_consumption()
+    define_audit_next()
     rank = {draft_id: i for i, draft_id in enumerate(ORDER)}
     missing = [m["draftId"] for m in MEMBERS if m["draftId"] not in rank]
     if missing or len(rank) != len(MEMBERS):
@@ -2293,6 +2294,26 @@ def define_consumption() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Rows of revision 01 that follow the consumption rows: A21 (Section 5.2,
+# agent.authentication of api-key) and SQ1 to SQ5 (the sequence member).
+# ---------------------------------------------------------------------------
+
+
+def define_audit_next() -> None:
+    member(
+        "A21",
+        "a21-authentication-api-key",
+        "A1",
+        "A1 with agent.authentication of api-key, a bearer secret presented with the request "
+        "that is not an OAuth access token; authentication is outside the request digest",
+        mutate("A1", _set("agent.authentication", "api-key")),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Retained records (Section 4.7, rows R1 to R9).
 #
 # A retained record is A1's envelope beside the retention entry a retaining
@@ -2649,7 +2670,8 @@ ORDER = (
     "R1 R2 R3 R4 R5 R6 R7 R8 R9 "
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
     "TI6 V4 V5 FR14 FR15 "
-    "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17"
+    "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17 "
+    "A21"
 ).split()
 
 

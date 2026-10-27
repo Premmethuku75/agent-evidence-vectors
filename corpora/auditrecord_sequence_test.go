@@ -1,0 +1,35 @@
+package corpora
+
+import "testing"
+
+// arNarrowVocabulary removes one value from a closed set for the test's span.
+func arNarrowVocabulary(t *testing.T, path, drop string) func() func() {
+	t.Helper()
+	return func() func() {
+		for i := range arVocabularies {
+			if arVocabularies[i].path != path {
+				continue
+			}
+			saved := arVocabularies[i].allowed
+			var kept []string
+			for _, value := range saved {
+				if value != drop {
+					kept = append(kept, value)
+				}
+			}
+			arVocabularies[i].allowed = kept
+			return func() { arVocabularies[i].allowed = saved }
+		}
+		t.Fatalf("no %s vocabulary", path)
+		return func() {}
+	}
+}
+
+// TestAuditRecordApiKeyIsForced: a reader whose agent.authentication set lacks
+// api-key fails A21 and no other member.
+func TestAuditRecordApiKeyIsForced(t *testing.T) {
+	got := arWeakened(t, arNarrowVocabulary(t, "agent.authentication", "api-key"))
+	if got != "A21" {
+		t.Errorf("agent.authentication without api-key: failing %q, want A21", got)
+	}
+}

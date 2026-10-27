@@ -491,6 +491,14 @@ SECTION_READINGS: list[tuple[str, Callable[[], contextlib.AbstractContextManager
         "A12,A13,A14,A18,A19,A20",
     ),
     (
+        "agent.authentication without api-key",
+        lambda: _narrowed_vocabulary(
+            "agent.authentication",
+            auditrecord.VOCABULARIES["agent.authentication"] - {"api-key"},
+        ),
+        "A21",
+    ),
+    (
         "oversight.act known only as check",
         lambda: _narrowed_vocabulary("oversight.act", frozenset({"check"})),
         "A15,A16,A17",

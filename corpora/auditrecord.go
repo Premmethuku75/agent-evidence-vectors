@@ -66,7 +66,7 @@ var arVocabularies = []struct {
 }{
 	{"tier", []string{"voluntary", "authoritative"}},
 	{"hashAlgorithm", []string{"sha256"}},
-	{"agent.authentication", []string{"wimse-wpt", "http-message-signature", "mtls", "oauth-access-token", "none"}},
+	{"agent.authentication", []string{"wimse-wpt", "http-message-signature", "mtls", "oauth-access-token", "api-key", "none"}},
 	{"delegation.subjectKind", []string{"user", "system", "none"}},
 	{"resource.kind", []string{"path", "uri", "tool"}},
 	{"resource.binding", []string{"digest-bound", "not-bindable"}},

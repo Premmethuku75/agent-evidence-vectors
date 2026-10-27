@@ -86,7 +86,7 @@ VOCABULARIES: dict[str, frozenset[str]] = {
     "tier": frozenset({"voluntary", "authoritative"}),
     "hashAlgorithm": frozenset({"sha256"}),
     "agent.authentication": frozenset(
-        {"wimse-wpt", "http-message-signature", "mtls", "oauth-access-token", "none"}
+        {"wimse-wpt", "http-message-signature", "mtls", "oauth-access-token", "api-key", "none"}
     ),
     "delegation.subjectKind": frozenset({"user", "system", "none"}),
     "resource.kind": frozenset({"path", "uri", "tool"}),
