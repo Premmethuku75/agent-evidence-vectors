@@ -2422,7 +2422,7 @@ def a1_envelope() -> dict[str, Any]:
 # --- OpenTimestamps anchors (Section 4.7.2, rows R10 to R12 and R16) ---------
 #
 # An opentimestamps anchor's proof is the base64 of a DetachedTimestampFile over
-# envelopeDigest: the magic, version 1, the sha256 file-hash op, the 32 digest
+# envelopeDigest: the magic, version 1, the sha256 file-hash op, the digest
 # bytes, then a timestamp tree of commitment operations ending in attestations.
 # A Bitcoin attestation names a block height, and the proof validates when the
 # message it attests is the Merkle root of the header at that height that the
@@ -3088,9 +3088,9 @@ def emit() -> None:
                 "The 80-byte headers of a test chain, pinned here so an opentimestamps anchor "
                 "validates with nothing fetched: a verifier holds them independently, as "
                 "blocks of the chain with the most work. An opentimestamps anchor validates "
-                "when its proof recomputes from envelopeDigest to the Merkle root (bytes 36 to "
-                "68) of the header at the height its Bitcoin attestation names; its time is the "
-                "header's time field (bytes 68 to 72, little-endian Unix seconds)."
+                "when its proof recomputes from envelopeDigest to the Merkle root field of the "
+                "header at the height its Bitcoin attestation names; its time is the "
+                "header's time field, little-endian Unix seconds."
             ),
         },
         "counts": counts,

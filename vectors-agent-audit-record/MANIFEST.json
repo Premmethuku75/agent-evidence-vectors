@@ -4,7 +4,7 @@
     "envelope": "ed25519"
   },
   "anchorTrust": {
-    "blockHeaderNote": "The 80-byte headers of a test chain, pinned here so an opentimestamps anchor validates with nothing fetched: a verifier holds them independently, as blocks of the chain with the most work. An opentimestamps anchor validates when its proof recomputes from envelopeDigest to the Merkle root (bytes 36 to 68) of the header at the height its Bitcoin attestation names; its time is the header's time field (bytes 68 to 72, little-endian Unix seconds).",
+    "blockHeaderNote": "The 80-byte headers of a test chain, pinned here so an opentimestamps anchor validates with nothing fetched: a verifier holds them independently, as blocks of the chain with the most work. An opentimestamps anchor validates when its proof recomputes from envelopeDigest to the Merkle root field of the header at the height its Bitcoin attestation names; its time is the header's time field, little-endian Unix seconds.",
     "blockHeaders": [
       {
         "header": "0000002092e8c40330ee352992bfb85a78aba86dfb0ef20b95edb0f766cfa2d9e2b15fdd09ad5f10064aabadc6c444c1293b841f55460544ce9b1570a4c5299b44226826e669ae6affff001d8b6d0d00",

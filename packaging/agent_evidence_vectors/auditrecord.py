@@ -1578,9 +1578,8 @@ def tree_heads(manifest: dict[str, Any]) -> AnchorTrust:
 
 
 def block_header(height: int, header: bytes) -> BlockHeader:
-    """Read the Merkle root (bytes 36 to 68, internal byte order) and the time
-    (a little-endian uint32 of Unix seconds at bytes 68 to 72) off the 80
-    bytes of a Bitcoin block header."""
+    """Read the Merkle root field, in internal byte order, and the time field,
+    little-endian Unix seconds, off the bytes of a Bitcoin block header."""
     if len(header) != 80:
         raise ValueError("a block header is 80 bytes")
     seconds = int.from_bytes(header[68:72], "little")
