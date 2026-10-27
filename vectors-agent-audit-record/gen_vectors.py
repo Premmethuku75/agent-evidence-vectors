@@ -344,6 +344,8 @@ def member(
     dating: dict[str, Any] | None = None,
     revision: str | None = None,
     aggregation: dict[str, Any] | None = None,
+    within: bool | None = None,
+    joint: dict[str, Any] | None = None,
 ) -> None:
     if (verdict is None) == (readings is None):
         raise SystemExit(
@@ -370,6 +372,8 @@ def member(
             "dating": dating,
             "revision": revision,
             "aggregation": aggregation,
+            "within": within,
+            "joint": joint,
         }
     )
 
@@ -1507,6 +1511,7 @@ def define() -> None:
     define_freshness()
     define_retained()
     define_revision_01()
+    define_consumption()
     rank = {draft_id: i for i, draft_id in enumerate(ORDER)}
     missing = [m["draftId"] for m in MEMBERS if m["draftId"] not in rank]
     if missing or len(rank) != len(MEMBERS):
@@ -1885,6 +1890,409 @@ def define_revision_01() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Consumption binding (Section 5.4 of revision 01): rows CS1 to CS17.
+#
+# A decision under a cumulative limit carries decision.operationKey, the
+# agent's identifier for one intended operation, and its consumption-state
+# entry carries the consumption member. Retry identity is the operation key,
+# never the request digest: a request digest is a content digest, so two
+# identical intended payments share one and the second must still be counted.
+# The worked numbers are a limit of 50000 pence with 30000 consumed and a
+# request of 12000 (probityai/agent-evidence-vectors#213).
+# ---------------------------------------------------------------------------
+
+CS_LIMIT_DOCUMENT = h("limit/spend-limit-document")
+CS_OTHER_LIMIT_DOCUMENT = h("limit/limit-document-named-by-the-authority")
+CS_HELD_REQUEST = h("request/the-first-call-as-the-held-entry-recorded-it")
+OP_R1, OP_R2, OP_R3 = "urn:example:op:r1", "urn:example:op:r2", "urn:example:op:r3"
+CONSUMPTION_ENTRY = 2
+
+
+def held_entry(key: str, request_digest: str, amount: int) -> dict[str, Any]:
+    return {"operationKey": key, "requestDigest": request_digest, "amount": amount}
+
+
+def consumption_pred(
+    *,
+    key: str = OP_R1,
+    consumed: int = 30000,
+    requested: int = 12000,
+    held: list[dict[str, Any]] | None = None,
+    revision: int = 41,
+    limit_digest: str = CS_LIMIT_DOCUMENT,
+) -> dict[str, Any]:
+    """The baseline decision under a 50000 GBP pence limit, carrying its operation
+    key and the consumption it read."""
+    pred = baseline()
+    held = held or []
+    pred["decision"]["operationKey"] = key
+    state = entry("consumption-state", "2026-09-19T11:04:00Z", 60)
+    state["consumption"] = {
+        "limitDigest": limit_digest,
+        "unit": "GBP",
+        "limit": 50000,
+        "consumed": consumed,
+        "reserved": sum(item["amount"] for item in held),
+        "requested": requested,
+        "held": held,
+        "stateRevision": revision,
+    }
+    pred["evaluation"]["inputs"] = baseline_inputs() + [state]
+    return pred
+
+
+def _consumption(pred: dict[str, Any]) -> dict[str, Any]:
+    found: dict[str, Any] = pred["evaluation"]["inputs"][CONSUMPTION_ENTRY]["consumption"]
+    return found
+
+
+def cs_root(name: str, **knobs: Any) -> Callable[[], Built]:
+    def build() -> Built:
+        return accept(name, consumption_pred(**knobs))
+
+    return build
+
+
+def cs_from(
+    parent: str, name: str, change: Callable[[dict[str, Any]], None]
+) -> Callable[[], Built]:
+    def build() -> Built:
+        pred = from_pred(parent)
+        change(pred)
+        return accept(name, pred)
+
+    return build
+
+
+def _cs4(pred: dict[str, Any]) -> None:
+    """The retry: the held entry is this call's own key and request digest."""
+    state = _consumption(pred)
+    state["held"] = [held_entry(OP_R1, pred["decision"]["requestDigest"], 12000)]
+    state["reserved"] = 12000
+    state["stateRevision"] = 42
+
+
+def _cs3(pred: dict[str, Any]) -> None:
+    _consumption(pred)["reserved"] = 12000
+
+
+def _cs10(pred: dict[str, Any]) -> None:
+    _consumption(pred)["held"][0]["requestDigest"] = CS_HELD_REQUEST
+
+
+def _cs11(pred: dict[str, Any]) -> None:
+    pred["decision"]["operationKey"] = OP_R2
+    _consumption(pred)["consumed"] = 20000
+
+
+def _cs13(pred: dict[str, Any]) -> None:
+    state = _consumption(pred)
+    digest_ = state["held"][0]["requestDigest"]
+    state["held"] = [held_entry(OP_R1, digest_, 12000), held_entry(OP_R1, digest_, 12000)]
+    state["reserved"] = 24000
+
+
+def _cs6(pred: dict[str, Any]) -> None:
+    pred["evaluation"]["inputs"][0]["consumption"] = copy.deepcopy(_consumption(pred))
+
+
+def _second_operation(
+    *,
+    key: str,
+    revision: int,
+    same_request: bool,
+    held: list[dict[str, Any]] | None = None,
+    consumed: int = 30000,
+    requested: int = 12000,
+    record: str,
+) -> dict[str, Any]:
+    pred = consumption_pred(
+        key=key, revision=revision, held=held, consumed=consumed, requested=requested
+    )
+    pred["recordId"] = f"urn:example:record:{record}"
+    if not same_request:
+        pred["resource"]["argumentsDigest"] = h("arguments/settlements-append-second")
+        rebind_request(pred)
+    seal_commitment(pred)
+    return pred
+
+
+def cs_set(
+    name: str, build_second: Callable[[dict[str, Any]], dict[str, Any]], first: str = "CS4"
+) -> Callable[[], Built]:
+    """A set member: two records under one limitDigest, the first a member of the
+    corpus in its own right, the second built from the first."""
+
+    def build() -> Built:
+        a = from_pred(first)
+        b = build_second(a)
+        PREDICATES[name] = copy.deepcopy(b)
+        return {"set": [signed(a)["payload"], signed(b)["payload"]]}
+
+    return build
+
+
+def _stale_second(same_request: bool) -> Callable[[dict[str, Any]], dict[str, Any]]:
+    def second(_first: dict[str, Any]) -> dict[str, Any]:
+        return _second_operation(
+            key=OP_R2, revision=41, same_request=same_request, record="cs-second"
+        )
+
+    return second
+
+
+def _release_pair(name: str) -> Callable[[], Built]:
+    """CS8: the first record reads revision 42 with the first call held; the
+    second reads revision 43 and no longer holds it, and no record of that
+    operation is in the set."""
+
+    def build() -> Built:
+        held = [held_entry(OP_R1, CS_HELD_REQUEST, 12000)]
+        a = _second_operation(
+            key=OP_R2,
+            revision=42,
+            same_request=False,
+            held=held,
+            requested=5000,
+            record="cs8-first",
+        )
+        b = _second_operation(
+            key=OP_R3,
+            revision=43,
+            same_request=False,
+            consumed=35000,
+            requested=5000,
+            record="cs8-second",
+        )
+        PREDICATES[name] = copy.deepcopy(b)
+        return {"set": [signed(a)["payload"], signed(b)["payload"]]}
+
+    return build
+
+
+def define_consumption() -> None:
+    Row = tuple[str, str, str | None, str, Callable[[], Built], str, list[str], bool | None]
+    rows: list[Row] = [
+        (
+            "CS1",
+            "cs1-within-limit-nothing-held",
+            None,
+            "a consumption entry under a limit of 50000: consumed 30000, nothing held, requested "
+            "12000, so 42000 of 50000",
+            cs_root("CS1"),
+            "valid",
+            [],
+            True,
+        ),
+        (
+            "CS2",
+            "cs2-beyond-limit-permit",
+            "CS1",
+            "CS1 with requested 25000, 55000 of 50000, still a permit: valid and findable, a "
+            "decision point exceeding its authority",
+            cs_from("CS1", "CS2", lambda p: _consumption(p).update(requested=25000)),
+            "valid",
+            [],
+            False,
+        ),
+        (
+            "CS3",
+            "cs3-reserved-not-the-held-sum",
+            "CS1",
+            "CS1 with reserved 12000 and nothing held",
+            mutate("CS1", _cs3),
+            "malformed",
+            ["consumption-reserved-mismatch"],
+            None,
+        ),
+        (
+            "CS4",
+            "cs4-retry-not-counted-twice",
+            "CS1",
+            "the retry of the first call: operationKey and requestDigest equal a held entry of "
+            "12000, within the limit (42000) only because it is not counted twice",
+            cs_from("CS1", "CS4", _cs4),
+            "valid",
+            [],
+            True,
+        ),
+        (
+            "CS5",
+            "cs5-negative-requested",
+            "CS1",
+            "CS1 with requested of -1",
+            mutate("CS1", lambda p: _consumption(p).update(requested=-1)),
+            "malformed",
+            ["consumption-value-invalid"],
+            None,
+        ),
+        (
+            "CS6",
+            "cs6-consumption-on-a-policy-source-entry",
+            "CS1",
+            "CS1 with the consumption member also on the policy-source entry",
+            mutate("CS1", _cs6),
+            "malformed",
+            ["consumption-misplaced"],
+            None,
+        ),
+        (
+            "CS9",
+            "cs9-no-state-revision",
+            "CS1",
+            "CS1 with stateRevision removed",
+            mutate("CS1", lambda p: _consumption(p).pop("stateRevision")),
+            "malformed",
+            ["member-missing"],
+            None,
+        ),
+        (
+            "CS10",
+            "cs10-held-key-with-another-request",
+            "CS4",
+            "CS4 with the held entry's requestDigest another request's: one operation key "
+            "reused for a different request",
+            mutate("CS4", _cs10),
+            "malformed",
+            ["consumption-key-reused"],
+            None,
+        ),
+        (
+            "CS11",
+            "cs11-new-operation-same-request-within-limit",
+            "CS4",
+            "CS4 under another operationKey with consumed 20000: the same intended payment "
+            "again, a new operation counted (20000 + 12000 + 12000 = 44000 of 50000)",
+            cs_from("CS4", "CS11", _cs11),
+            "valid",
+            [],
+            True,
+        ),
+        (
+            "CS12",
+            "cs12-new-operation-same-request-beyond-limit",
+            "CS4",
+            "CS4 under another operationKey: counted it is 54000 of 50000, and read as a retry "
+            "of the held call it would be 42000",
+            cs_from("CS4", "CS12", lambda p: p["decision"].update(operationKey=OP_R2)),
+            "valid",
+            [],
+            False,
+        ),
+        (
+            "CS13",
+            "cs13-two-held-entries-one-key",
+            "CS4",
+            "CS4 with two held entries under one operationKey, 12000 each, summing to reserved",
+            mutate("CS4", _cs13),
+            "malformed",
+            ["consumption-held-key-repeated"],
+            None,
+        ),
+        (
+            "CS14",
+            "cs14-no-operation-key",
+            "CS1",
+            "CS1 with decision.operationKey removed",
+            mutate("CS1", lambda p: p["decision"].pop("operationKey")),
+            "malformed",
+            ["member-missing"],
+            None,
+        ),
+        (
+            "CS15",
+            "cs15-limit-document-differs-from-authority",
+            "CS1",
+            "CS1 with limitDigest the digest of a limit document the authority names: not "
+            "delegation.authorityDigest, and valid",
+            cs_from(
+                "CS1", "CS15", lambda p: _consumption(p).update(limitDigest=CS_OTHER_LIMIT_DOCUMENT)
+            ),
+            "valid",
+            [],
+            True,
+        ),
+        (
+            "CS16",
+            "cs16-limit-document-is-the-authority",
+            "CS1",
+            "CS1 with limitDigest equal to delegation.authorityDigest, the authority document "
+            "stating the limit itself",
+            cs_from(
+                "CS1",
+                "CS16",
+                lambda p: _consumption(p).update(limitDigest=p["delegation"]["authorityDigest"]),
+            ),
+            "valid",
+            [],
+            True,
+        ),
+    ]
+    for draft_id, slug, parent, row, build, verdict, codes, within in rows:
+        member(
+            draft_id,
+            slug,
+            parent,
+            row,
+            build,
+            verdict,
+            codes,
+            tier="authoritative" if verdict == "valid" else None,
+            revision=REVISION_01,
+            within=within,
+        )
+    sets = [
+        (
+            "CS7",
+            "cs7-set-stale-revision-omits-held",
+            _stale_second(False),
+            "the retry of the first call, which reads revision 42 and holds it, then a new "
+            "operation that reads revision 41, omits the held call and is permitted: each record "
+            "valid, the pair spends the limit twice",
+            "consumption-set-stale-revision",
+        ),
+        (
+            "CS17",
+            "cs17-set-stale-revision-identical-request",
+            _stale_second(True),
+            "CS7 where the second operation is the same intended payment, an identical "
+            "requestDigest under another operationKey: the set still fails, so the check keys on "
+            "the operation key and not on the request digest",
+            "consumption-set-stale-revision",
+        ),
+    ]
+    for draft_id, slug, second, row, code in sets:
+        member(
+            draft_id,
+            slug,
+            "CS4",
+            row,
+            cs_set(draft_id, second),
+            "valid",
+            tier="authoritative",
+            revision=REVISION_01,
+            joint={"verdict": "malformed", "codes": [code], "withinLimit": [True, True]},
+        )
+    member(
+        "CS8",
+        "cs8-set-release-without-a-none-record",
+        None,
+        "a record reading revision 42 holds an earlier call; the next, reading revision 43, "
+        "no longer holds it, and no record of that operation shows none or occurred: each "
+        "record valid, the release is unexplained",
+        _release_pair("CS8"),
+        "valid",
+        tier="authoritative",
+        revision=REVISION_01,
+        joint={
+            "verdict": "malformed",
+            "codes": ["consumption-set-release-unshown"],
+            "withinLimit": [True, True],
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Retained records (Section 4.7, rows R1 to R9).
 #
 # A retained record is A1's envelope beside the retention entry a retaining
@@ -2240,7 +2648,8 @@ ORDER = (
     "EV1 EV2 EV3 EV4 EV5 EV6 EV7 EV8 EV9 EV10 EV11 EV12 EV13 OV1 OV2 OV3 N1 N2 "
     "R1 R2 R3 R4 R5 R6 R7 R8 R9 "
     "FR13b FR16 FR17a FR17b FR17c FR18 EV14 "
-    "TI6 V4 V5 FR14 FR15"
+    "TI6 V4 V5 FR14 FR15 "
+    "CS1 CS2 CS3 CS4 CS5 CS6 CS7 CS8 CS9 CS10 CS11 CS12 CS13 CS14 CS15 CS16 CS17"
 ).split()
 
 
@@ -2253,6 +2662,10 @@ def expected_of(entry: Member) -> dict[str, Any]:
         expected["derivedTier"] = entry["tier"]
     if entry["dating"] is not None:
         expected["dating"] = entry["dating"]
+    if entry["within"] is not None:
+        expected["withinLimit"] = entry["within"]
+    if entry["joint"] is not None:
+        expected["set"] = entry["joint"]
     return expected
 
 
@@ -2277,6 +2690,23 @@ def optional_fields(entry: Member, ids: dict[str, str]) -> dict[str, Any]:
     return out
 
 
+def member_folder(entry: Member) -> str:
+    if entry["dating"] is not None:
+        return "retained"
+    return "sets" if entry["joint"] is not None else "statements"
+
+
+def member_bundle(made: Built) -> dict[str, Any]:
+    """The JSON a member's file carries: a set's records, a retained record's
+    envelope beside its entry, or the one envelope."""
+    if "set" in made:
+        return {"records": [envelope(payload) for payload in made["set"]]}
+    if "retained" in made:
+        retained_bundle: dict[str, Any] = made["retained"]
+        return retained_bundle
+    return envelope(made["payload"])
+
+
 def emit() -> None:
     define()
     statements_dir = os.path.join(HERE, "statements")
@@ -2285,7 +2715,7 @@ def emit() -> None:
     ids: dict[str, str] = {}
     for entry in MEMBERS:
         made = entry["build"]()
-        bundle = made["retained"] if "retained" in made else envelope(made["payload"])
+        bundle = member_bundle(made)
         raw = json.dumps(bundle, indent=2, sort_keys=True).encode() + b"\n"
         ident = vector_id(raw)
         if ident in ids.values():
@@ -2295,10 +2725,11 @@ def emit() -> None:
 
     retained_dir = os.path.join(HERE, "retained")
     os.makedirs(retained_dir, exist_ok=True)
+    os.makedirs(os.path.join(HERE, "sets"), exist_ok=True)
     vectors: list[dict[str, Any]] = []
     keep: set[str] = set()
     for entry, raw, ident in built:
-        folder = "retained" if entry["dating"] is not None else "statements"
+        folder = member_folder(entry)
         rel = f"{folder}/{ident}.json"
         with open(os.path.join(HERE, rel), "wb") as fh:
             fh.write(raw)
@@ -2315,7 +2746,7 @@ def emit() -> None:
         out.update(optional_fields(entry, ids))
         vectors.append(out)
 
-    for folder in ("statements", "retained"):
+    for folder in ("statements", "retained", "sets"):
         for stale in sorted(os.listdir(os.path.join(HERE, folder))):
             if stale.endswith(".json") and f"{folder}/{stale}" not in keep:
                 os.remove(os.path.join(HERE, folder, stale))
@@ -2428,6 +2859,11 @@ def write_index(manifest: dict[str, Any]) -> None:
             verdict = v["expected"]["verdict"]
         if "dating" in v["expected"]:
             verdict += ", " + _dating_label(v["expected"]["dating"])
+        if "withinLimit" in v["expected"]:
+            verdict += ", withinLimit " + str(v["expected"]["withinLimit"]).lower()
+        if "set" in v["expected"]:
+            joint = v["expected"]["set"]
+            verdict += f", the set {joint['verdict']} ({joint['codes'][0]})"
         source = f"Section {v['draftSection']}" if "draftSection" in v else "Appendix B"
         lines.append(
             f"| `{v['draftId']}` | {source} | {parent} | {verdict} | "

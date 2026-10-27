@@ -14,7 +14,12 @@ has no row for, and name the section in ``draftSection``. Members carrying
 they differ: an entry for an input with several values takes its pair from one
 value (``aggregate_values``), and the coverage clause of Section 5.7 is
 ``scopeComplete`` of true, a gap inside ``pathScope`` beside it being malformed
-at any tier.
+at any tier. Members CS1 to CS17 are rows of the same revision: a
+``consumption-state`` entry may carry the ``consumption`` member, and
+``decision.operationKey`` is the agent's identifier for one intended operation
+and the identity of a retry (``consumption_findings``, ``within_limit``,
+``verify_set``). A set member (CS7, CS8, CS17) is a file of several records
+judged one by one and then as a set under one ``limitDigest``.
 
 ``evaluation.inputs`` is required under both statuses, each entry's age runs
 from its ``lastResult`` to ``decision.reportedAt``, and the unavailable inputs
@@ -132,6 +137,43 @@ EVALUATION_INPUTS = frozenset(
 UNAVAILABLE_INPUTS = EVALUATION_INPUTS
 #: The three members an evaluation entry carries, each required, and no other.
 ENTRY_MEMBERS = frozenset({"input", "lastResult", "maxAge"})
+#: The one member an entry may carry beside them, and only on a consumption-state
+#: entry (Section 5.4 of revision 01): the cumulative-limit state the decision
+#: point read.
+ENTRY_OPTIONAL = frozenset({"consumption"})
+CONSUMPTION_INPUT = "consumption-state"
+#: The members of ``consumption``, each required, and no other.
+CONSUMPTION_MEMBERS = (
+    "limitDigest",
+    "unit",
+    "limit",
+    "consumed",
+    "reserved",
+    "requested",
+    "held",
+    "stateRevision",
+)
+#: The non-negative integers among them (smallest subunit of ``unit``).
+CONSUMPTION_COUNTS = ("limit", "consumed", "reserved", "requested", "stateRevision")
+#: The members of one ``held`` entry, an earlier permit that has not settled.
+HELD_MEMBERS = ("operationKey", "requestDigest", "amount")
+PERMITS = frozenset({"permit", "permit-with-conditions"})
+#: The sentences of the consumption rule, by name, so a sweep can weaken one at a
+#: time (check_vectors.py): where the member sits, that ``reserved`` is the held
+#: sum, that held keys are distinct, that the call carries its operation key,
+#: that counts are non-negative integers, that stateRevision is required, and
+#: that one key is one request.
+CONSUMPTION_CHECKS = frozenset(
+    {
+        "misplaced",
+        "reserved",
+        "distinct-keys",
+        "operation-key",
+        "counts",
+        "state-revision",
+        "key-reuse",
+    }
+)
 #: The lastResult of an input the decision point never held a value of.
 NEVER_HELD = "none"
 #: The tolerance for every comparison between times two parties wrote.
@@ -569,7 +611,7 @@ def _entry_shape(entry: Any) -> None:
         raise Malformed("evaluation-entry-malformed")
     if not ENTRY_MEMBERS <= set(entry):
         raise Malformed("member-missing")
-    if set(entry) - ENTRY_MEMBERS:
+    if set(entry) - ENTRY_MEMBERS - ENTRY_OPTIONAL:
         raise Malformed("evaluation-entry-malformed")
     if entry["input"] not in EVALUATION_INPUTS:
         raise Malformed("value-outside-vocabulary")
@@ -668,6 +710,135 @@ def _rule_oversight(state: _State) -> None:
         raise Malformed("oversight-malformed")
     if "recordDigest" in oversight and not _is_digest(oversight["recordDigest"]):
         raise Malformed("oversight-malformed")
+
+
+# --------------------------------------------------------------------------
+# Consumption binding (Section 5.4, revision 01): the operation key.
+# --------------------------------------------------------------------------
+
+
+def _is_count(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def consumption_of(pred: dict[str, Any]) -> dict[str, Any] | None:
+    """The ``consumption`` member of the consumption-state entry, if one carries it."""
+    for entry in pred["evaluation"]["inputs"]:
+        if isinstance(entry, dict) and entry.get("input") == CONSUMPTION_INPUT:
+            found = entry.get("consumption")
+            return found if isinstance(found, dict) else None
+    return None
+
+
+def held_for(consumption: dict[str, Any], decision: dict[str, Any]) -> dict[str, Any] | None:
+    """The held entry this call is a retry of: the one whose operationKey is the
+    call's own. Retry identity is the agent's operation key and nothing else; a
+    request digest is a content digest, so two intended payments with the same
+    action, arguments and resource share one (CS11, CS12)."""
+    for held in consumption["held"]:
+        if held["operationKey"] == decision.get("operationKey"):
+            return held
+    return None
+
+
+def within_limit(pred: dict[str, Any]) -> bool | None:
+    """The value a verifier derives for a record that carries consumption: the
+    amount already consumed, plus the amount held for earlier permits, plus this
+    call's amount unless it is a retry of a held permit, is at most the limit.
+    None for a record that carries no consumption."""
+    consumption = consumption_of(pred)
+    if consumption is None:
+        return None
+    counted = consumption["consumed"] + consumption["reserved"]
+    if held_for(consumption, pred["decision"]) is None:
+        counted += consumption["requested"]
+    return bool(counted <= consumption["limit"])
+
+
+def _held_shape(item: Any) -> None:
+    """One held entry: exactly operationKey, requestDigest and amount."""
+    if not isinstance(item, dict):
+        raise Malformed("consumption-malformed")
+    if any(name not in item for name in HELD_MEMBERS):
+        raise Malformed("member-missing")
+    if set(item) - set(HELD_MEMBERS):
+        raise Malformed("consumption-malformed")
+    key = item["operationKey"]
+    if not isinstance(key, str) or not key or not _is_digest(item["requestDigest"]):
+        raise Malformed("consumption-value-invalid")
+    if not _is_count(item["amount"]):
+        raise Malformed("consumption-value-invalid")
+
+
+def _consumption_shape(consumption: Any) -> dict[str, Any]:
+    if not isinstance(consumption, dict):
+        raise Malformed("consumption-malformed")
+    required = [
+        name
+        for name in CONSUMPTION_MEMBERS
+        if name != "stateRevision" or "state-revision" in CONSUMPTION_CHECKS
+    ]
+    if any(name not in consumption for name in required):
+        raise Malformed("member-missing")
+    if set(consumption) - set(CONSUMPTION_MEMBERS):
+        raise Malformed("consumption-malformed")
+    unit = consumption["unit"]
+    if not _is_digest(consumption["limitDigest"]) or not isinstance(unit, str) or not unit:
+        raise Malformed("consumption-value-invalid")
+    counted = [name for name in CONSUMPTION_COUNTS if name in consumption]
+    if "counts" in CONSUMPTION_CHECKS and not all(_is_count(consumption[n]) for n in counted):
+        raise Malformed("consumption-value-invalid")
+    held = consumption["held"]
+    if not isinstance(held, list):
+        raise Malformed("consumption-malformed")
+    for item in held:
+        _held_shape(item)
+    return consumption
+
+
+def _rule_consumption(state: _State) -> None:
+    """The consumption member and the operation key (CS3 to CS6, CS9 to CS14).
+
+    ``consumption`` sits only on a consumption-state entry. ``reserved`` is the
+    sum of the held amounts and the held operation keys are distinct. A record
+    that carries consumption carries ``decision.operationKey``. A call whose key
+    is held is a retry: its request digest and amount are the held entry's
+    (CS10), and it is not counted twice (CS4); a call whose key is not held is a
+    new operation even when its request digest is a held entry's (CS11, CS12)."""
+    pred = state.predicate
+    for entry in pred["evaluation"]["inputs"]:
+        if (
+            "misplaced" in CONSUMPTION_CHECKS
+            and "consumption" in entry
+            and entry["input"] != CONSUMPTION_INPUT
+        ):
+            raise Malformed("consumption-misplaced")
+    decision = pred["decision"]
+    key = decision.get("operationKey")
+    if "operationKey" in decision and (not isinstance(key, str) or not key):
+        raise Malformed("operation-key-invalid")
+    consumption = consumption_of(pred)
+    if consumption is None:
+        return
+    _consumption_shape(consumption)
+    keys = [held["operationKey"] for held in consumption["held"]]
+    if "distinct-keys" in CONSUMPTION_CHECKS and len(set(keys)) != len(keys):
+        raise Malformed("consumption-held-key-repeated")
+    held_sum = sum(held["amount"] for held in consumption["held"])
+    if "reserved" in CONSUMPTION_CHECKS and held_sum != consumption["reserved"]:
+        raise Malformed("consumption-reserved-mismatch")
+    if "operation-key" in CONSUMPTION_CHECKS and "operationKey" not in decision:
+        raise Malformed("member-missing")
+    retried = held_for(consumption, decision)
+    if (
+        "key-reuse" in CONSUMPTION_CHECKS
+        and retried is not None
+        and (
+            retried["requestDigest"] != decision["requestDigest"]
+            or retried["amount"] != consumption["requested"]
+        )
+    ):
+        raise Malformed("consumption-key-reused")
 
 
 def _rule_delegation(state: _State) -> None:
@@ -834,6 +1005,7 @@ RULES: list[tuple[str, Callable[[_State], None]]] = [
     ("closed-vocabularies", _rule_closed_vocabularies),
     ("evaluation", _rule_evaluation),
     ("oversight", _rule_oversight),
+    ("consumption", _rule_consumption),
     ("delegation", _rule_delegation),
     ("binding", _rule_binding),
     ("request-digest", _rule_request_digest),
@@ -997,9 +1169,7 @@ def _inclusion_proof(proof: bytes) -> tuple[bytes, int, int, list[bytes]]:
     return log_id, tree_size, leaf_index, path
 
 
-def inclusion_root(
-    leaf: bytes, leaf_index: int, tree_size: int, path: list[bytes]
-) -> bytes | None:
+def inclusion_root(leaf: bytes, leaf_index: int, tree_size: int, path: list[bytes]) -> bytes | None:
     """RFC 9162 Section 2.1.3.2, returning the root the path recomputes to."""
     if leaf_index >= tree_size:
         return None
@@ -1224,6 +1394,116 @@ def dating_rule_names() -> list[str]:
 
 
 # --------------------------------------------------------------------------
+# Records retained together (Section 5.4, revision 01): the set checks.
+# --------------------------------------------------------------------------
+
+
+@dataclass
+class SetReport:
+    """A set of records judged together under one limitDigest."""
+
+    verdict: str
+    codes: list[str]
+
+
+def _held_keys(pred: dict[str, Any]) -> set[str]:
+    consumption = consumption_of(pred)
+    assert consumption is not None
+    return {held["operationKey"] for held in consumption["held"]}
+
+
+def _revision(pred: dict[str, Any]) -> int:
+    consumption = consumption_of(pred)
+    assert consumption is not None
+    return int(consumption["stateRevision"])
+
+
+def _set_stale_revision(group: list[dict[str, Any]]) -> bool:
+    """A permit that read a stateRevision older than a record already holding an
+    unsettled permit, and omits that permit's operationKey from held, read a
+    state that had not counted it: one limit spent twice (CS7, CS17). The key is
+    the operation key; a request digest cannot tell two identical intended
+    payments apart (CS17)."""
+    for later in group:
+        for earlier in group:
+            if later is earlier or _revision(later) >= _revision(earlier):
+                continue
+            if later["decision"]["reported"] not in PERMITS:
+                continue
+            consumption = consumption_of(earlier)
+            assert consumption is not None
+            seen = _held_keys(later) | {later["decision"].get("operationKey")}
+            if any(held["operationKey"] not in seen for held in consumption["held"]):
+                return True
+    return False
+
+
+def _set_release_unshown(group: list[dict[str, Any]]) -> bool:
+    """A held permit absent from a record that read a later state must be
+    explained by the record of that operation: showing none (released) or
+    occurred (moved to consumed). A lost response leaves it held (CS8)."""
+    shown = {p["decision"].get("operationKey"): p["effect"]["observed"] for p in group}
+    for later in group:
+        for earlier in group:
+            if later is earlier or _revision(later) <= _revision(earlier):
+                continue
+            consumption = consumption_of(earlier)
+            assert consumption is not None
+            gone = _held_keys(earlier) - _held_keys(later)
+            if any(shown.get(key) not in ("none", "occurred") for key in gone):
+                return True
+    return False
+
+
+SET_RULES: list[tuple[str, str, Callable[[list[dict[str, Any]]], bool]]] = [
+    ("stale-revision", "consumption-set-stale-revision", _set_stale_revision),
+    ("release-unshown", "consumption-set-release-unshown", _set_release_unshown),
+]
+
+
+def consumption_set_findings(
+    predicates: list[dict[str, Any]], *, disabled: str | None = None
+) -> SetReport:
+    """Judge records that carry consumption, grouped by limitDigest. A set is
+    malformed on the first check, in SET_RULES order, that any group fails."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for pred in predicates:
+        consumption = consumption_of(pred)
+        if consumption is not None:
+            groups.setdefault(consumption["limitDigest"], []).append(pred)
+    for name, code, check in SET_RULES:
+        if name != disabled and any(check(group) for group in groups.values()):
+            return SetReport("malformed", [code])
+    return SetReport("valid", [])
+
+
+def set_records(raw: bytes) -> list[bytes]:
+    """The envelopes a set member carries, each as bytes a verifier is handed."""
+    bundle = json.loads(raw, object_pairs_hook=_no_duplicates)
+    return [json.dumps(env).encode() for env in bundle["records"]]
+
+
+def verify_set(
+    raw: bytes, policy: Policy, *, disabled: str | None = None
+) -> tuple[list[Report], SetReport]:
+    """Judge a set member: every record on its own, then the records together.
+    A record that is itself malformed leaves the set unjudged (malformed)."""
+    try:
+        envelopes = set_records(raw)
+    except (Malformed, ValueError, KeyError, TypeError):
+        return [], SetReport("malformed", ["set-unreadable"])
+    reports = [verify(env, policy, disabled=disabled) for env in envelopes]
+    if any(r.verdict != "valid" for r in reports):
+        return reports, SetReport("malformed", ["set-record-malformed"])
+    predicates = [parse_statement(_envelope_payload(env)[1])["predicate"] for env in envelopes]
+    return reports, consumption_set_findings(predicates, disabled=disabled)
+
+
+def set_rule_names() -> list[str]:
+    return [name for name, _, _ in SET_RULES]
+
+
+# --------------------------------------------------------------------------
 # The corpus judge.
 # --------------------------------------------------------------------------
 
@@ -1263,6 +1543,47 @@ def _declared_findings(entry: dict[str, Any], report: Report) -> list[str]:
         declared = expected.get("derivedTier")
         return [f"{label}: expected derivedTier {declared!r}, got {report.derived_tier!r}"]
     return []
+
+
+def _limit_findings(entry: dict[str, Any], raw: bytes) -> list[str]:
+    """A member whose record carries consumption declares the withinLimit a
+    verifier derives; a member that carries none declares none."""
+    label = f"{entry.get('draftId')} {entry.get('slug')}"
+    expected = entry.get("expected") or {}
+    try:
+        pred = json.loads(_envelope_payload(raw)[1])["predicate"]
+        got = within_limit(pred)
+    except (Malformed, KeyError, TypeError, ValueError):
+        return [] if "withinLimit" not in expected else [f"{label}: withinLimit cannot be derived"]
+    if got != expected.get("withinLimit"):
+        return [f"{label}: expected withinLimit {expected.get('withinLimit')}, got {got}"]
+    return []
+
+
+def _set_findings(entry: dict[str, Any], raw: bytes, policy: Policy) -> list[str]:
+    """A set member: each record reaches the member's verdict, tier and
+    withinLimit, and the records together reach expected.set."""
+    label = f"{entry.get('draftId')} {entry.get('slug')}"
+    expected = entry["expected"]
+    declared = expected["set"]
+    reports, joint = verify_set(raw, policy)
+    findings: list[str] = []
+    for index, report in enumerate(reports):
+        for found in _declared_findings(entry, report):
+            findings.append(f"record {index + 1}: {found}")
+    limits = []
+    for env in set_records(raw):
+        limits.append(within_limit(json.loads(_envelope_payload(env)[1])["predicate"]))
+    if limits != declared.get("withinLimit"):
+        findings.append(
+            f"{label}: expected withinLimit {declared.get('withinLimit')}, got {limits}"
+        )
+    if (joint.verdict, joint.codes) != (declared["verdict"], declared["codes"]):
+        findings.append(
+            f"{label}: expected set {declared['verdict']} {declared['codes']}, "
+            f"got {joint.verdict} {joint.codes}"
+        )
+    return findings
 
 
 def conforming_verdicts(entry: dict[str, Any]) -> set[str]:
@@ -1357,8 +1678,13 @@ def _judge_member(
         findings.extend(_declared_findings(entry, report))
         findings.extend(_dating_findings(entry, dated))
         return identifier, kind, findings
+    if "set" in expected:
+        findings.extend(_set_findings(entry, raw, policy))
+        return identifier, kind, findings
     report = verify(raw, policy)
     findings.extend(aggregation_findings(entry, raw))
+    if kind == "accept":
+        findings.extend(_limit_findings(entry, raw))
     if kind in ("accept", "reject"):
         findings.extend(_declared_findings(entry, report))
     elif kind == "indeterminate":

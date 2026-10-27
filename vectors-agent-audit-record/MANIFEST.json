@@ -50,11 +50,11 @@
       }
     ]
   },
-  "corpusDigest": "4a4d5329232ed7404ff53a48155ee4d774a518564d8af5b9b3e1716ca8858a06",
+  "corpusDigest": "0eb7c3be1246ce3d61df6810c7d8d46a169adc8250f2d7afa3170bc7612f0e92",
   "counts": {
-    "accept": 38,
+    "accept": 48,
     "indeterminate": 1,
-    "reject": 72
+    "reject": 79
   },
   "draft": "draft-gilda-audit-agent-audit-record-00",
   "emptyTree": {
@@ -1843,6 +1843,318 @@
       "parentDraftId": "FR14",
       "row": "the entry carrying the second value's lastResult beside the first value's maxAge, under evaluated: the pair the -00 rule writes, age 3600 under 60",
       "slug": "fr15-oldest-last-result-beside-smallest-max-age"
+    },
+    {
+      "draftId": "CS1",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": true
+      },
+      "file": "statements/vd831202c1ad2f50c.json",
+      "id": "vd831202c1ad2f50c",
+      "kind": "accept",
+      "row": "a consumption entry under a limit of 50000: consumed 30000, nothing held, requested 12000, so 42000 of 50000",
+      "slug": "cs1-within-limit-nothing-held"
+    },
+    {
+      "draftId": "CS2",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": false
+      },
+      "file": "statements/v6cc2e68d93e92dda.json",
+      "id": "v6cc2e68d93e92dda",
+      "kind": "accept",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with requested 25000, 55000 of 50000, still a permit: valid and findable, a decision point exceeding its authority",
+      "slug": "cs2-beyond-limit-permit"
+    },
+    {
+      "draftId": "CS3",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "consumption-reserved-mismatch"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/v10ba3fc4188f0e39.json",
+      "id": "v10ba3fc4188f0e39",
+      "kind": "reject",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with reserved 12000 and nothing held",
+      "slug": "cs3-reserved-not-the-held-sum"
+    },
+    {
+      "draftId": "CS4",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": true
+      },
+      "file": "statements/v9b00b354248b297c.json",
+      "id": "v9b00b354248b297c",
+      "kind": "accept",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "the retry of the first call: operationKey and requestDigest equal a held entry of 12000, within the limit (42000) only because it is not counted twice",
+      "slug": "cs4-retry-not-counted-twice"
+    },
+    {
+      "draftId": "CS5",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "consumption-value-invalid"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/vb67f7ec106141463.json",
+      "id": "vb67f7ec106141463",
+      "kind": "reject",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with requested of -1",
+      "slug": "cs5-negative-requested"
+    },
+    {
+      "draftId": "CS6",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "consumption-misplaced"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/vbb2c8162ef6a8d03.json",
+      "id": "vbb2c8162ef6a8d03",
+      "kind": "reject",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with the consumption member also on the policy-source entry",
+      "slug": "cs6-consumption-on-a-policy-source-entry"
+    },
+    {
+      "draftId": "CS7",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "set": {
+          "codes": [
+            "consumption-set-stale-revision"
+          ],
+          "verdict": "malformed",
+          "withinLimit": [
+            true,
+            true
+          ]
+        },
+        "verdict": "valid"
+      },
+      "file": "sets/v149c4a717d5c0797.json",
+      "id": "v149c4a717d5c0797",
+      "kind": "accept",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "the retry of the first call, which reads revision 42 and holds it, then a new operation that reads revision 41, omits the held call and is permitted: each record valid, the pair spends the limit twice",
+      "slug": "cs7-set-stale-revision-omits-held"
+    },
+    {
+      "draftId": "CS8",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "set": {
+          "codes": [
+            "consumption-set-release-unshown"
+          ],
+          "verdict": "malformed",
+          "withinLimit": [
+            true,
+            true
+          ]
+        },
+        "verdict": "valid"
+      },
+      "file": "sets/v2c9175c6a76c19fa.json",
+      "id": "v2c9175c6a76c19fa",
+      "kind": "accept",
+      "row": "a record reading revision 42 holds an earlier call; the next, reading revision 43, no longer holds it, and no record of that operation shows none or occurred: each record valid, the release is unexplained",
+      "slug": "cs8-set-release-without-a-none-record"
+    },
+    {
+      "draftId": "CS9",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "member-missing"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/vcc73d61ebdee4655.json",
+      "id": "vcc73d61ebdee4655",
+      "kind": "reject",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with stateRevision removed",
+      "slug": "cs9-no-state-revision"
+    },
+    {
+      "draftId": "CS10",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "consumption-key-reused"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/v39dcf1038e2b1c48.json",
+      "id": "v39dcf1038e2b1c48",
+      "kind": "reject",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "CS4 with the held entry's requestDigest another request's: one operation key reused for a different request",
+      "slug": "cs10-held-key-with-another-request"
+    },
+    {
+      "draftId": "CS11",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": true
+      },
+      "file": "statements/v48738ecf3d62a507.json",
+      "id": "v48738ecf3d62a507",
+      "kind": "accept",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "CS4 under another operationKey with consumed 20000: the same intended payment again, a new operation counted (20000 + 12000 + 12000 = 44000 of 50000)",
+      "slug": "cs11-new-operation-same-request-within-limit"
+    },
+    {
+      "draftId": "CS12",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": false
+      },
+      "file": "statements/v8ed304e3129736a6.json",
+      "id": "v8ed304e3129736a6",
+      "kind": "accept",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "CS4 under another operationKey: counted it is 54000 of 50000, and read as a retry of the held call it would be 42000",
+      "slug": "cs12-new-operation-same-request-beyond-limit"
+    },
+    {
+      "draftId": "CS13",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "consumption-held-key-repeated"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/v8602d00da9dff937.json",
+      "id": "v8602d00da9dff937",
+      "kind": "reject",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "CS4 with two held entries under one operationKey, 12000 each, summing to reserved",
+      "slug": "cs13-two-held-entries-one-key"
+    },
+    {
+      "draftId": "CS14",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [
+          "member-missing"
+        ],
+        "verdict": "malformed"
+      },
+      "file": "statements/v4cdf02dcf7e21dcb.json",
+      "id": "v4cdf02dcf7e21dcb",
+      "kind": "reject",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with decision.operationKey removed",
+      "slug": "cs14-no-operation-key"
+    },
+    {
+      "draftId": "CS15",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": true
+      },
+      "file": "statements/v45d917b447e398f5.json",
+      "id": "v45d917b447e398f5",
+      "kind": "accept",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with limitDigest the digest of a limit document the authority names: not delegation.authorityDigest, and valid",
+      "slug": "cs15-limit-document-differs-from-authority"
+    },
+    {
+      "draftId": "CS16",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "verdict": "valid",
+        "withinLimit": true
+      },
+      "file": "statements/v7f27584250e068d1.json",
+      "id": "v7f27584250e068d1",
+      "kind": "accept",
+      "parent": "vd831202c1ad2f50c",
+      "parentDraftId": "CS1",
+      "row": "CS1 with limitDigest equal to delegation.authorityDigest, the authority document stating the limit itself",
+      "slug": "cs16-limit-document-is-the-authority"
+    },
+    {
+      "draftId": "CS17",
+      "draftRevision": "draft-gilda-audit-agent-audit-record-01",
+      "expected": {
+        "codes": [],
+        "derivedTier": "authoritative",
+        "set": {
+          "codes": [
+            "consumption-set-stale-revision"
+          ],
+          "verdict": "malformed",
+          "withinLimit": [
+            true,
+            true
+          ]
+        },
+        "verdict": "valid"
+      },
+      "file": "sets/vbc0faef3ecca56e2.json",
+      "id": "vbc0faef3ecca56e2",
+      "kind": "accept",
+      "parent": "v9b00b354248b297c",
+      "parentDraftId": "CS4",
+      "row": "CS7 where the second operation is the same intended payment, an identical requestDigest under another operationKey: the set still fails, so the check keys on the operation key and not on the request digest",
+      "slug": "cs17-set-stale-revision-identical-request"
     }
   ]
 }
