@@ -8,16 +8,18 @@ carries the row's identifier in `draftId` (`A1`, `F3b`, `R4`, ...) and its
 `from` column in `parentDraftId`. After the last row come seven members for
 sentences of Section 5.4 that Appendix B has no row for; each carries
 `draftSection` and continues the identifier series beside it (`FR13b`, `FR16`,
-`FR17a` to `FR17c`, `FR18`, `EV14`). The last five members are rows of revision
-01 of the draft (`TI6`, `V4`, `V5`, `FR14`, `FR15`); each carries
-`draftRevision` and the identifier -01 prints. [`INDEX.md`](INDEX.md) lists
-every member beside its file.
+`FR17a` to `FR17c`, `FR18`, `EV14`). The last members are rows of revision 01
+of the draft: `TI6`, `V4`, `V5`, `FR14` and `FR15`, then `CS1` to `CS17`, which
+bind consumption state with an operation key; each carries `draftRevision` and
+the identifier -01 prints. [`INDEX.md`](INDEX.md) lists every member beside its
+file.
 
 ## Which revision this tests
 
 | Release | Draft revision the corpus tests | Members |
 | --- | --- | --- |
-| v0.26.0 and later | `draft-gilda-audit-agent-audit-record-00`, and five rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 5 rows of -01 |
+| v0.27.0 and later | `draft-gilda-audit-agent-audit-record-00`, and 22 rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 22 rows of -01 |
+| v0.26.0 to v0.26.2 | `draft-gilda-audit-agent-audit-record-00`, and five rows of `-01` | the 99 Appendix B rows, 7 Section 5.4 members and 5 rows of -01 |
 | v0.17.0 to v0.25.0 | `draft-gilda-wimse-agent-audit-record-02` | 68 at v0.18.1, 71 at v0.25.0 |
 
 A record under revision 02 carries no `evaluation.inputs`, which Section 5.4 of
@@ -27,7 +29,7 @@ revision and is not a conformance claim for -00. To test -00, pin v0.26.0 or
 later. Every member keeps its Appendix B identifier; the file identifiers are
 digests of member bytes and moved where a member gained its inputs.
 [`ID-MAP.json`](ID-MAP.json) maps each `draftId` to its file identifier at
-v0.18.1, v0.25.0 and v0.26.0 and says what changed.
+v0.18.1, v0.25.0, v0.26.0 and v0.27.0 and says what changed.
 
 Each member is a DSSE envelope whose payload is an in-toto Statement carrying one
 agent audit record, except `R1` to `R9`: each of those is a retained record, a
@@ -235,6 +237,49 @@ by SHA-256 in [`REVISION-01-PIN.json`](REVISION-01-PIN.json).
 `check_vectors.py` proves both changes are load-bearing: restoring the -00
 coverage clause fails exactly `TI6`, `V4` and `V5`, and restoring independent
 minima in `aggregate_values` fails `FR14`'s aggregation check.
+
+## Consumption state and the operation key: `CS1` to `CS17`
+
+A cumulative limit, such as a delegated spending limit, makes a permit correct
+only if what is already consumed, plus what is held for earlier permits that
+have not settled, plus this call's amount, is within the limit. A
+`consumption-state` entry of `evaluation.inputs` may therefore carry a
+`consumption` member (`limitDigest`, `unit`, `limit`, `consumed`, `reserved`,
+`requested`, `held` and `stateRevision`), and `decision.operationKey` is the
+agent's identifier for one intended operation, taken from its signed request.
+The key is required whenever a `consumption` member is present. The design and
+its worked case (limit 50000 pence, 30000 consumed, one 12000 payment held) are
+in [#213](https://github.com/probityai/agent-evidence-vectors/issues/213).
+
+- Retry identity is the operation key, scoped by `limitDigest`. A call whose key
+  is held is a retry: its `requestDigest` and amount must be the held entry's
+  (`CS10` refuses one key reused for another request), and it is not counted
+  twice (`CS4`). A call whose key is not held is a new operation and is counted
+  even when its `requestDigest` equals a held entry's (`CS11`, `CS12`). A
+  `requestDigest` is a content digest over action, arguments and resource, so
+  two identical intended payments share one; only the key tells them apart.
+- A verifier derives `withinLimit`, and the manifest carries it in
+  `expected.withinLimit` the way it carries `agreement`. A permit beyond the
+  limit is valid and findable (`CS2`, `CS12`), never rejected.
+- `reserved` is the sum of the held amounts (`CS3`), held keys are distinct
+  (`CS13`), amounts are non-negative integers (`CS5`), `consumption` sits only
+  on a `consumption-state` entry (`CS6`), `stateRevision` is required (`CS9`)
+  and so is the operation key (`CS14`). `limitDigest` may differ from
+  `delegation.authorityDigest` when the limit sits in another document (`CS15`)
+  and equals it when the authority states the limit (`CS16`).
+- `CS7`, `CS8` and `CS17` are files in `sets/` of several records under one
+  `limitDigest`. Each record is judged on its own, then the records together
+  under `expected.set`: a permit that read an older `stateRevision` and omits a
+  held operation key spent one limit twice (`CS7`), and a held permit released
+  with no record of that operation showing `none` is unexplained (`CS8`).
+  `CS17` is the control: two operations with identical `requestDigest` and
+  distinct keys, so a check keyed on the request digest passes where the
+  operation key fails.
+
+`check_vectors.py` drops each sentence of the rule and each set check in turn and
+requires the corpus to fail on exactly the members that test it; a retry keyed
+on the request digest fails `CS10` and `CS12`, and dropping the set check fails
+`CS7`, `CS8` and `CS17`. The Go rail in `corpora/` runs the same sweep.
 
 ## Retained records and the dating check: Section 4.7
 
