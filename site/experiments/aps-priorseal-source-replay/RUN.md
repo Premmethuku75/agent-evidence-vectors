@@ -145,5 +145,5 @@ The capsule's [review-only notice](https://github.com/altrudev/Frequency-Federat
   unmodified on a GitHub-hosted runner, against the wrapper `run-pinned.sh` at `b12879d5`. All three
   injected-failure cases matched the vector: the wrapper exits 0, records 0 and prints `PASS` with no report.
   The artifact is retained on [run 37404021921](https://github.com/piiiico/agent-errata/actions/runs/37404021921),
-  and the full record is [atlas#43](https://github.com/probityai/agent-evidence-atlas/issues/43). It covers that
+  and the full record is [atlas#43](https://github.com/probityai/agent-evidence/issues/31). It covers that
   wrapper revision only, not the corrected runner at `cf738909`.

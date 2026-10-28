@@ -252,7 +252,7 @@
       "status": "draft",
       "summary": "Provides task-based project navigation, agent assurance documentation and an Open Evidence Lab run register.",
       "task": "Choose a tool or inspect recorded claims and retained runs",
-      "url": "https://github.com/probityai/agent-evidence-atlas"
+      "url": "https://github.com/probityai/agent-evidence"
     },
     {
       "display_name": "Checkout composition reference",
@@ -317,7 +317,7 @@
       "status": "released",
       "summary": "Provides a source-tagged agent guard harness, signed admission records and public regression cases.",
       "task": "Check an agent guard against replay and regression cases",
-      "url": "https://github.com/probityai/ratchet"
+      "url": "https://github.com/probityai/probity"
     },
     {
       "display_name": "Agent Evidence Vectors",

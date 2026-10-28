@@ -56,7 +56,7 @@ contribution is a concrete experiment with a named owner. A run in the Lab does
 not appoint your project to a coalition role or establish its endorsement.
 
 Have a tool, a check, or a problem to work on?
-[Join the collaboration thread](https://github.com/probityai/agent-evidence-atlas/issues/49)
+[Join the collaboration thread](https://github.com/probityai/agent-evidence/issues/24)
 and tell us about it.
 
 [Propose a run](https://github.com/probityai/agent-evidence/issues/new?template=evidence-run.yml).
