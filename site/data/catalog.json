@@ -418,8 +418,8 @@
       "status": "draft",
       "publication": "public",
       "reviewed": true,
-      "full_name": "probityai/agent-evidence-atlas",
-      "url": "https://github.com/probityai/agent-evidence-atlas",
+      "full_name": "probityai/agent-evidence",
+      "url": "https://github.com/probityai/agent-evidence",
       "source": {
         "repository": "repo-atlas",
         "commit": "44066a188c1b080b7c9bd5a73f6626c229baaa14",
@@ -435,8 +435,8 @@
       "status": "released",
       "publication": "public",
       "reviewed": true,
-      "full_name": "probityai/ratchet",
-      "url": "https://github.com/probityai/ratchet",
+      "full_name": "probityai/probity",
+      "url": "https://github.com/probityai/probity",
       "source": {
         "repository": "repo-ratchet",
         "commit": "e2164379c19cf17a00356dfbdf625a998272ac58",
