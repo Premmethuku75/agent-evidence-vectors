@@ -22,7 +22,7 @@ There is a separate run-contract limit. In the [pinned review wrapper at `b12879
 
 ## Roles and acceptance
 
-The [replay tools guide](replay-tools.md) describes the current tools, which require callers to declare their runner identity. They retain the entrypoint and helper source hashes separately from producer input pins. The [copied-file procedure](https://github.com/probityai/agent-evidence/blob/main/site/experiments/aps-priorseal-source-replay/RUN.md#use-copied-tools-outside-an-atlas-checkout) supports callers without an Atlas checkout. A declared identity does not prove who controlled the operator, keys or storage. Historical receipts and pilot decisions retain their original scope.
+The [replay tools guide](replay-tools.md) describes the current tools, which require callers to declare their runner identity. They retain the entrypoint and helper source hashes separately from producer input pins. The [copied-file procedure](https://github.com/probityai/agent-evidence/blob/main/site/experiments/aps-priorseal-source-replay/RUN.md#use-copied-tools-outside-an-atlas-checkout) supports callers without an Atlas checkout. A declared identity does not prove who controlled the operator, keys or storage. Old receipts and pilot decisions keep the scope they were issued under.
 
 | Work | Proposed owner | Decision needed |
 |----|----|----|

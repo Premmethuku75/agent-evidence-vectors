@@ -33,7 +33,7 @@ records the frozen protocol, reviewed source, merge and authenticated workflow
 run separately.
 
 All 128 calls started and scored. None has an error, incomplete, unknown-start
-or unsupported outcome. Completeness does not remove wrong policy decisions.
+or unsupported outcome. A complete run can still contain wrong policy decisions.
 
 ## Original semantic scores
 

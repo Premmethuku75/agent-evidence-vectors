@@ -16,7 +16,7 @@ action. An invalid record cannot establish whether the action succeeded. Probity
 keeps the test outcome, the record's validity and the recorded result separate,
 with the inputs and reader needed to repeat the check.
 
-This note demonstrates those meanings with published conformance fixtures. The
+This note shows those meanings on published conformance fixtures. The
 refund workflow is an example of the customer problem. The measurements below
 come from synthetic artifacts.
 
