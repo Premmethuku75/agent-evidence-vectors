@@ -2,7 +2,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/probityai/agent-evidence/ci.yml?label=CI)](https://github.com/probityai/agent-evidence/actions/workflows/ci.yml)
 [![Licence](https://img.shields.io/github/license/probityai/agent-evidence)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/probityai/agent-evidence?style=flat)](https://github.com/probityai/agent-evidence/stargazers)
+[![Stars](https://img.shields.io/github/stars/probityai/agent-evidence?style=flat)](https://github.com/probityai/agent-evidence)
 [![vectors on PyPI](https://img.shields.io/pypi/v/agent-evidence-vectors?label=vectors)](https://pypi.org/project/agent-evidence-vectors/)
 [![vectors per month](https://img.shields.io/pypi/dm/agent-evidence-vectors?label=vectors%20per%20month)](https://pepy.tech/projects/agent-evidence-vectors)
 [![vectors total](https://static.pepy.tech/badge/agent-evidence-vectors)](https://pepy.tech/projects/agent-evidence-vectors)
