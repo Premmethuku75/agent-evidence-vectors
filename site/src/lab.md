@@ -13,9 +13,7 @@ authorized the request. It takes a separate observation to show that the refund
 happened. If the acknowledgement was lost, the outcome may still be unknown.
 These are different questions, and the evidence should keep them separate.
 
-The Open Evidence Lab helps teams test a specific question like this. A useful
-run leaves an example you can reproduce, a result you can inspect, and a clear
-account of its limits. A failed check or missing observation can be useful too.
+The Open Evidence Lab helps teams test a specific question like this. A useful run leaves an example you can reproduce and a result you can inspect, and it says what it does not show. A failed check or missing observation can be useful too.
 
 ## Find an example
 
@@ -47,9 +45,7 @@ the observed effect match the approved action?
 
 Probity offers working examples, verification tools, a shared result page, and
 help with the integration it contributes. You bring the real question and the
-part of the system you can exercise. Together, define what success would mean,
-include cases that should fail, and retain the original output. A check your
-own project can keep is a useful next step.
+part of the system you can exercise. Together we agree what success would mean, add cases that should fail, and keep the original output. The aim is a check your own project can keep running.
 
 You keep control of your implementation, policy, and original result. The first
 contribution is a concrete experiment with a named owner. A run in the Lab does
@@ -317,9 +313,7 @@ both provenance files.
 
 ## Retained recovery and actual-weight runs
 
-These are Probity-operated runs and Probity-selected reader reproductions. They
-advance runnable capability and retained measurement; they establish no outside
-workflow adoption or independent effect custody. [The register](lab/register.json)
+These are Probity-operated runs and Probity-selected reader reproductions. They add runnable capability and retained measurement. They do not show outside workflow adoption or independent effect custody. [The register](lab/register.json)
 binds measured claims to exact report fields and retains separate outcome axes.
 
 | Run | Measured result | Retained bytes and limit |
@@ -395,7 +389,7 @@ intermediate writes occurred.
 The record remains voluntary/peer/log-import/software-only. Its predicate is
 valid, native invocation reports complete and the selected byte join verifies,
 while `scopeComplete` is false and typed collection health remains
-`unknown-no-typed-envelope`. These axes stay separate. The producer's native
+`unknown-no-typed-envelope`. Each of these is reported on its own.  The producer's native
 learn/check PASS is a same-byte calibration outside the claimed signed interval;
 it does not establish authority, collection health or task quality. Same-team
 software signing does not establish independent key, store or clock custody.
@@ -433,7 +427,7 @@ remote revocation or external effect custody. Child process identifiers are
 unsigned runner testimony. Expected outcomes were exposed in the tests, and
 observations and assertions were emitted together.
 
-This is an additional bounded Lab record. It preserves all fifteen earlier
+This record adds to the register and preserves all fifteen earlier
 register objects and artifact bytes. Upstream maintainer acceptance, completed
 host CI, recurring outside use and independently operated custody remain
 unestablished for this contribution.
@@ -616,8 +610,7 @@ reader refuses the unsupported format profile. The upgraded reader preserves
 the earlier native reports and verifies the format experiment's evidence for
 bounded report publication. A separate selected quality policy still holds
 both larger-model schema-decoded policy rows: each is correct in one of six
-cases against the example host's minimum of three. Verification of evidence,
-publication of a scoped report and approval of model decisions are distinct.
+cases against the example host's minimum of three. Verifying the evidence does not approve the model's decisions, and publishing a scoped report does not either.
 A changed-source mutant is also held.
 
 The [complete installed upgrade archive](experiments/installed-format-policy-2026-10-02/original-artifact.zip)
@@ -652,8 +645,7 @@ and [source/member provenance](experiments/model-boundary-cpu-2026-10-02/provena
 preserve all 871 compact members and an explicit mapping to the complete
 901-member preparation original, including all thirty omissions. The complete
 original remains privately archived. All fourteen earlier register objects and
-retained artifact bytes remain unchanged. Selected source, installed consumer
-acceptance and actual outside operation remain distinct records.
+retained artifact bytes remain unchanged. The selected source, the installed consumer's acceptance and actual outside operation are recorded separately.
 
 ## Installed boundary evidence and semantic quality policy
 

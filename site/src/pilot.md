@@ -24,7 +24,7 @@ The [replay tools guide](replay-tools.html) describes the current tools, which r
 They retain the entrypoint and helper source hashes separately from producer input pins.
 The [copied-file procedure](https://github.com/probityai/agent-evidence/blob/main/site/experiments/aps-priorseal-source-replay/RUN.md#use-copied-tools-outside-an-atlas-checkout) supports callers without an Atlas checkout.
 A declared identity does not prove who controlled the operator, keys or storage.
-Historical receipts and pilot decisions retain their original scope.
+Old receipts and pilot decisions keep the scope they were issued under.
 
 | Work | Proposed owner | Decision needed |
 | --- | --- | --- |

@@ -32,7 +32,7 @@ Keep the generated `receipt.json` or `record.json`, its child command metadata a
 
 The CI artifact keeps `result/receipt.json` and `contract-result/record.json` with their sibling logs. The curated controls are in `caller-controls/public-results/`. Their manifest declares that base relative to its own directory and binds each selected file by size and SHA-256. Follow those declared paths to check the artifact.
 
-The wrapper's `meetsRunContract` is true only when its actual and retained exits are zero and a previously absent report path exists after execution. It does not establish that the report is valid or that Probity admitted it. The procedure keeps the original producer outcomes and their stated limits.
+The wrapper's `meetsRunContract` is true only when its actual and retained exits are zero and a previously absent report path exists after execution. It does not establish that the report is valid or that Probity admitted it. The procedure leaves the original producer outcomes and their stated limits unchanged.
 
 <a id="read-the-existing-evidence"></a>
 

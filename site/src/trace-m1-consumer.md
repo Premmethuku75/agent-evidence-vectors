@@ -24,4 +24,4 @@ The command downloads fixtures using [a manifest of the producer commit and file
 
 Signature verification checks byte integrity. It does not establish workload identity, authority, effects or the truth of the producer's result. The [supported ASCII JSON profile](https://github.com/probityai/agent-evidence/blob/main/site/interop/trace-m1/src/json_profile.py) covers a subset of the [JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785.html), and an unsigned mapping of external evidence remains outside [TRACE Trust Record](https://github.com/agentrust-io/trace-spec/blob/4c7d6eccc468c87f2d00e02118b29164a4a5479b/schema/trace-claim.json) and conformance claims.
 
-[Find other retained runs](runs.html) or [bring an evidence question to the Open Evidence Lab](lab.html).
+[Find other retained runs](runs.html), or [bring an evidence question to the Open Evidence Lab](lab.html).

@@ -54,7 +54,7 @@ selected file by size and SHA-256. Follow those declared paths to check the arti
 The wrapper's `meetsRunContract` is true only when its actual and retained exits
 are zero and a previously absent report path exists after execution.
 It does not establish that the report is valid or that Probity admitted it.
-The procedure keeps the original producer outcomes and their stated limits.
+The procedure leaves the original producer outcomes and their stated limits unchanged.
 
 ## Read the existing evidence
 

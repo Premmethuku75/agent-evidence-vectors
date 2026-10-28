@@ -78,7 +78,7 @@ action labels from the frozen policy contract: `admit`, `dispatch`, `hold`,
 | 360M | 24 | 9/16 | 5/16 | 2/16 |
 | 360M | 96 | 9/16 | 5/16 | 2/16 |
 
-This separates a candidate interface intervention from decision reasoning.
+It tests the interface change on its own, apart from decision reasoning.
 Constraining outputs to host-selected valid action labels could remove the
 first class of failures. The five wrong decisions using valid labels already
 show that vocabulary compliance alone cannot satisfy the original task rubric.
