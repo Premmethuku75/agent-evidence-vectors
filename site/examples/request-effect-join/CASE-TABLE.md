@@ -1,7 +1,7 @@
 # A changed call and a later changed file
 
 `giskard09` selected [execution-join-ref-v1](https://github.com/giskard09/argentum-core/blob/f4d989052bb3a61691b1b156cd6dd655793fea4f/docs/spec/execution-join-ref-v1.md)
-for [the Lab's request/effect case](https://github.com/probityai/agent-evidence-atlas/issues/49#issuecomment-6072781535).
+for [the Lab's request/effect case](https://github.com/probityai/agent-evidence/issues/24#issuecomment-6247269392).
 This table freezes the two situations separately so a producer, reader and file-effect observer can compare the same cases.
 
 The producer's selected contract owns its identifier and failure-code semantics.
