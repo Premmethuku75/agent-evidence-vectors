@@ -39,6 +39,15 @@ from typing import Any
 # uploaded whole, and the count below says how many were elided.
 MAX_ROWS = 50
 
+# The one line that points a reader of a passing run at the offline verifier.
+# The corpus READMEs carry the same text, and scripts/probity-bridge-test.py
+# holds every copy to this constant, so a release of probityai changes the pin
+# here and the test names every README still on the old one.
+BRIDGE = (
+    "Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). "
+    "Check evidence offline with probity-verify: `pip install probityai==0.1.0`."
+)
+
 
 def required(name: str) -> str:
     value = os.environ.get(name)
@@ -117,11 +126,7 @@ def main() -> int:
     summary.append(f"| {cells} |\n\n")
 
     if result == "pass":
-        summary.append(
-            "Verified by Probity (github.com/probityai/probity). "
-            "The `probityai` command line is planned and not yet released: "
-            "`uv add probityai`, then `pip install probityai`.\n\n"
-        )
+        summary.append(f"{BRIDGE}\n\n")
 
     summary.extend(_failure_rows(report))
 
