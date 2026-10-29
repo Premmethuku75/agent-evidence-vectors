@@ -110,6 +110,11 @@ probity-verify = { git = "https://github.com/probityai/probity", rev = "932c1e3e
 
 [dependency-groups]
 crosscheck = ["probity-verify"]
+# The repository tools of the imported parts (scripts/workspace.py and the other
+# tests under tests/). The packages under packages/ are standalone projects built
+# by directory (`uv build packages/<name>`); none of them has a runtime dependency. Their ruff run
+# reads ruff-parts.toml, not the rules below, which the corpora and the rail keep.
+dev = ["packaging==26.3", "pytest==9.1.1", "ruff==0.17.1"]
 
 # What the wheel carries, and where. The rail is a single stdlib-only module
 # kept at packaging/run_vectors.py, where every gate in scripts/ imports it by
@@ -533,3 +538,7 @@ select = ["E", "F", "W", "I", "UP", "B", "C901"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-ra"]

@@ -21,3 +21,11 @@ __pycache__/
 
 # Generated site output.
 _site/
+
+# Rust and Python build output of the crates and packages.
+target/
+.venv/
+dist/
+*.egg-info/
+build/
+conformance-report.json
