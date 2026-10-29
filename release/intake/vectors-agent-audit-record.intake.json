@@ -99,7 +99,7 @@
       },
       "path": "vectors-agent-audit-record/README.md",
       "serialization": "bytes",
-      "sha256": "6cc970f9466c9e2940d54954d79df8d2f5974d20f415c4bc8c5ffc1571b139b6"
+      "sha256": "f516ea299befd2665d4218eddfd5e45785006c35c558f155cb67d26882f9250f"
     },
     {
       "consumed": "unconsumed",
@@ -1485,7 +1485,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "6f5a4bcee7cc8d96a4e78bbf0b94b405a043422a42c860eca8d8af97533d0fc5"
+    "sha256": "ad0c152347c79cf3cf3712ef87af7a6c66acabb882e17862d1ede8ca27614b1c"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
