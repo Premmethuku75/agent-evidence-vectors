@@ -41,13 +41,13 @@ MAX_ROWS = 50
 
 # The line that points a reader at the offline verifier. A failing run carries
 # OFFLINE alone, because a maintainer reading a red run is who wants the tool;
-# a passing run, and every corpus README, carry BRIDGE, which adds the "Verified
-# by" statement a failing run cannot make. scripts/probity-bridge-test.py holds
+# a passing run, and every corpus README, carry BRIDGE, which adds the "Checked with
+# Probity" statement a failing run cannot make. scripts/probity-bridge-test.py holds
 # every copy to these constants, so a release of probityai changes the pin here
 # and the test names every README still on the old one.
 OFFLINE = "Check evidence offline with probity-verify: `pip install probityai==0.1.0`."
 BRIDGE = (
-    "Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). "
+    "Checked with Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). "
     + OFFLINE
 )
 
