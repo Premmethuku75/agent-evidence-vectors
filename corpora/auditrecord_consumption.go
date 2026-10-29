@@ -14,9 +14,11 @@ import (
 // the Go rail, mirroring packaging/agent_evidence_vectors/auditrecord.py. A
 // consumption-state entry of evaluation.inputs may carry a consumption member,
 // and decision.operationKey is the agent's identifier for one intended
-// operation and the identity of a retry. Members CS1 to CS17 exercise it; CS7,
-// CS8 and CS17 are files of several records judged one by one and then as a
-// set under one limitDigest.
+// operation and the identity of a retry. Members CS1 to CS25 exercise it, and
+// consumption.supersedes names the limit document a record's limitDigest
+// replaced. CS7, CS8, CS17, CS18 to CS22 and CS25 are files of several records judged
+// one by one and then as a set, under one ledger: the limitDigest values that
+// supersedes links.
 
 // arInt reads a JSON integer as the decoder's json.Number.
 func arInt(value any) (int64, bool) {
@@ -103,6 +105,35 @@ func arHeldShape(item any) error {
 }
 
 func arConsumptionShape(consumption map[string]any) error {
+	if err := arConsumptionMembership(consumption); err != nil {
+		return err
+	}
+	digest, _ := consumption["limitDigest"].(string)
+	unit, isText := consumption["unit"].(string)
+	if !arIsDigest(digest) || !isText || unit == "" {
+		return arRefuse("consumption-value-invalid")
+	}
+	if err := arConsumptionSupersedes(consumption, digest); err != nil {
+		return err
+	}
+	if err := arConsumptionCountValues(consumption); err != nil {
+		return err
+	}
+	held, ok := consumption["held"].([]any)
+	if !ok {
+		return arRefuse("consumption-malformed")
+	}
+	for _, item := range held {
+		if err := arHeldShape(item); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// arConsumptionMembership: every required member is present and no member is
+// outside the required and optional sets.
+func arConsumptionMembership(consumption map[string]any) error {
 	for _, name := range arConsumptionMembers {
 		if name == "stateRevision" && !arConsumptionChecks["state-revision"] {
 			continue
@@ -112,29 +143,38 @@ func arConsumptionShape(consumption map[string]any) error {
 		}
 	}
 	for name := range consumption {
-		if !arContains(arConsumptionMembers, name) {
+		if !arContains(arConsumptionMembers, name) && !arContains(arConsumptionOptional, name) {
 			return arRefuse("consumption-malformed")
 		}
 	}
-	digest, _ := consumption["limitDigest"].(string)
-	unit, isText := consumption["unit"].(string)
-	if !arIsDigest(digest) || !isText || unit == "" {
+	return nil
+}
+
+// arConsumptionSupersedes: a supersedes member is a digest and names a limit
+// other than the one this set is held under.
+func arConsumptionSupersedes(consumption map[string]any, digest string) error {
+	raw, present := consumption["supersedes"]
+	if !present {
+		return nil
+	}
+	replaced, isDigest := raw.(string)
+	if arConsumptionChecks["supersedes-digest"] && (!isDigest || !arIsDigest(replaced)) {
 		return arRefuse("consumption-value-invalid")
 	}
-	if arConsumptionChecks["counts"] {
-		for _, name := range arConsumptionCounts {
-			if value, ok := consumption[name]; ok && !arIsCount(value) {
-				return arRefuse("consumption-value-invalid")
-			}
-		}
+	if arConsumptionChecks["supersedes-self"] && replaced == digest {
+		return arRefuse("consumption-supersedes-self")
 	}
-	held, ok := consumption["held"].([]any)
-	if !ok {
-		return arRefuse("consumption-malformed")
+	return nil
+}
+
+// arConsumptionCountValues: each declared count member is a count.
+func arConsumptionCountValues(consumption map[string]any) error {
+	if !arConsumptionChecks["counts"] {
+		return nil
 	}
-	for _, item := range held {
-		if err := arHeldShape(item); err != nil {
-			return err
+	for _, name := range arConsumptionCounts {
+		if value, ok := consumption[name]; ok && !arIsCount(value) {
+			return arRefuse("consumption-value-invalid")
 		}
 	}
 	return nil
@@ -232,7 +272,7 @@ type arSetRule struct {
 	check func(group []map[string]any) bool
 }
 
-// arSetRules are the checks across the records under one limitDigest, in the
+// arSetRules are the checks across the records of one ledger, in the
 // order a set is refused. It is a variable so a test can drop one.
 var arSetRules = []arSetRule{
 	{"stale-revision", "consumption-set-stale-revision", arSetStaleRevision},
@@ -311,17 +351,75 @@ func arSetReleaseUnshown(group []map[string]any) bool {
 	return false
 }
 
-// arConsumptionSetFindings judges the records that carry consumption, grouped
-// by limitDigest. A set is malformed on the first check, in arSetRules order,
-// that any group fails. disabled names one check to skip.
-func arConsumptionSetFindings(predicates []map[string]any, disabled string) arSetReport {
-	groups := map[string][]map[string]any{}
-	for _, pred := range predicates {
-		if consumption := arConsumptionOf(pred); consumption != nil {
-			digest, _ := consumption["limitDigest"].(string)
-			groups[digest] = append(groups[digest], pred)
+// arSetChainJoin is the one way records are grouped: a replacement links two
+// limit documents into one ledger. A test drops it to read the groups as one
+// limitDigest each. arSetJoinAll reads every record as one ledger whatever its
+// limit (CS25).
+var (
+	arSetChainJoin = true
+	arSetJoinAll   = false
+)
+
+// arConsumptionGroups groups the records that carry consumption by ledger. Two
+// limitDigest values belong to one ledger when any record names one as the
+// other's supersedes, transitively (CS18 to CS22): a permit held under a limit
+// that was then replaced is still held under the replacement, so its retry is
+// the same operation and its release has to be shown. Records whose limitDigest
+// values no supersedes links stay in separate groups (CS25). A retry is identified by
+// its operation key and never by the limit, and stateRevision orders the whole
+// ledger, so a replacement does not restart it.
+func arConsumptionGroups(predicates []map[string]any) [][]map[string]any {
+	parent := map[string]string{}
+	var find func(digest string) string
+	find = func(digest string) string {
+		if _, known := parent[digest]; !known {
+			parent[digest] = digest
 		}
+		if parent[digest] != digest {
+			parent[digest] = find(parent[digest])
+		}
+		return parent[digest]
 	}
+	type carrier struct {
+		digest string
+		pred   map[string]any
+	}
+	var carrying []carrier
+	for _, pred := range predicates {
+		consumption := arConsumptionOf(pred)
+		if consumption == nil {
+			continue
+		}
+		digest, _ := consumption["limitDigest"].(string)
+		if replaced, has := consumption["supersedes"].(string); arSetChainJoin && has {
+			parent[find(replaced)] = find(digest)
+		}
+		carrying = append(carrying, carrier{digest, pred})
+	}
+	grouped := map[string][]map[string]any{}
+	var order []string
+	for _, item := range carrying {
+		root := find(item.digest)
+		if arSetJoinAll {
+			root = ""
+		}
+		if _, seen := grouped[root]; !seen {
+			order = append(order, root)
+		}
+		grouped[root] = append(grouped[root], item.pred)
+	}
+	groups := make([][]map[string]any, 0, len(order))
+	for _, root := range order {
+		groups = append(groups, grouped[root])
+	}
+	return groups
+}
+
+// arConsumptionSetFindings judges the records that carry consumption, grouped
+// by ledger (arConsumptionGroups). A set is malformed on the first check, in
+// arSetRules order, that any group fails. disabled names one check to skip.
+func arConsumptionSetFindings(predicates []map[string]any, disabled string) arSetReport {
+	groups := arConsumptionGroups(predicates)
 	for _, rule := range arSetRules {
 		if rule.name == disabled {
 			continue
