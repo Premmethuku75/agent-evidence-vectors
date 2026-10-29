@@ -1,9 +1,10 @@
-name: ci
+name: parts
 
-# One entry point for every pull request and every push to main. The changes
+# The entry point for the crates, packages, Action and conformance board imported from
+# agent-evidence (ci.yml holds the corpus, the rail and the readers). The changes
 # job asks scripts/workspace.py which areas a change touches (crates/<name>,
 # packages/<name>, actions, vectors, site); each area's checks run only when needed, and
-# `ci-ok` is the one required check. An imported area adds its job here and to
+# `ci-ok` collects them. An imported area adds its job here and to
 # the `needs` of `ci-ok`.
 
 on:
@@ -19,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: parts-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -59,8 +60,12 @@ jobs:
         with:
           version: "0.12.8"
           enable-cache: false
-      - name: one lint configuration for the repository tools
-        run: uv run --frozen --only-group dev ruff check .
+      - name: one lint configuration for the repository tools of the imported parts
+        run: uv run --frozen --only-group dev ruff check --config ruff-parts.toml scripts/workspace.py scripts/build_predicate_pages.py scripts/build_vocabulary_pages.py scripts/check-jcs-admit-python-release.py scripts/check-jcs-admit-python-release-test.py scripts/check_predicate_pages.py scripts/check_uris_resolve.py scripts/family_pin_guard.py scripts/record_paths.py scripts/go-module-size-gate.py tests packages actions
+      - name: the root Go module stays small
+        run: |
+          python3 scripts/go-module-size-gate.py --selftest
+          python3 scripts/go-module-size-gate.py
       - name: the repository tools' tests
         run: uv run --frozen --only-group dev python -m pytest
       - name: the jcs-admit wheel release check refuses every fault it names

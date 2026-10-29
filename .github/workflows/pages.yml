@@ -35,8 +35,21 @@ jobs:
         run: uv sync --extra dev
       - name: check page routes and links
         run: uv run --extra dev python -m pytest -q scripts/test_site_navigation.py
+      # The identifier pages imported from agent-evidence are copied into the site
+      # unchanged. w3id.org/agent-evidence/ resolves to them, and the predicate pages
+      # are pinned by pages/predicate/v1/PAGES.sha256.
+      - name: every imported predicate page matches its pin
+        run: python3 scripts/check_predicate_pages.py
       - name: build the site from tracked files
         run: uv run python docs/site/build.py --out _site
+      - name: the built site carries the imported identifier pages byte for byte
+        run: |
+          set -euo pipefail
+          cd pages
+          find . -type f ! -path ./index.html -print0 | sort -z | while IFS= read -r -d '' file; do
+            cmp "$file" "../_site/${file#./}"
+          done
+          echo "every imported identifier file is in the built site unchanged"
       - name: the built pages load nothing from another host
         run: |
           # A hermetic page names no external script or stylesheet. Links to the
@@ -73,3 +86,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: every predicate type URI answers 200 from the published host
         run: python3 scripts/predicate-uri-gate.py --live
+      # Only the host can show that it serves the pinned bytes, and only after the deploy.
+      - name: every imported predicate page is served with its pinned bytes
+        run: |
+          set -euo pipefail
+          while read -r digest name; do
+            url="https://probityai.github.io/agent-evidence-vectors/predicate/v1/$name/"
+            served=""
+            for _ in 1 2 3 4 5 6; do
+              if served="$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" && [ "$served" = "$digest" ]; then
+                break
+              fi
+              sleep 20
+            done
+            if [ "$served" != "$digest" ]; then
+              echo "::error::$url serves $served, pinned $digest"
+              exit 1
+            fi
+            echo "$url serves the pinned page"
+          done < pages/predicate/v1/PAGES.sha256
