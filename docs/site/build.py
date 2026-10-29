@@ -12,7 +12,6 @@ import html
 import json
 import posixpath
 import re
-import shutil
 import sys
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -588,35 +587,6 @@ def write_discovery(out: Path, paths: Iterable[Path]) -> None:
     (out / "sitemap.xml").write_bytes(sitemap(paths))
 
 
-#: The identifier pages imported from agent-evidence: the two predicate types, the vocabulary
-#: terms and their registry bytes, and the witness key. Persistent identifiers at
-#: https://w3id.org/agent-evidence/ resolve to these paths, and the predicate pages are pinned by
-#: pages/predicate/v1/PAGES.sha256, so they are copied byte for byte and never re-rendered.
-IMPORTED_PAGES = REPO_ROOT / "pages"
-
-
-def copy_imported_pages(out: Path) -> int:
-    """Copy the imported identifier pages into the built site unchanged; return how many.
-
-    The root pages/index.html is left out: it was the landing page of the retired
-    /agent-evidence/ site, and the corpus index is this site's root. A path that a generated page
-    already holds is a collision and stops the build, so a later predicate or route cannot
-    silently replace a published identifier.
-    """
-    copied = 0
-    for source in sorted(p for p in IMPORTED_PAGES.rglob("*") if p.is_file()):
-        relative = source.relative_to(IMPORTED_PAGES)
-        if relative == Path("index.html"):
-            continue
-        target = out / relative
-        if target.exists():
-            raise SystemExit(f"FAIL: pages/{relative.as_posix()} collides with a generated page")
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
-        copied += 1
-    return copied
-
-
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=SUMMARY)
     parser.add_argument("--out", required=True, type=Path)
@@ -636,9 +606,8 @@ def main(argv: list[str]) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(rendered, encoding="utf-8")
     write_discovery(out, pages)
-    imported = copy_imported_pages(out)
     (out / ".nojekyll").write_text("", encoding="utf-8")
-    print(f"wrote {len(pages)} pages and copied {imported} imported identifier files to {out}")
+    print(f"wrote {len(pages)} pages to {out}")
     return 0
 
 

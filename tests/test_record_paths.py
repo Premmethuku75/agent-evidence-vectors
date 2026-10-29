@@ -39,7 +39,7 @@ def test_every_local_root_is_found(path: str) -> None:
 
 @pytest.mark.parametrize(
     "text",
-    ["site/experiments/x/report.json", "../.build/result", "https://example.invalid/home/page",
+    ["pages/x/report.json", "../.build/result", "https://example.invalid/home/page",
      "see the foo/tmp/bar file", "a~/b"],
 )
 def test_repo_relative_paths_and_urls_pass(text: str) -> None:
@@ -74,10 +74,6 @@ def _tracked(*pathspec: str) -> list[Path]:
         ["git", "ls-files", "-z", *pathspec], cwd=ROOT, capture_output=True, check=True
     ).stdout.decode()
     return [ROOT / n for n in out.split("\0") if n]
-
-
-def _tracked_records() -> list[Path]:
-    return [p for p in _tracked("site") if p.name.endswith(RECORD_SUFFIXES)]
 
 
 # These files define the path patterns themselves, so they must spell the roots.
@@ -138,16 +134,6 @@ def _leaks(paths: list[Path], *, decode: bool) -> list[str]:
             if found is not None:
                 leaks.append(f"{name}: {found!r}")
     return leaks
-
-
-def test_the_scan_sees_the_published_records() -> None:
-    names = {p.relative_to(ROOT).as_posix() for p in _tracked_records()}
-    assert "site/experiments/remora-e7-pip-0.25.0-2026-10-23/report.json" in names
-    assert len(names) > 100
-
-
-def test_no_published_record_carries_an_absolute_local_path() -> None:
-    assert not _leaks(_tracked_records(), decode=False)
 
 
 def test_no_tracked_file_or_encoded_field_carries_an_absolute_local_path() -> None:

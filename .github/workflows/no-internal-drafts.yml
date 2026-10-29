@@ -79,12 +79,9 @@ jobs:
             fi
           done
           # Absolute home paths are never legitimate in a published artifact.
-          # site/ keeps the qualification records of past experiments byte for
-          # byte (their digests are cited); the paths in them name a CI box
-          # account, not a person.
-          if git grep -nI -E '/home/[a-z_][a-z0-9_-]*/' -- . ':!*.yml' ':!site/' >/dev/null 2>&1; then
+          if git grep -nI -E '/home/[a-z_][a-z0-9_-]*/' -- . ':!*.yml' >/dev/null 2>&1; then
             echo "::error::an absolute /home/<user>/ path is tracked; it leaks the author's filesystem"
-            git grep -nI -E '/home/[a-z_][a-z0-9_-]*/' -- . ':!*.yml' ':!site/' | head -20
+            git grep -nI -E '/home/[a-z_][a-z0-9_-]*/' -- . ':!*.yml' | head -20
             found=1
           fi
           exit $found

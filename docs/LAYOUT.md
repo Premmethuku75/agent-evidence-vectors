@@ -8,8 +8,7 @@
 | `packages/<name>/` | one Python distribution each | uv, as members of the root uv workspace |
 | `actions/` | the code behind the root `action.yml`, the one Action of this repository ([ACTION.md](ACTION.md)) | nothing to build; `run.py` uses the standard library |
 | `vectors/` | the conformance corpora and their harness | uv |
-| `site/` | the conformance board and the pages that serve the published identifiers | the site's own build |
-| `pages/` | the Pages site of this repository, `https://probityai.github.io/agent-evidence/`: the pages the persistent identifiers under `https://w3id.org/agent-evidence/` redirect to ([predicate-pages.md](predicate-pages.md)) | `scripts/build_predicate_pages.py`, deployed by `pages.yml` |
+| `pages/` | the pages the persistent identifiers under `https://w3id.org/agent-evidence/` redirect to, served at `https://probityai.github.io/agent-evidence/` ([predicate-pages.md](predicate-pages.md)); this repository's own Pages site does not serve them | `scripts/build_predicate_pages.py`, pins checked by `pages.yml` |
 
 A directory appears when its part is imported. An import brings the source repository's full history under the new directory, so `git log --follow` and `git blame` keep working, and renames its tags with the part's prefix (below). The source repository is then archived, and its tags, releases, Actions and pages keep working.
 

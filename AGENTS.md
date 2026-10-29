@@ -18,7 +18,7 @@ most often breaks here.
   `scripts/readme-lint.py` fails a README over 600 prose words, with no code block in its first
   45 lines, or with a relative link that resolves to no file.
 
-Parts imported from agent-evidence (`crates/`, `packages/`, `actions/`, `pages/`, `site/`, `release.toml`):
+Parts imported from agent-evidence (`crates/`, `packages/`, `actions/`, `pages/`, `release.toml`):
 
 - Run `uv run --frozen --only-group dev ruff check .` and `uv run --frozen --only-group dev python -m pytest` from the root before every commit that touches them.
 - Run `actionlint` after editing anything under `.github/workflows/`.

@@ -4,7 +4,5 @@
 # Run: uv run --frozen --only-group dev ruff check --config ruff-parts.toml scripts/workspace.py tests packages actions
 # The repository tools read TOML with tomllib, which needs Python 3.11.
 target-version = "py311"
-# site/ is the conformance board: its docs/ are published bytes and its
-# experiments are frozen with recorded digests. A crate brings its own checks
-# (crate-<name>.yml), which ruff was never part of.
-extend-exclude = ["crates", "site"]
+# A crate brings its own checks (crate-<name>.yml), which ruff was never part of.
+extend-exclude = ["crates"]

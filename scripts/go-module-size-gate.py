@@ -2,7 +2,7 @@
 
 The Go module proxy serves the root module as a zip of every tracked file that does not sit
 under a nested go.mod (a directory with its own go.mod is a separate module and is left out).
-The repository also holds trees that are not Go source (site/, crates/, packages/), so each of
+The repository also holds trees that are not Go source (crates/, packages/), so each of
 those carries a sentinel go.mod; a new large tree without one would be shipped to every
 consumer of the module. This gate measures the uncompressed bytes of the files the module zip
 would carry and fails above the bound.
@@ -76,7 +76,7 @@ def main(argv: list[str]) -> int:
     print(f"root module carries {total} bytes uncompressed (bound {BOUND_BYTES})")
     if total > BOUND_BYTES:
         print("the root Go module is over its bound: give the new tree a sentinel go.mod "
-              "(see site/go.mod) or move it out of the module root", file=sys.stderr)
+              "(see packages/go.mod) or move it out of the module root", file=sys.stderr)
         return 1
     return 0
 

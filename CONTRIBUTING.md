@@ -321,7 +321,7 @@ the sign-off is yours; a tool does not add one on your behalf.
 
 ## Crates, packages and the Action
 
-The repository also holds the `dsse` and `jcs-admit` crates under `crates/`, the vocabulary and admission packages under `packages/`, the admission checks of the root Action under `actions/`, and the conformance board under `site/`. Each directory documents its own checks in its README. From the repository root:
+The repository also holds the `dsse` and `jcs-admit` crates under `crates/`, the vocabulary and admission packages under `packages/`, and the admission checks of the root Action under `actions/`. Each directory documents its own checks in its README. From the repository root:
 
 ```bash
 uv run --frozen --only-group dev ruff check .
