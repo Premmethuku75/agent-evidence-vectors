@@ -404,6 +404,13 @@ show_error_codes = true
 python_version = "3.13"
 files = ["packaging", "vectors", "tools"]
 
+[tool.typecheck-gate]
+# Imported from the sibling specification repository with their own jobs:
+# parts.yml lints and tests actions/, packages/ and tests/, the crate workflows
+# own crates/, and the site-* workflows own site/. scripts/typecheck-gate.py
+# does not read these directories and does not count them.
+held-elsewhere = ["actions", "crates", "packages", "site", "tests"]
+
 [tool.pyright]
 # Named by DIRECTORY, deliberately, and this is the whole point of the section.
 #
