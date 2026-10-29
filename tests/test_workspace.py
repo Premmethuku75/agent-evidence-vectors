@@ -109,3 +109,24 @@ def test_the_repository_itself_reads_cleanly() -> None:
     assert isinstance(workspace.areas(), list)
     with pytest.raises(SystemExit, match="names no single unit|does not match"):
         workspace.release_target("dsse-v0.0.0")
+
+
+@pytest.mark.parametrize("tag, version", [("v0.30.0", "0.30.0"), ("v1.2.3", "1.2.3"), ("v0.0.0", "0.0.0")])
+def test_a_bare_corpus_tag_resolves_to_no_registry(tag: str, version: str) -> None:
+    got = workspace.release_target(tag)
+    assert got["registry"] == "none" and got["prefix"] == "" and got["version"] == version
+
+
+@pytest.mark.parametrize("tag", ["v0.30", "v0.30.0-rc1", "V0.30.0", "v0.30.0.1", "vv0.30.0", "cited/1bc6a5a"])
+def test_a_near_miss_of_a_bare_tag_is_still_refused(tag: str) -> None:
+    with pytest.raises(SystemExit, match="is not <prefix>-v"):
+        workspace.release_target(tag)
+
+
+def test_every_prefixed_unit_tag_resolves_to_a_real_registry_in_this_repository() -> None:
+    units = tomllib.loads((workspace.ROOT / "release.toml").read_text())["unit"]
+    assert units
+    for unit in units:
+        version = workspace._version(unit, workspace.ROOT)
+        got = workspace.release_target(f"{unit['prefix']}-v{version}")
+        assert got["registry"] == unit["registry"] != "none", unit["prefix"]

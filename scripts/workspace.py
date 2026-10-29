@@ -24,6 +24,9 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 _DOCS = re.compile(r"(docs/.*|.*\.md|LICENSE)\Z")
 _TAG = re.compile(r"(?P<prefix>[a-z0-9][a-z0-9-]*?)-v(?P<version>\d+\.\d+\.\d+)\Z")
+# The corpus release: a bare v<major>.<minor>.<patch> tag. release.yml publishes it from its
+# own tag-push path, so a GitHub release published for it resolves to no registry.
+_BARE_TAG = re.compile(r"v(?P<version>\d+\.\d+\.\d+)\Z")
 _TOP_AREAS = ("actions", "vectors", "site", "pages")
 
 
@@ -59,7 +62,15 @@ def _version(unit: dict[str, str], root: Path) -> str:
 
 
 def release_target(tag: str, root: Path = ROOT) -> dict[str, str]:
-    """Resolve a release tag ``<prefix>-v<version>`` to the unit it publishes."""
+    """Resolve a release tag ``<prefix>-v<version>`` to the unit it publishes.
+
+    A bare ``v<version>`` tag is the corpus release; it names no unit of release.toml and
+    resolves to registry ``none``, which every release job treats as "publish nothing".
+    """
+    bare = _BARE_TAG.match(tag)
+    if bare:
+        return {"prefix": "", "name": "agent-evidence-vectors", "registry": "none",
+                "directory": "", "version": bare["version"]}
     match = _TAG.match(tag)
     if not match:
         raise SystemExit(f"release tag {tag!r} is not <prefix>-v<major>.<minor>.<patch>")
