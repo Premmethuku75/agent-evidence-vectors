@@ -83,7 +83,7 @@ def mutation_errors(work: Path) -> list[str]:
     source = SUMMARY.read_text(encoding="utf-8")
     anchor = 'summary.append(f"{BRIDGE}\\n\\n")'
     if source.count(anchor) != 1:
-        return ["mutation: the bridge append is not present exactly once, so it would prove nothing"]
+        return ["mutation: the bridge append is not present exactly once; it would prove nothing"]
     mutant = work / "action-summary-mutant.py"
     mutant.write_text(source.replace(anchor, "pass"), encoding="utf-8")
     if not summary_errors(mutant, work):
