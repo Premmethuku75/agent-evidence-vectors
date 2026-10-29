@@ -68,7 +68,7 @@
       },
       "path": "vectors-self-reported-record/README.md",
       "serialization": "bytes",
-      "sha256": "cc38f9313bd0c559130fbf6cc10da24f029489e835d522ed36239f97921e0b65"
+      "sha256": "4aca61ae923d883de87b2087dea873e4f6da35b9f5a071d0ac6a2ac8edde14a9"
     },
     {
       "consumed": "unconsumed",
@@ -235,7 +235,7 @@
         "go.mod"
       ],
       "serialization": "sha256-listing-v1",
-      "sha256": "1557dd3bcc55d30f59e1bee7177b54588418cf88a2e5f2026904bac5dd6d9c91"
+      "sha256": "ff357ce342f96db881e437868dbe9d0d27471d5434e982193a54fd583d019e41"
     },
     "runtime": {
       "name": "go",
@@ -340,7 +340,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "534261b052688b7c18748329cda67931d5be3ac4ac87ea634743f0e122fc4483"
+    "sha256": "3aa9e143d142119f90935128dbaacbd9e158a1779365199306871d8f2da69a8f"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
