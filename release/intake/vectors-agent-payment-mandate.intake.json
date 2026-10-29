@@ -68,7 +68,7 @@
       },
       "path": "vectors-agent-payment-mandate/README.md",
       "serialization": "bytes",
-      "sha256": "65c66eed829c2601aa3011dd302255f16dc793064635a87bcb92346771283cd1"
+      "sha256": "25d6d5cea3b7d8730266d71f9d6d1d27daac1331e7222c340d24726cabeeaecb"
     },
     {
       "consumed": "unconsumed",
@@ -372,7 +372,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "6496e512a30cdcf2ee06f79a57b4aa01c9a9429d73fc5b35e56f94eedecd9b0a"
+    "sha256": "509482b3b0e92f563fc0412eb9ddb498c5a449db287eb6391fdfd27392918ec5"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
