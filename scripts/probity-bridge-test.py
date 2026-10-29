@@ -37,7 +37,7 @@ _spec.loader.exec_module(_module)
 BRIDGE: str = _module.BRIDGE
 OFFLINE: str = _module.OFFLINE
 
-# The README badge: shields.io with the probityai org avatar (32 px PNG) as the
+# The README badge: shields.io with the probityai org avatar (a small PNG) as the
 # logo, linking the verifier repository. Every README carries this exact text.
 BADGE = (
     "[![Checked with Probity]("
