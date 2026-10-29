@@ -87,7 +87,7 @@ def sync(root: Path, version: str, apply: bool) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument("--check", action="store_true", help="fail instead of rewriting")
     args = parser.parse_args()
     version = published_version(ROOT)
