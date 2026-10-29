@@ -2,6 +2,8 @@
 
 Conformance vectors and an independent twin verifier for the evidence artifacts of the Proof-of-Control standard (LFDT-ProofOfControl, v1.0 draft).
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 For implementers of a Proof-of-Control verifier or evidence producer, and for the working group that wants a requirement to name a test.
 
 ```

@@ -7,6 +7,8 @@ the grade **derived by the consumer** from what the record shows. A grade the
 producer declares, and integrity booleans the producer sets about its own
 record, never raise it.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Replay from the installed package:
 
 ```sh

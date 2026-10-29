@@ -4,6 +4,8 @@ The subject under test here is not a protocol message. It is a **run record**:
 the artifact a cross-implementation claim rests on when it says two
 implementations agree.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The rule is in `../docs/INTEROP-EVIDENCE.md` and `check_run_record.py` is that
 rule as code. This corpus is the checker's own conformance suite, so the rule
 is measured rather than asserted beside itself. `aee-verify` runs the

@@ -7,6 +7,8 @@ attribution, the model, a prompt fingerprint, the embedded acceptance contract
 and human sign-offs. The predicate is under discussion for adoption at
 `ossf/tac#628`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The suite tests a verifier in the predicate's default **attest-only** mode:
 recompute the artifact digests, verify the ed25519 signatures over the
 canonical statement, and read attribution from the predicate without executing

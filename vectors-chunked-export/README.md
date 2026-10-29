@@ -4,6 +4,8 @@ Cases for `chunked-export/v1`: an export gate's view when one chunk of a flagged
 dataset is presented, and the decision the gate must reach. The expected
 decision and reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Each chunk is reversible on its own, through a documented delete-from-destination
 capability, so every per-step class is honestly `reversible`. The chain is not:
 once enough of the dataset has left, the recipient can reconstruct it, and

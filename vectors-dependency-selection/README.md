@@ -7,6 +7,8 @@ consumer-held profile `dependency-selection/v1` (section 6.2), so the verifier,
 the signature scheme and the three verdicts are the ones
 [`vectors-artifact-binding`](../vectors-artifact-binding/) already pins.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Run it:
 
 ```bash

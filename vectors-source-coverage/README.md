@@ -4,6 +4,8 @@ Eight synthetic cases for `source_text_coverage/v1`. Each case has a separate
 consumer policy, a source capture binding, and a report binding. The expected
 decision and reason are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 | Case | Expected decision | Distinction |
 | --- | --- | --- |
 | complete | supported | The selected passage appears in both bound artifacts. |

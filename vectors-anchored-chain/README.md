@@ -11,6 +11,8 @@ signed chain, plus a rollback to an abandoned branch,
 a re-anchoring attempt and three controls. The expected decision and reason
 for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The point of the corpus is the column headed "every signature verifies". An
 adversary with write access to the store and no key can delete, reorder,
 replay and roll back records the system signed itself. Those stores pass any

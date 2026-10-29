@@ -7,6 +7,8 @@ records (identifier registrations, grants, revocations, disputes, resolutions,
 identifier links, retirements), one signed presentation, and the policy that
 judges them. The cases come in four sets:
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 - `tree-`: revocation across a delegation tree, including a revocation that is
   disputed, as in the case "revocation issued in error, or disputed" proposed to
   the AAIF Identity and Trust working group;

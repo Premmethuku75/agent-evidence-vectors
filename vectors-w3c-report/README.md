@@ -16,6 +16,8 @@ subject types, the Run object of `draft-arsentev-agent-run-metrics-00` and the
 discovery snapshot of `draft-arsentev-llm-context-discovery-00`, judged by
 their own sentences.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## Where the corpus and the v0.1 text differ
 
 Section 10 of v0.1 says the text governs where the two differ. The three

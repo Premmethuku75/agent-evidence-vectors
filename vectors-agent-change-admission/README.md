@@ -9,6 +9,8 @@ evaluator, the recorded-trace corpus each new guard was replayed over, the
 digest of every report it rests on, the gates it checked and every exception
 met on the way.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Replay from the installed package:
 
 ```sh

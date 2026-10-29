@@ -6,6 +6,8 @@ anybody can check is that they are still the bytes their publisher released.
 This corpus gives such sets a home and a check, and it is the check a
 publisher's own CI can run against the directory it keeps.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## The contract
 
 A recorded set is a directory holding a `SHA256SUMS` file and the files it

@@ -3,6 +3,8 @@
 Nineteen checks over ACI Draft Specification v0.9, one per normative sentence,
 and 26 deployments that force them.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ```sh
 go build -o aee-verify ./cmd/aee-verify
 ./aee-verify vectors-aci

@@ -10,6 +10,8 @@ measured in `0091` (a file can be pinned, listed and carried and still enter no
 verdict). The six messages are vendored under `spec-vendored/` and pinned by
 sha256 in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## Every ground is a sentence
 
 The messages carry no identifiers. Each rejection ground is minted here as

@@ -5,6 +5,8 @@ agent acting under delegated authority, the bytes it dispatched, and the
 decision a verifier must reach at dispatch time. The expected decision and
 reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 An approval says someone agreed to an action once. Whether the authority behind
 it still held when the action left is a separate question, and the column
 headed "approved bytes" is the point of the corpus: several denied records

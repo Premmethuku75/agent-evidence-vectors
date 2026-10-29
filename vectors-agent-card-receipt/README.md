@@ -6,6 +6,8 @@ its issuer and the time of the check. The expected decision and reason for every
 are in `MANIFEST.json`, and the predicate is specified in
 [spec/predicates/agent-card-receipt.md](../spec/predicates/agent-card-receipt.md).
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 A card is self-declared. The receipt is a second statement from someone who ran the
 agent: it names the card by the digest of its RFC 8785 form without its top-level
 `signatures` (A2A section 8.4.1 rules 2 and 3), says how it graded, and says until when.

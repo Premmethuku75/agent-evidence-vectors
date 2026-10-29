@@ -7,6 +7,8 @@ know whether the effect happened. The safe reading is that it is unknown: a retr
 may repeat it, and capacity held for it stays charged until the effect owner says
 what it holds.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Each case is a runtime's trail for that operation, with an expected decision and
 reason in `MANIFEST.json`. Each case also names the runtime scenario it pairs with:
 the behaviour of a counting effect owner that puts a runtime in the same situation,

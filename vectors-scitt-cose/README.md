@@ -7,6 +7,8 @@ header, and the RFC 9942 Receipt in its unprotected header hold together well
 enough that a party who trusts neither the agent nor its operator can check the
 thing offline.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 `../profiles/scitt-cose.md` is the profile these vectors enforce. Read it first;
 every requirement here resolves to a section of it, and every section of it
 resolves to a section of a published document.

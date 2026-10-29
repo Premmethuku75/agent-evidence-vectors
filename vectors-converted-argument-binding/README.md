@@ -6,6 +6,8 @@ shown to the approver, the approval, the rebuild of the approved arguments, the
 call as it stood after the approval chain, and the arguments the tool ran with.
 The expected decision and reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The rule is the one inspect_ai adopted in
 [UKGovernmentBEIS/inspect_ai#5652](https://github.com/UKGovernmentBEIS/inspect_ai/pull/5652)
 (design `design/tool-approval-arguments.md`, head

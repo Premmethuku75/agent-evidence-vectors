@@ -2,6 +2,8 @@
 
 Suite `done-probes/v1`. What a grader runs beside the acceptance commands: an import probe that reads no answer, the visible test run again inside the candidate's own process, and detectors over the visible test. Every member declares the five checks' verdicts and the outcome and integrity verdicts over them.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Follows the Done Receipt predicate (spec/predicates/done-receipt.md). The rules and the members are recorded from probity-verify's tests at probityai/probity@932c1e3 (`packages/probity-verify/tests/test_out_of_tree_tamper.py` and `test_probe_observed.py`).
 
 ## Run it

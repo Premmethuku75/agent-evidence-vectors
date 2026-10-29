@@ -5,6 +5,8 @@ Eight vectors for the contract in
 complete trial directory with a signed binding record beside it, and each carries
 the verdict an implementation must reach.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Run it:
 
 ```bash

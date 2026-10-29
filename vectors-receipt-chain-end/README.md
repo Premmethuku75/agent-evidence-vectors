@@ -10,6 +10,8 @@ open and close records, and key rotation markers with an endorsement signed by
 the retiring key. The expected decision and reason for every case are in
 `MANIFEST.json`, and each case says what it does not assert.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The point of the corpus is the difference between a valid chain and a whole
 chain. A writer who can edit the stored receipts needs no key to cut the tail,
 and a cut chain is a valid prefix: every signature verifies and every link

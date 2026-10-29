@@ -1,5 +1,7 @@
 # AI Agent Action v0.1 conformance suite
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## Identifiers name the bytes, not the answer
 
 Every member of this suite is named after a digest of its own bytes and lives in

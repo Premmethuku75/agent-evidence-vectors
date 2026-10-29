@@ -5,6 +5,8 @@ refusable on its face, and a verifier that reads such a record's assertions
 without requiring the signature an observation would carry accepts every one of
 five attacks that already succeeded against a deployed self-reported store.**
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Conformance corpus for the contract at
 [`spec/self-reported-record/v1.md`](../spec/self-reported-record/v1.md), type URI
 `https://probityai.github.io/agent-evidence-vectors/predicate/v1/self-reported-record`.

@@ -7,6 +7,8 @@ under that party's own policy. A verifier could pass every member there and
 still print a pass for a statement nothing independent stands behind. This
 corpus judges that answer.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Each member is a pair: one statement and one consumer policy. The member
 requires an admission answer and names the policy conditions that decide it.
 [`INDEX.md`](INDEX.md) lists every member with its case in words.

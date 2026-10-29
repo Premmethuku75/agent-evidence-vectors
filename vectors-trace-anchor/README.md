@@ -9,6 +9,8 @@ verdict rests on the registry entry itself, and a `merkle_root` or `leaf_count`
 the receipt carries is checked against that entry rather than replayed
 against.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Each case hands a verifier the three inputs section 5.1 names: the claim, the
 receipt, and the section 4 registry entry, any of which an attacker may leave
 out or bend. The expected decision and reason for every case are in

@@ -5,6 +5,8 @@ policy check over shared state, a fence (an exclusive hold on the context) taken
 to dispatch, the effect, and the commit of its result. The expected decision and
 reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The shape under test is a check and a fence that read state separately, and an
 exclusive hold shorter than the tool it covers. Each can be correct alone. The
 pair is not: a fence that re-reads state cannot show it acted on the state the

@@ -4,6 +4,8 @@ Conformance corpus for the predicate at
 [`spec/predicates/observed-effect.md`](../spec/predicates/observed-effect.md),
 type URI `https://probityai.github.io/agent-evidence-vectors/predicate/v1/observed-effect`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The member count, the split by expected verdict, the conditions and the corpus
 digest are in [`MANIFEST.json`](MANIFEST.json), under `vectors`, `counts`,
 `conditions` and `corpusDigest`. This page copies none of them.

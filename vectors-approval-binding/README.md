@@ -4,6 +4,8 @@ Cases for `approval-binding/v1`: a record of one approval presented for one
 use, the payload bytes of the use, and the decision a verifier must reach. The
 expected decision and reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 An approval can be well formed, correctly signed and unexpired and still be the
 wrong approval for the use in front of the verifier. Every denied case here
 changes exactly one binding of an otherwise conformant record, so a verifier

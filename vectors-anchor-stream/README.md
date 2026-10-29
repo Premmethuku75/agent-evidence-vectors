@@ -6,6 +6,8 @@ here at the tag `anchors-verify-v0.4`, commit `44c40ba`. The contract text that
 tag ships is vendored at `spec-vendored/anchors-verify-44c40ba.md` and its
 sha256 is `specDigest` in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## The reason is the assertion, not the verdict
 
 A verifier reaches a verdict through more than one branch. Some of those

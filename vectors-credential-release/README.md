@@ -5,6 +5,8 @@ against an [agent-card receipt](../vectors-agent-card-receipt/README.md). The ex
 decision and reason for every case are in `MANIFEST.json`, and the predicate is specified
 in [spec/predicates/credential-release.md](../spec/predicates/credential-release.md).
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The record names the receipt by digest, copies the two receipt fields the decision turned
 on, names the revocation list it consulted by digest, and states the credential's audience,
 scope and lifetime. It has no field that can hold the credential, a hash of it or a

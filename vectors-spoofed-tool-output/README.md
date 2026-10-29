@@ -2,6 +2,8 @@
 
 Suite `spoofed-tool-output/v2`. An agent that prints what a passing run prints and never runs it, against the observer's record: the tool-claim and completion-claim checks, with the near misses that decide whether a reader implements the rules or an approximation of them, stale and shadowed runs, and runs of a sealed command.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Follows `tool_claim_match/v1` and `completion_claim/v1` of the Done Receipt predicate (spec/predicates/done-receipt.md).
 
 ## Run it

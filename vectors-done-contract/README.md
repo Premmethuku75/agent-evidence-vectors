@@ -2,6 +2,8 @@
 
 Suite `done-contract/v2`. A sealed contract for a coding agent's task, carried by an unsigned in-toto Statement under the done-contract predicate: valid contracts, one for each optional member the contract may seal, and one invalid contract for every rule of the record and of the statement.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Follows the Done Contract predicate (spec/predicates/done-contract.md) and the record rules (spec/predicates/done-records.md).
 
 ## Run it

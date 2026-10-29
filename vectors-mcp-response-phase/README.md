@@ -5,6 +5,8 @@ Conformance vectors for a gateway or client that runs interceptors on the
 the response-phase policy is invoked on the operation's completion at all, and
 whether its decision governs what the caller receives.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The rules are in `../docs/mcp-response-phase.md`. The specification whose gap
 they fill is the MCP interceptors proposal
 (`modelcontextprotocol/experimental-ext-interceptors`), vendored in

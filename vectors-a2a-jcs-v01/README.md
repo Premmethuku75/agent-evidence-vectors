@@ -8,6 +8,8 @@ commit, the corpus digest
 `29b3f2c5a9c2e6b07dc7e925b13c81563e2efd407a62ce05df513fca04e9361c` and every
 file's SHA-256. The corpus documentation, generators and oracles stay upstream.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Score a canonicalizer through the harness or the GitHub Action:
 
 ```sh

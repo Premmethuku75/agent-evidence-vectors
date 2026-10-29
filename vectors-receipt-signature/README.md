@@ -10,6 +10,8 @@ reaches the right verdict on it, in the cases where the receipt looks well
 formed and the answer still has to be a refusal, and in the cases where the
 draft's answer is the gap.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The members and their expected outcomes are in `INDEX.md`, which the generator
 writes from the manifest.
 

@@ -2,6 +2,8 @@
 
 Cases for `completion-confirmation/v1`: a task reported complete, the authorization decision for it, and the confirmation record the claim rests on. An operation the enforcement point allowed is not thereby a completed one. A verifier that accepts the claim on the authorization decision and the agent's own report accepts every denied case here.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The cases follow the wording proposed for OWASP AIT Pillar 2, section 5.1, level L3 (Tymofii Pidlisnyi, OWASP Slack, 2026-10-22), and the gap Mayur Agnihotri named on 2026-10-23, that "an allowed operation whose completion cannot be verified does not satisfy the positive control":
 
 > The record links the decision to the enforcement outcome and, if execution occurs, to the protected-resource result. Unresolved outcomes are recorded as such and do not establish success or absence of effect.

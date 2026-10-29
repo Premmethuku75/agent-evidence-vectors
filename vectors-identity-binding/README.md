@@ -5,6 +5,8 @@ subject is a `did:web` or `did:wba` DID, the DID documents a resolver would
 return for it, and the decision a verifier must reach. The expected decision and
 reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 A signature tells a verifier that some key signed the bytes. It does not tell
 it that the key belongs to the DID the record is about. The column headed
 "signature verifies" is the point of the corpus: several rejected records carry

@@ -5,6 +5,8 @@ SCITT wave, built from each draft's own structures, and each answering one
 question: what must a conforming verifier say about this input, and what does
 that verdict not establish?
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 | draft | what the cases test |
 | --- | --- |
 | [draft-emirdag-scitt-ai-agent-execution-01](https://datatracker.ietf.org/doc/draft-emirdag-scitt-ai-agent-execution/01/) | the AgentInteractionRecord hash chain of Sections 5.5 to 5.8 |

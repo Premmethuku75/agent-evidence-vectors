@@ -8,6 +8,8 @@ A record names the provider stacks (harness, agent, language models) that ran
 an agentic process, its result, the user accountable for it, when it started
 and ended, and the session logs, tools and context artifacts it used.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Replay from the installed package:
 
 ```sh

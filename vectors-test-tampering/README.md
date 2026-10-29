@@ -2,6 +2,8 @@
 
 Suite `test-tampering/v2`. Edits of the files an agent is judged by, the ones an observer sees and the ones it loses: the protected-path check, with controls, edit-and-restore, links in the final tree, and the changes only the final tree shows.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Follows `protected_paths/v1` of the Done Receipt predicate (spec/predicates/done-receipt.md).
 
 ## Run it

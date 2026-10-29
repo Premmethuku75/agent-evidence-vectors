@@ -11,6 +11,8 @@ upstream path its bytes came from and whether they are upstream's or a
 proposal. Every member file quotes the sentences it turns on, with that commit,
 under `requirementText`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## Nothing has been run against this
 
 There is no reference adapter in the specification's repository at the pinned

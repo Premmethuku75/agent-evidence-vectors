@@ -2,6 +2,8 @@
 
 Suite `done-receipt/v2`. Whole runs of one task and the receipts a verifier wrote for them: a run in each corner of the receipt's two verdicts (done or not, gamed or not), forged receipts, and a defect for every rule of the receipt and of the records it names. Every member declares the five checks' verdicts, the outcome and integrity verdicts over them, and the receipt check's own verdict.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 Follows the Done Receipt predicate (spec/predicates/done-receipt.md) and the record rules (spec/predicates/done-records.md).
 
 ## Run it

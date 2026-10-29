@@ -17,6 +17,8 @@ anchors and the delegation root). Each carries `draftRevision` and the
 identifier the draft prints. [`INDEX.md`](INDEX.md) lists every member beside its
 file.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 ## Which revision this tests
 
 | Release | Draft revision the corpus tests | Members |

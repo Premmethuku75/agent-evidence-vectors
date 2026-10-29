@@ -6,6 +6,8 @@ at the in-toto Statement layer, for the cases the framework's text leaves a rail
 free to choose. It is not vendored and it edits nothing upstream; every rule in
 it cites the framework text it resolves.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 [`predicates/adversarial-execution-evidence.md`](predicates/adversarial-execution-evidence.md)
 is a version-locked copy of the Adversarial Execution Evidence predicate
 specification, vendored so this repository is self-contained: a relying party

@@ -7,6 +7,8 @@ The RFC writes `args_hash` as `sha256:<hex>` and leaves open how the argument
 object is turned into bytes, so two producers can hash one call to different
 digests. The thread asked the rule to say two things, and these vectors pin both:
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 - `args_hash` is SHA-256 over the RFC 8785 (JCS) bytes of the argument object,
   the named projection the hash covers
   ([#554 comment](https://github.com/in-toto/attestation/issues/554#issuecomment-4962035548));

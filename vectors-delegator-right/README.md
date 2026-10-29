@@ -2,6 +2,8 @@
 
 Cases for `delegator-right/v1`: does a delegated request stay inside the rights its delegators held? Each case is one record: the grant chain behind the request, the entitlements to delegate that the authoritative source holds, the scope removals that took effect at that source, and the propagation limit within which a change at the source must reach enforcement. A verifier that checks the chain's signatures, expiry and narrowing alone allows every denied case here.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The cases follow the wording proposed for OWASP AIT Pillar 2, section 5.1, level L4 (Tymofii Pidlisnyi, OWASP Slack, 2026-10-22):
 
 > At execution, the enforcement point checks the derived grant against its ancestor grants and the delegating principal's authority to delegate the requested operation. Revocation or narrowing of an ancestor grant, or loss of the principal's authority to delegate that operation, shall prevent use of the affected scope within the defined propagation limit.

@@ -4,6 +4,8 @@ Cases for `aggregate-accounting/v1`: the decisions an accounting authority took
 against one budget shared by a principal and the delegation subtrees under it.
 The expected decision and reason for every case are in `MANIFEST.json`.
 
+Verified by Probity ([github.com/probityai/probity](https://github.com/probityai/probity)). Check evidence offline with probity-verify: `pip install probityai==0.1.0`.
+
 The shape under test is a limit that holds for each agent while the budget the
 agents share does not. Each request can be inside its own limit and the set of
 them outside the budget. A control that looks at one agent cannot see it.
