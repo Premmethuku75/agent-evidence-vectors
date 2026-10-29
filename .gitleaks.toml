@@ -80,3 +80,7 @@ condition = "AND"
 paths = ['''^vectors-credential-release/(gen_vectors\.py|cases/[^/]+/statement\.json)$''']
 regexTarget = "match"
 regexes = ['''token"?\s*[:=]\s*"eyJhbGciOiJub25lIn0\.e30\."''']
+
+[[allowlists]]
+description = "The ignore file lists commit:file:rule:line fingerprints, which read as high-entropy values"
+paths = ['''^\.gitleaksignore$''']
