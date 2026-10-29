@@ -22,10 +22,14 @@ __pycache__/
 # Generated site output.
 _site/
 
-# Rust and Python build output of the crates and packages.
+# Rust and Python build output of the crates and packages. Scoped to those
+# trees: corpus directories track files named build/ and conformance-report.json,
+# and the wheel build skips anything this file ignores.
 target/
 .venv/
 dist/
 *.egg-info/
-build/
-conformance-report.json
+/crates/**/build/
+/packages/**/build/
+/crates/**/conformance-report.json
+/packages/**/conformance-report.json
