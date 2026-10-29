@@ -16,7 +16,7 @@ Test an agent-evidence verifier against saved records with known outcomes. The c
 
 The recording is `demo/four-arms.sh` from a fresh clone; `vhs demo/four-arms.tape` re-records it.
 
-Add it to a project with `uv add agent-evidence-vectors==0.26.0`, then `pip install agent-evidence-vectors==0.26.0`. The `probityai` command line is planned, not yet released: `uv add probityai`, then `pip install probityai`.
+Add it to a project with `uv add agent-evidence-vectors==0.26.0`, then `pip install agent-evidence-vectors==0.26.0`. The `probityai` command checks a claim about an agent run offline against evidence you pinned: `pip install probityai==0.1.0`.
 
 <a name="run-the-suite-against-your-verifier"></a>
 

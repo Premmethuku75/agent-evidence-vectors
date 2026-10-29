@@ -6,7 +6,8 @@ Ruling P-54 puts one line on every spec README and on the Action's job summary:
 install. This test holds each copy to `BRIDGE` in scripts/action-summary.py:
 
 1. A passing run's summary carries the line once, after the result table.
-2. A failing run's summary does not carry it, because the line says "Verified".
+2. A failing run's summary, with or without a report, carries the offline
+   verifier line (`OFFLINE`) and not the "Verified by Probity" statement.
 3. Every vectors-*/README.md that exists, and spec/README.md, carries it.
 4. Removing the line from the summary script turns check 1 red, so the check
    cannot pass while the summary has lost the line.
@@ -33,6 +34,7 @@ assert _spec is not None and _spec.loader is not None
 _module = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_module)
 BRIDGE: str = _module.BRIDGE
+OFFLINE: str = _module.OFFLINE
 
 REPORT = {
     "rail": "external",
@@ -44,9 +46,11 @@ REPORT = {
 }
 
 
-def run_summary(script: Path, status: str, work: Path) -> str:
+def run_summary(script: Path, status: str, work: Path, with_report: bool = True) -> str:
     report = work / "report.json"
-    report.write_text(json.dumps(REPORT), encoding="utf-8")
+    report.unlink(missing_ok=True)
+    if with_report:
+        report.write_text(json.dumps(REPORT), encoding="utf-8")
     summary = work / "summary.md"
     summary.write_text("", encoding="utf-8")
     outputs = work / "outputs.txt"
@@ -64,8 +68,14 @@ def summary_errors(script: Path, work: Path) -> list[str]:
         errors.append(f"pass summary carries the bridge {passed.count(BRIDGE)} times, expected 1")
     elif passed.index(BRIDGE) < passed.index("| ---: |"):
         errors.append("pass summary puts the bridge before the result table")
-    if BRIDGE in run_summary(script, "1", work):
-        errors.append("a failing run's summary says Verified by Probity")
+    for label, text in (
+        ("failing", run_summary(script, "1", work)),
+        ("no-report", run_summary(script, "2", work, with_report=False)),
+    ):
+        if text.count(OFFLINE) != 1:
+            errors.append(f"{label} summary carries the offline line {text.count(OFFLINE)} times")
+        if "Verified by Probity" in text:
+            errors.append(f"{label} summary says Verified by Probity")
     return errors
 
 
@@ -81,7 +91,7 @@ def readme_errors() -> list[str]:
 
 def mutation_errors(work: Path) -> list[str]:
     source = SUMMARY.read_text(encoding="utf-8")
-    anchor = 'summary.append(f"{BRIDGE}\\n\\n")'
+    anchor = 'summary.append(f"{BRIDGE if result == \'pass\' else OFFLINE}\\n\\n")'
     if source.count(anchor) != 1:
         return ["mutation: the bridge append is not present exactly once; it would prove nothing"]
     mutant = work / "action-summary-mutant.py"
