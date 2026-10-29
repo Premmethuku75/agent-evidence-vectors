@@ -8,7 +8,7 @@ edition = "2021"
 rust-version = "1.88"
 description = "Python bindings for the jcs-admit and dsse crates, built into the jcs-admit wheel"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/probityai/agent-evidence"
+repository = "https://github.com/probityai/agent-evidence-vectors"
 # The extension ships on PyPI inside the jcs-admit wheel, never on crates.io.
 publish = false
 

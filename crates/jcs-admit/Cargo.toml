@@ -5,12 +5,12 @@ edition = "2021"
 rust-version = "1.74"
 description = "Admission control for JSON about to be signed: refuses duplicate object members, nesting past a depth cap, non-scalar strings and unsafe integers on the raw bytes, then delegates RFC 8785 canonicalization to serde_json_canonicalizer"
 documentation = "https://docs.rs/jcs-admit"
-homepage = "https://github.com/probityai/agent-evidence/tree/main/crates/jcs-admit#readme"
+homepage = "https://github.com/probityai/agent-evidence-vectors/tree/main/crates/jcs-admit#readme"
 readme = "README.md"
 keywords = ["jcs", "rfc8785", "canonicalization", "attestation", "in-toto"]
 categories = ["encoding", "cryptography", "parser-implementations"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/probityai/agent-evidence"
+repository = "https://github.com/probityai/agent-evidence-vectors"
 # The README cites docs/INCUMBENT-MEASUREMENT.md and docs/MUTATION-SWEEP.md as
 # the evidence behind its table. Excluding them would publish a README whose two
 # strongest citations do not resolve inside the artifact that carries it.

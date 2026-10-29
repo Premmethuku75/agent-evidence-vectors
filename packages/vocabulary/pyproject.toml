@@ -24,9 +24,9 @@ classifiers = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/probityai/agent-evidence/blob/main/packages/vocabulary/docs/ABOUT.md"
-Source = "https://github.com/probityai/agent-evidence/tree/main/packages/vocabulary"
-Issues = "https://github.com/probityai/agent-evidence/issues"
+Documentation = "https://github.com/probityai/agent-evidence-vectors/blob/main/packages/vocabulary/docs/ABOUT.md"
+Source = "https://github.com/probityai/agent-evidence-vectors/tree/main/packages/vocabulary"
+Issues = "https://github.com/probityai/agent-evidence-vectors/issues"
 
 [tool.setuptools]
 packages = ["agent_evidence_vocabulary"]
