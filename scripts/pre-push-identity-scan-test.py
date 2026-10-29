@@ -736,7 +736,10 @@ def _import_exemption_cases() -> tuple[int, list[str]]:
         "mod = importlib.util.module_from_spec(spec)\n"
         "spec.loader.exec_module(mod)\n"
         "mod.IMPORT_TIP = sys.argv[2]\n"
-        "raise SystemExit(mod.main(['scan', '--range', sys.argv[3]]))\n"
+        "import io, subprocess\n"
+        "head = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()\n"
+        "sys.stdin = io.StringIO(f'refs/heads/x {head} refs/heads/x {\"0\" * 40}\\n')\n"
+        "raise SystemExit(mod.main(['scan']))\n"
     )
 
     def git(repo: Path, *args: str) -> str:
@@ -744,8 +747,8 @@ def _import_exemption_cases() -> tuple[int, list[str]]:
                               capture_output=True, text=True)
         return done.stdout.strip()
 
-    def scan(repo: Path, tip: str, rev: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run([sys.executable, "-c", driver, str(SCANNER), tip, rev],
+    def scan(repo: Path, tip: str, rev: str = "HEAD") -> subprocess.CompletedProcess[str]:
+        return subprocess.run([sys.executable, "-c", driver, str(SCANNER), tip],
                               cwd=repo, env=env, capture_output=True, text=True,
                               timeout=600, check=False)
 
