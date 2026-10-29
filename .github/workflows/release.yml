@@ -5,7 +5,8 @@ name: release
 # 1. The corpus. A pushed tag `v<major>.<minor>.<patch>` runs `verify` (the
 #    signed digest list, the tag signature, the time evidence) and then
 #    `publish`, which builds the agent-evidence-vectors wheel and sdist and
-#    uploads them to PyPI (environment pypi) with attestations. This workflow
+#    uploads them to PyPI with attestations; its job names no environment, as
+#    its trusted publisher entry names none. This workflow
 #    VERIFIES and never signs: the private half of the corpus signing key is in
 #    the maintainer's keyring and the signature is made locally, at tag time, by
 #    scripts/release-sign.sh. Putting the key in an Actions secret would make it
@@ -183,9 +184,6 @@ jobs:
     needs: verify
     if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/project/agent-evidence-vectors/
     permissions:
       contents: read
       id-token: write
