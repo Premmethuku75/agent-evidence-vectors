@@ -114,7 +114,7 @@
       },
       "path": "vectors-agent-payment-mandate/gen_vectors.py",
       "serialization": "bytes",
-      "sha256": "f153b66c2a741c98517866b3417bb563a5f047c093f685f5dca1b71c2337fe59"
+      "sha256": "88d336503beb9fe39a30d9a61c1a5fd173b98d73f8c5ab3569af19317b5a3641"
     },
     {
       "consumed": "unconsumed",
@@ -183,7 +183,7 @@
       },
       "path": "vectors-agent-payment-mandate/tests/test_corpus.py",
       "serialization": "bytes",
-      "sha256": "c42cf21d8a7570face97a08cd459f1c780644e98f50d324ba8c267d069016ca0"
+      "sha256": "e64d3f656677c52f6e5329dae466037d37e0b855702e48d099089fee44f65f92"
     }
   ],
   "boundary": {
@@ -372,7 +372,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "06f89f5881359a20b519e318b30bff5194995e8599713dbdf9b0f3798472434f"
+    "sha256": "5274767bab72821320a0671a9c4933c4ce877f2baab04dd3dcee78e14d1979bd"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
