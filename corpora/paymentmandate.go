@@ -13,7 +13,7 @@ func paymentMandate() ruleCorpus {
 	return ruleCorpus{suite: "agent-payment-mandate/v1", accept: "mandate_chain_holds", rules: []rcRule{
 		{"mandate_unsigned", func(r any) bool {
 			sig := rcMap(rcGet(r, "mandate.signature"))
-			return !(sig != nil && rcStr(sig["key_id"]) != "" && gfHex64.MatchString(rcStr(sig["value_sha256"])))
+			return sig == nil || rcStr(sig["key_id"]) == "" || !gfHex64.MatchString(rcStr(sig["value_sha256"]))
 		}},
 		{"mandate_digest_mismatch", func(r any) bool {
 			return rcStr(rcGet(r, "mandate.digest")) != rcDigest(rcGet(r, "mandate.terms"))
