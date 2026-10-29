@@ -120,6 +120,9 @@ def test_a_clean_record_is_written_and_an_existing_output_is_refused(tmp_path: P
 # The corpus scan: a record already committed, or a new writer that bypasses
 # write_records, goes red here. Adversarial inputs under cases/ name roots on purpose.
 RECORD_SUFFIXES = (".json", ".jsonl", ".log", ".txt", ".stderr", ".stdout", ".xml")
+# Imported site trees keep the qualification records of past experiments byte
+# for byte; their digests are cited, so a path inside them is evidence, not a leak.
+RETAINED_RECORD_TREES = ("site/",)
 
 
 def _tracked_records() -> list[Path]:
@@ -129,7 +132,9 @@ def _tracked_records() -> list[Path]:
     return [
         ROOT / name
         for name in out.split("\0")
-        if name.endswith(RECORD_SUFFIXES) and "/cases/" not in name
+        if name.endswith(RECORD_SUFFIXES)
+        and "/cases/" not in name
+        and not name.startswith(RETAINED_RECORD_TREES)
     ]
 
 
