@@ -92,7 +92,7 @@ def _scope_missing(r: dict[str, Any]) -> bool:
 
 
 def _scope_digest(r: dict[str, Any]) -> bool:
-    return _get(r, "connector.grant_digest") != digest_of(_get(r, "connector.declared_scope"))
+    return bool(_get(r, "connector.grant_digest") != digest_of(_get(r, "connector.declared_scope")))
 
 
 def _phi(r: dict[str, Any]) -> bool:
@@ -101,7 +101,7 @@ def _phi(r: dict[str, Any]) -> bool:
 
 
 def _performed(r: dict[str, Any]) -> bool:
-    return _get(r, "outcome.result") == "performed"
+    return bool(_get(r, "outcome.result") == "performed")
 
 
 def _change_on_read_grant(r: dict[str, Any]) -> bool:
@@ -134,7 +134,7 @@ def _refusal_unrecorded(r: dict[str, Any]) -> bool:
 
 
 def _action_digest(r: dict[str, Any]) -> bool:
-    return _get(r, "record.action_digest") != digest_of(_get(r, "action"))
+    return bool(_get(r, "record.action_digest") != digest_of(_get(r, "action")))
 
 
 CHECKS: tuple[tuple[str, Callable[[dict[str, Any]], bool]], ...] = (
