@@ -130,6 +130,7 @@ only-include = [
     "vectors-anchored-chain",
     "vectors-trace-anchor",
     "vectors-grade-floor",
+    "vectors-connector-scope",
     "vectors-agent-payment-mandate",
     "vectors-agent-change-admission",
     "vectors-agentic-process-evidence",
@@ -191,6 +192,7 @@ exclude = ["**/__pycache__", "**/.build", "**/*.pyc", "vectors/**/*.py", "vector
 "vectors-anchored-chain" = "agent_evidence_vectors/corpora/vectors-anchored-chain"
 "vectors-trace-anchor" = "agent_evidence_vectors/corpora/vectors-trace-anchor"
 "vectors-grade-floor" = "agent_evidence_vectors/corpora/vectors-grade-floor"
+"vectors-connector-scope" = "agent_evidence_vectors/corpora/vectors-connector-scope"
 "vectors-agent-payment-mandate" = "agent_evidence_vectors/corpora/vectors-agent-payment-mandate"
 "vectors-agent-change-admission" = "agent_evidence_vectors/corpora/vectors-agent-change-admission"
 "vectors-agentic-process-evidence" = "agent_evidence_vectors/corpora/vectors-agentic-process-evidence"
@@ -292,6 +294,7 @@ only-include = [
     "vectors-anchored-chain",
     "vectors-trace-anchor",
     "vectors-grade-floor",
+    "vectors-connector-scope",
     "vectors-agent-payment-mandate",
     "vectors-agent-change-admission",
     "vectors-agentic-process-evidence",
