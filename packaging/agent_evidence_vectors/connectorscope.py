@@ -1,6 +1,11 @@
 """Connector scope record: the reference reader for the `connector-scope-record/v1` corpus.
 
-A connector that reaches a health-system record states three things: what it can read, what it can change, and what it refused. The reader judges one action against the scope the connector was granted: a change under a read-only grant, an unlisted action that ran, a permitted action refused as out of scope, and a refusal with no recorded reason are all refused. The scope must match the digest granted, and a fixture that carries a protected-health-information pattern is refused so a shared corpus stays clean.
+A connector that reaches a health-system record states three things: what it can read, what it
+can change, and what it refused. The reader judges one action against the scope the connector
+was granted: a change under a read-only grant, an unlisted action that ran, a permitted action
+refused as out of scope, and a refusal with no recorded reason are all refused. The scope must
+match the digest granted, and a fixture that carries a protected-health-information pattern is
+refused so a shared corpus stays clean.
 
 Every rule below is a refusal code. A record is accepted only when none of the
 rules fires; a rejected record names the first rule that fired, in the order
@@ -30,8 +35,11 @@ EXIT_FOR = {ACCEPTED: 0, REJECTED: 1}
 ACCEPT_REASON = "scope_respected"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HERE = Path(__file__).resolve().parent
-ROOT = (_HERE / "corpora" / "vectors-connector-scope" if
-        (_HERE / "corpora").exists() else _HERE.parents[1] / "vectors-connector-scope")
+ROOT = (
+    _HERE / "corpora" / "vectors-connector-scope"
+    if (_HERE / "corpora").exists()
+    else _HERE.parents[1] / "vectors-connector-scope"
+)
 
 
 def _sha(data: bytes) -> str:
@@ -51,8 +59,12 @@ def digest_of(value: object) -> str:
     return _sha(canon(value))
 
 
-PHI_PATTERNS = (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), re.compile(r"(?i)\bmrn[:=]?\s*\d{5,}"),
-                re.compile(r"(?i)\bdob[:=]"), re.compile(r"\b(19|20)\d{2}-\d{2}-\d{2}\b.*(?i:born)"))
+PHI_PATTERNS = (
+    re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
+    re.compile(r"(?i)\bmrn[:=]?\s*\d{5,}"),
+    re.compile(r"(?i)\bdob[:=]"),
+    re.compile(r"\b(19|20)\d{2}-\d{2}-\d{2}\b.*(?i:born)"),
+)
 
 
 def _get(record: dict[str, Any], path: str) -> Any:
@@ -93,8 +105,12 @@ def _performed(r: dict[str, Any]) -> bool:
 
 
 def _change_on_read_grant(r: dict[str, Any]) -> bool:
-    return (_get(r, "action.kind") == "change" and _performed(r)
-            and not _in(r, "change") and _in(r, "read"))
+    return (
+        _get(r, "action.kind") == "change"
+        and _performed(r)
+        and not _in(r, "change")
+        and _in(r, "read")
+    )
 
 
 def _out_of_scope_performed(r: dict[str, Any]) -> bool:
@@ -102,13 +118,19 @@ def _out_of_scope_performed(r: dict[str, Any]) -> bool:
 
 
 def _in_scope_refused(r: dict[str, Any]) -> bool:
-    return (_get(r, "outcome.result") == "refused" and _permitted(r)
-            and _get(r, "outcome.reason") == "out_of_scope")
+    return (
+        _get(r, "outcome.result") == "refused"
+        and _permitted(r)
+        and _get(r, "outcome.reason") == "out_of_scope"
+    )
 
 
 def _refusal_unrecorded(r: dict[str, Any]) -> bool:
-    return (_get(r, "outcome.result") == "refused" and not _permitted(r)
-            and not (_get(r, "outcome.reason") and _get(r, "outcome.refusal_recorded_by")))
+    return (
+        _get(r, "outcome.result") == "refused"
+        and not _permitted(r)
+        and not (_get(r, "outcome.reason") and _get(r, "outcome.refusal_recorded_by"))
+    )
 
 
 def _action_digest(r: dict[str, Any]) -> bool:
@@ -180,8 +202,13 @@ def _validated_entries(root: Path) -> tuple[list[dict[str, Any]], str | None]:
 
 def _external_answer(command: list[str], case_path: Path) -> tuple[bool, dict[str, Any] | str]:
     try:
-        result = subprocess.run([*command, str(case_path), "--json"], capture_output=True,
-                                text=True, timeout=90, check=False)
+        result = subprocess.run(
+            [*command, str(case_path), "--json"],
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+        )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return False, f"verifier did not run: {exc}"
     try:
@@ -195,7 +222,8 @@ def _external_answer(command: list[str], case_path: Path) -> tuple[bool, dict[st
 
 
 def check(
-    verifier: str | list[str] | None = None, root: Path = ROOT,
+    verifier: str | list[str] | None = None,
+    root: Path = ROOT,
     skip: frozenset[str] = frozenset(),
 ) -> tuple[int, list[str]]:
     """Check every case through the named verifier or the reference reader.
@@ -249,15 +277,21 @@ def run(root: str, verifier: list[str] | None, report_path: str, rail_note: str)
         print("no report written: no case was answered")
         return 2
     report = {
-        "suite": SUITE, "rail": "own-reader" if verifier is None else "external",
+        "suite": SUITE,
+        "rail": "own-reader" if verifier is None else "external",
         "verifier": {"command": verifier, "vectorsExecuted": answered, "note": rail_note},
         "corpusDigest": manifest["corpusDigest"],
-        "totals": {"vectors": total, "conform": total - len(errors), "fail": len(errors),
-                   "suiteRefusals": 0},
+        "totals": {
+            "vectors": total,
+            "conform": total - len(errors),
+            "fail": len(errors),
+            "suiteRefusals": 0,
+        },
         "failures": errors,
     }
-    Path(report_path).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
-                                 encoding="utf-8")
+    Path(report_path).write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return 1 if errors or answered != total else 0
 
 
@@ -269,8 +303,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.case:
         answer = verify(Path(args.case))
-        print(json.dumps(answer, sort_keys=True) if args.json else
-              f"{answer['decision']} {answer['reason']}")
+        print(
+            json.dumps(answer, sort_keys=True)
+            if args.json
+            else f"{answer['decision']} {answer['reason']}"
+        )
         return EXIT_FOR[answer["decision"]]
     answered, errors = check(args.verifier)
     for error in errors:
