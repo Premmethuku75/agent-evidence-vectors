@@ -243,7 +243,10 @@ jobs:
       - name: the wheel's version is the tag's
         id: version
         run: |
-          version="$(ls dist/agent_evidence_vectors-*.whl | sed -E 's|.*/agent_evidence_vectors-([^-]+)-.*|\1|')"
+          wheels=(dist/agent_evidence_vectors-*.whl)
+          test "${#wheels[@]}" -eq 1
+          name="${wheels[0]##*/agent_evidence_vectors-}"
+          version="${name%%-*}"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           if [ -z "${GITHUB_REF_NAME:-}" ]; then
             echo "no tag in this run; the wheel is version ${version}"
