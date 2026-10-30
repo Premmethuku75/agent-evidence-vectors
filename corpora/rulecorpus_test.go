@@ -17,7 +17,7 @@ import (
 	"github.com/probityai/agent-evidence-vectors/corpora"
 )
 
-func rcTwins(t *testing.T, dir string) map[string]string {
+func rlTwins(t *testing.T, dir string) map[string]string {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join(corpusPath(dir), "MANIFEST.json")) // #nosec G304 -- the committed manifest
 	if err != nil {
@@ -41,7 +41,7 @@ func rcTwins(t *testing.T, dir string) map[string]string {
 	return twins
 }
 
-func rcStageWithCase(t *testing.T, dir, member, caseFrom string) string {
+func rlStageWithCase(t *testing.T, dir, member, caseFrom string) string {
 	t.Helper()
 	copied := filepath.Join(t.TempDir(), dir)
 	copyTree(t, corpusPath(dir), copied)
@@ -55,7 +55,7 @@ func rcStageWithCase(t *testing.T, dir, member, caseFrom string) string {
 	return copied
 }
 
-func rcCommittedCorpusIsClean(t *testing.T, dir string, accepted, rejected int) {
+func rlCommittedCorpusIsClean(t *testing.T, dir string, accepted, rejected int) {
 	t.Helper()
 	result, err := corpora.Judge(corpusPath(dir))
 	if err != nil {
@@ -70,13 +70,13 @@ func rcCommittedCorpusIsClean(t *testing.T, dir string, accepted, rejected int) 
 	}
 }
 
-func rcReaderDerivesRatherThanEchoes(t *testing.T, dir string) {
+func rlReaderDerivesRatherThanEchoes(t *testing.T, dir string) {
 	t.Helper()
-	for rejected, accepted := range rcTwins(t, dir) {
+	for rejected, accepted := range rlTwins(t, dir) {
 		for _, pair := range [][2]string{{rejected, accepted}, {accepted, rejected}} {
 			member, from := pair[0], pair[1]
 			t.Run(member+"<-"+from, func(t *testing.T) {
-				result, err := corpora.Judge(rcStageWithCase(t, dir, member, from))
+				result, err := corpora.Judge(rlStageWithCase(t, dir, member, from))
 				if err != nil {
 					t.Fatalf("judge: %v", err)
 				}

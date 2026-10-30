@@ -170,6 +170,7 @@ RECOMPUTERS: dict[str, Callable[[Path, dict[str, Any]], str]] = {
     "vectors-authority-at-dispatch": _recompute_from_generator,
     "vectors-approval-binding": _recompute_from_generator,
     "vectors-dispatch-fence": _recompute_from_generator,
+    "vectors-refund-connected": _recompute_from_generator,
     "vectors-aggregate-accounting": _recompute_from_generator,
     "vectors-uncertain-effect": _recompute_from_generator,
     "vectors-agent-card-receipt": _recompute_from_generator,
