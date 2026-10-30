@@ -12,7 +12,7 @@ import (
 // rule fires on is accepted. The Python readers in packaging/agent_evidence_vectors
 // apply the same rules in the same order; the manifest carries the answer both
 // must reach, and a rejected member names the accepted twin it differs from.
-type rcRule struct {
+type rlRule struct {
 	code  string
 	fires func(record any) bool
 }
@@ -20,31 +20,31 @@ type rcRule struct {
 type ruleCorpus struct {
 	suite  string
 	accept string
-	rules  []rcRule
+	rules  []rlRule
 }
 
 func (c ruleCorpus) Suite() string { return c.suite }
 
-type rcExpected struct {
+type rlExpected struct {
 	Decision string `json:"decision"`
 	Reason   string `json:"reason"`
 }
 
-type rcVector struct {
+type rlVector struct {
 	ID       string            `json:"id"`
 	Path     string            `json:"path"`
 	Files    map[string]string `json:"files"`
-	Expected rcExpected        `json:"expected"`
+	Expected rlExpected        `json:"expected"`
 	Twin     string            `json:"twin"`
 }
 
-func (c ruleCorpus) decide(record any) rcExpected {
+func (c ruleCorpus) decide(record any) rlExpected {
 	for _, rule := range c.rules {
 		if rule.fires(record) {
-			return rcExpected{Decision: "rejected", Reason: rule.code}
+			return rlExpected{Decision: "rejected", Reason: rule.code}
 		}
 	}
-	return rcExpected{Decision: "accepted", Reason: c.accept}
+	return rlExpected{Decision: "accepted", Reason: c.accept}
 }
 
 func (c ruleCorpus) Judge(dir string, raw []byte) (*Result, error) {
@@ -54,9 +54,9 @@ func (c ruleCorpus) Judge(dir string, raw []byte) (*Result, error) {
 	}
 	result := &Result{}
 	accepted := map[string]bool{}
-	var vectors []rcVector
+	var vectors []rlVector
 	for _, entry := range manifest.Vectors {
-		var v rcVector
+		var v rlVector
 		if err := json.Unmarshal(entry, &v); err != nil {
 			result.Findings = append(result.Findings, fmt.Sprintf("a manifest row does not parse: %v", err))
 			continue
@@ -78,7 +78,7 @@ func (c ruleCorpus) Judge(dir string, raw []byte) (*Result, error) {
 	return result, nil
 }
 
-func (c ruleCorpus) judgeMember(caseDir string, v rcVector) []string {
+func (c ruleCorpus) judgeMember(caseDir string, v rlVector) []string {
 	findings := acFileFindings(caseDir, v.Files)
 	body, err := readIn(caseDir, "case.json")
 	if err != nil {
@@ -95,9 +95,9 @@ func (c ruleCorpus) judgeMember(caseDir string, v rcVector) []string {
 	return findings
 }
 
-// rcGet walks a dotted path through nested objects and returns nil when any
+// rlGet walks a dotted path through nested objects and returns nil when any
 // step is missing or is not an object, as the Python readers' _get does.
-func rcGet(record any, path string) any {
+func rlGet(record any, path string) any {
 	node := record
 	for _, part := range strings.Split(path, ".") {
 		object, ok := node.(map[string]any)
@@ -113,14 +113,14 @@ func rcGet(record any, path string) any {
 	return node
 }
 
-func rcStr(v any) string {
+func rlStr(v any) string {
 	if s, ok := v.(string); ok {
 		return s
 	}
 	return ""
 }
 
-func rcInt(v any) int64 {
+func rlInt(v any) int64 {
 	if n, ok := v.(json.Number); ok {
 		i, _ := n.Int64()
 		return i
@@ -128,24 +128,24 @@ func rcInt(v any) int64 {
 	return 0
 }
 
-func rcList(v any) []any {
+func rlList(v any) []any {
 	l, _ := v.([]any)
 	return l
 }
 
-func rcMap(v any) map[string]any {
+func rlMap(v any) map[string]any {
 	m, _ := v.(map[string]any)
 	return m
 }
 
-func rcTrue(v any) bool {
+func rlTrue(v any) bool {
 	b, ok := v.(bool)
 	return ok && b
 }
 
-// rcDigest is the SHA-256 of the value in the compact, sorted, ASCII form the
+// rlDigest is the SHA-256 of the value in the compact, sorted, ASCII form the
 // Python readers' digest_of takes.
-func rcDigest(v any) string {
+func rlDigest(v any) string {
 	compact, err := pythonCompactJSON(v)
 	if err != nil {
 		return ""
@@ -153,15 +153,15 @@ func rcDigest(v any) string {
 	return sha(compact)
 }
 
-func rcStringSet(v any) map[string]bool {
+func rlStringSet(v any) map[string]bool {
 	set := map[string]bool{}
-	for _, item := range rcList(v) {
-		set[rcStr(item)] = true
+	for _, item := range rlList(v) {
+		set[rlStr(item)] = true
 	}
 	return set
 }
 
-func rcSubset(a, b map[string]bool) bool {
+func rlSubset(a, b map[string]bool) bool {
 	for k := range a {
 		if !b[k] {
 			return false
