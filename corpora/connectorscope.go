@@ -12,30 +12,30 @@ var csPHI = []*regexp.Regexp{
 }
 
 func csIn(r any, kind string) bool {
-	scope := rcMap(rcGet(r, "connector.declared_scope"))
-	return rcStringSet(scope[kind])[rcStr(rcGet(r, "action.resource"))]
+	scope := rlMap(rlGet(r, "connector.declared_scope"))
+	return rlStringSet(scope[kind])[rlStr(rlGet(r, "action.resource"))]
 }
 
 func csPermitted(r any) bool {
-	kind := rcStr(rcGet(r, "action.kind"))
+	kind := rlStr(rlGet(r, "action.kind"))
 	return (kind == "read" || kind == "change") && csIn(r, kind)
 }
 
-func csPerformed(r any) bool { return rcGet(r, "outcome.result") == "performed" }
+func csPerformed(r any) bool { return rlGet(r, "outcome.result") == "performed" }
 
 // connectorScope judges vectors-connector-scope/: one action against the scope a
 // health-system connector was granted. The rules and their order are those of
 // packaging/agent_evidence_vectors/connectorscope.py.
 func connectorScope() ruleCorpus {
-	return ruleCorpus{suite: "connector-scope-record/v1", accept: "scope_respected", rules: []rcRule{
+	return ruleCorpus{suite: "connector-scope-record/v1", accept: "scope_respected", rules: []rlRule{
 		{"scope_declaration_missing", func(r any) bool {
-			scope := rcMap(rcGet(r, "connector.declared_scope"))
+			scope := rlMap(rlGet(r, "connector.declared_scope"))
 			_, read := scope["read"]
 			_, change := scope["change"]
 			return scope == nil || !read || !change
 		}},
 		{"grant_digest_mismatch", func(r any) bool {
-			return rcStr(rcGet(r, "connector.grant_digest")) != rcDigest(rcGet(r, "connector.declared_scope"))
+			return rlStr(rlGet(r, "connector.grant_digest")) != rlDigest(rlGet(r, "connector.declared_scope"))
 		}},
 		{"fixture_not_phi_free", func(r any) bool {
 			text, err := pythonCompactJSON(r)
@@ -47,21 +47,21 @@ func connectorScope() ruleCorpus {
 					return true
 				}
 			}
-			return !rcTrue(rcGet(r, "fixture.phi_free"))
+			return !rlTrue(rlGet(r, "fixture.phi_free"))
 		}},
 		{"change_performed_under_read_grant", func(r any) bool {
-			return rcGet(r, "action.kind") == "change" && csPerformed(r) && !csIn(r, "change") && csIn(r, "read")
+			return rlGet(r, "action.kind") == "change" && csPerformed(r) && !csIn(r, "change") && csIn(r, "read")
 		}},
 		{"out_of_scope_action_performed", func(r any) bool { return csPerformed(r) && !csPermitted(r) }},
 		{"in_scope_action_refused_as_out_of_scope", func(r any) bool {
-			return rcGet(r, "outcome.result") == "refused" && csPermitted(r) && rcGet(r, "outcome.reason") == "out_of_scope"
+			return rlGet(r, "outcome.result") == "refused" && csPermitted(r) && rlGet(r, "outcome.reason") == "out_of_scope"
 		}},
 		{"refusal_not_recorded", func(r any) bool {
-			return rcGet(r, "outcome.result") == "refused" && !csPermitted(r) &&
-				!(rcStr(rcGet(r, "outcome.reason")) != "" && rcStr(rcGet(r, "outcome.refusal_recorded_by")) != "")
+			return rlGet(r, "outcome.result") == "refused" && !csPermitted(r) &&
+				!(rlStr(rlGet(r, "outcome.reason")) != "" && rlStr(rlGet(r, "outcome.refusal_recorded_by")) != "")
 		}},
 		{"action_digest_mismatch", func(r any) bool {
-			return rcStr(rcGet(r, "record.action_digest")) != rcDigest(rcGet(r, "action"))
+			return rlStr(rlGet(r, "record.action_digest")) != rlDigest(rlGet(r, "action"))
 		}},
 	}}
 }
