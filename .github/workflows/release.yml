@@ -264,7 +264,7 @@ jobs:
 
   # Refuses a release that the newest published release of another family
   # distribution cannot be installed beside (scripts/family_pin_guard.py).
-  family-pin-guard:
+  family-pin-guard-corpus:
     needs: build-corpus
     if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
     uses: ./.github/workflows/family-pin-guard.yml
@@ -281,7 +281,7 @@ jobs:
   # the trusted publisher registered for the project, and attestations: true
   # attaches PEP 740 provenance to every uploaded distribution.
   publish:
-    needs: [verify, build-corpus, family-pin-guard]
+    needs: [verify, build-corpus, family-pin-guard-corpus]
     if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     permissions:
