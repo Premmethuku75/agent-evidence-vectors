@@ -737,7 +737,8 @@ def _import_exemption_cases() -> tuple[int, list[str]]:
         "spec.loader.exec_module(mod)\n"
         "mod.IMPORT_TIP = sys.argv[2]\n"
         "import io, subprocess\n"
-        "head = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()\n"
+        "head = subprocess.run(['git', 'rev-parse', 'HEAD'],\n"
+        "                      capture_output=True, text=True).stdout.strip()\n"
         "sys.stdin = io.StringIO(f'refs/heads/x {head} refs/heads/x {\"0\" * 40}\\n')\n"
         "raise SystemExit(mod.main(['scan']))\n"
     )

@@ -542,6 +542,20 @@ extraPaths = ["packaging", "interop/agentavow-live-mcp", "interop/agentavow-sign
 [tool.ruff]
 line-length = 100
 target-version = "py313"
+# The repository tools of the imported parts are linted by ruff-parts.toml in
+# parts.yml; both configs on one file would give it two contradictory verdicts.
+extend-exclude = [
+  "scripts/workspace.py",
+  "scripts/build_predicate_pages.py",
+  "scripts/build_vocabulary_pages.py",
+  "scripts/check-jcs-admit-python-release.py",
+  "scripts/check-jcs-admit-python-release-test.py",
+  "scripts/check_predicate_pages.py",
+  "scripts/check_uris_resolve.py",
+  "scripts/family_pin_guard.py",
+  "scripts/record_paths.py",
+  "scripts/go-module-size-gate.py",
+]
 
 [tool.ruff.lint]
 # E/W pycodestyle, F pyflakes, I isort, UP pyupgrade, B bugbear, C901 mccabe

@@ -449,7 +449,8 @@ def scan_range(rev_args: list[str], sidecar: Sidecar) -> tuple[int, list[str]]:
     """Scan every commit `git log <rev_args>` reaches. Returns (commits scanned, hits)."""
     every = [c for c in _git("rev-list", *rev_args).split() if c]
     if _holds(IMPORT_TIP):
-        rev_args = [f"^{IMPORT_TIP}", *rev_args]  # first: after a "--not", "^" would flip back to positive
+        # first: after a "--not", "^" would flip back to positive
+        rev_args = [f"^{IMPORT_TIP}", *rev_args]
     commits = [c for c in _git("rev-list", *rev_args).split() if c]
     if len(every) != len(commits):
         print(f"identity-scan: {len(every) - len(commits)} imported commit(s) reachable from "
