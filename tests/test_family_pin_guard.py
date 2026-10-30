@@ -161,7 +161,7 @@ def test_every_pypi_publish_job_waits_for_a_guard_job():
             current = line.strip().rstrip(":")
         elif current and line.startswith("    needs:"):
             publishers[current] = line
-    pypi = ["publish-agent-evidence-vectors", "publish-agent-evidence-vocabulary",
+    pypi = ["publish", "publish-agent-evidence-vocabulary",
             "publish-agent-evidence-admission", "publish-jcs-admit-python"]
     for job in pypi:
         assert "family-pin-guard" in publishers[job], job

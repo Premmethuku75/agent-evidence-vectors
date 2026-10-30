@@ -183,19 +183,16 @@ jobs:
           cat release/CORPUS-DIGESTS.txt
           openssl x509 -in spec/tsa-roots.pem -noout -subject -fingerprint -sha256
 
-  # The package on PyPI is cut from the same tag the signed digest list was
-  # verified for, and only after that verification passed: a wheel whose
-  # corpus does not verify is not published. No API token is stored anywhere;
-  # the id-token grant lets PyPI check this workflow's OIDC identity against
-  # the trusted publisher registered for the project, and attestations: true
-  # attaches PEP 740 provenance to every uploaded distribution.
-  publish:
+  # Builds and checks the wheel and the sdist once. The guard and the publish
+  # job below use these bytes.
+  build-corpus:
     needs: verify
     if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -244,8 +241,10 @@ jobs:
       # runs this step before a push; the version check then has no tag to
       # compare against and says so rather than comparing to an empty string.
       - name: the wheel's version is the tag's
+        id: version
         run: |
           version="$(ls dist/agent_evidence_vectors-*.whl | sed -E 's|.*/agent_evidence_vectors-([^-]+)-.*|\1|')"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
           if [ -z "${GITHUB_REF_NAME:-}" ]; then
             echo "no tag in this run; the wheel is version ${version}"
           elif [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
@@ -254,6 +253,45 @@ jobs:
           else
             echo "wheel ${version} matches tag ${GITHUB_REF_NAME}"
           fi
+
+      # The guard and the publish job read these exact bytes, so the wheel that
+      # was replayed and version-checked above is the wheel that is uploaded.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-dist-agent-evidence-vectors
+          path: dist/
+          if-no-files-found: error
+
+  # Refuses a release that the newest published release of another family
+  # distribution cannot be installed beside (scripts/family_pin_guard.py).
+  family-pin-guard:
+    needs: build-corpus
+    if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
+    uses: ./.github/workflows/family-pin-guard.yml
+    with:
+      distribution: agent-evidence-vectors
+      version: ${{ needs.build-corpus.outputs.version }}
+      artifact: python-dist-agent-evidence-vectors
+      wheel-glob: "*.whl"
+
+  # The package on PyPI is cut from the same tag the signed digest list was
+  # verified for, and only after that verification passed: a wheel whose
+  # corpus does not verify is not published. No API token is stored anywhere;
+  # the id-token grant lets PyPI check this workflow's OIDC identity against
+  # the trusted publisher registered for the project, and attestations: true
+  # attaches PEP 740 provenance to every uploaded distribution.
+  publish:
+    needs: [verify, build-corpus, family-pin-guard]
+    if: ${{ github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-dist-agent-evidence-vectors
+          path: dist/
 
       # Pinned to v1.14.2 rather than to the release/v1 branch, because a
       # moving ref is a different action on every run. v1.14.0 was pinned here
