@@ -50,7 +50,10 @@ def metadata(path):
     with tarfile.open(path) as sdist:
         names = [n for n in sdist.getnames() if n.count("/") == 1 and n.endswith("/PKG-INFO")]
         need(len(names) == 1, f"{path.name}: expected one PKG-INFO, found {names}")
-        return sdist.extractfile(names[0]).read().decode()
+        member = sdist.extractfile(names[0])
+        need(member is not None, f"{path.name}: {names[0]} is not a regular file")
+        assert member is not None
+        return member.read().decode()
 
 
 def field(text, name):

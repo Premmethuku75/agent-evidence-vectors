@@ -164,7 +164,7 @@ def _report(found: list[Violation]) -> str:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").partition("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
     one = sub.add_parser("check")
     one.add_argument("--name", required=True)

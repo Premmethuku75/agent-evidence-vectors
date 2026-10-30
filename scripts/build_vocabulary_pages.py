@@ -28,6 +28,8 @@ PACKAGE = ROOT / "packages" / "vocabulary"
 OUT = ROOT / "pages" / "vocab" / "v1"
 PAGES_BASE = "https://probityai.github.io/agent-evidence/vocab/v1/"
 _SPEC = importlib.util.spec_from_file_location("build_predicate_pages", ROOT / "scripts" / "build_predicate_pages.py")
+if _SPEC is None or _SPEC.loader is None:
+    raise ImportError("cannot load scripts/build_predicate_pages.py")
 _predicate = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_predicate)
 SOURCE_URL = "https://github.com/probityai/agent-evidence/blob/main/packages/vocabulary/vocabulary.yaml"
@@ -110,7 +112,7 @@ def render(index: dict) -> dict[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").partition("\n")[0])
     parser.add_argument("--check", action="store_true", help="fail when the pages are stale")
     args = parser.parse_args(argv)
     index = json.loads((PACKAGE / "registry.json").read_text(encoding="utf-8"))

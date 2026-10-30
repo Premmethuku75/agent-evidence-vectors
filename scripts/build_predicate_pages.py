@@ -115,7 +115,7 @@ def build(spec_dir: Path, commit: str) -> dict[str, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").partition("\n")[0])
     parser.add_argument("--spec-dir", type=Path, required=True)
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()

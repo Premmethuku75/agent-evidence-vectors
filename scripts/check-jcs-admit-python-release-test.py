@@ -10,6 +10,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("check", HERE / "check-jcs-admit-python-release.py")
+if spec is None or spec.loader is None:
+    raise ImportError("cannot load check-jcs-admit-python-release.py")
 check = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check)
 

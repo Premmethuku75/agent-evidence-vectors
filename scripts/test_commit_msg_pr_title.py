@@ -14,11 +14,12 @@ import unittest
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
 from pathlib import Path
+from typing import Any
 
 HOOK = Path(__file__).resolve().parents[1] / ".githooks" / "commit-msg"
 
 
-def load_hook():
+def load_hook() -> Any:
     loader = SourceFileLoader("commit_msg_hook", str(HOOK))
     spec = spec_from_loader(loader.name, loader)
     assert spec is not None

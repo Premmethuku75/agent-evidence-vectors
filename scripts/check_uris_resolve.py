@@ -104,6 +104,9 @@ def check_network(pages: Path, index: dict, table: list[tuple[re.Pattern, str]])
     opener = urllib.request.build_opener(_NoRedirect)
     for uri in sorted({u.split("#", 1)[0] for u in identifiers(pages, index)}):
         expected = rewrite(uri, table)
+        if expected is None:
+            failures.append(f"{uri}: no w3id.org rule matches")
+            continue
         try:
             opener.open(urllib.request.Request(uri, method="HEAD"), timeout=30)
             failures.append(f"{uri}: answered without a redirect")
@@ -122,7 +125,7 @@ def check_network(pages: Path, index: dict, table: list[tuple[re.Pattern, str]])
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "").partition("\n")[0])
     parser.add_argument("--network", action="store_true", help="also check the live w3id.org rules and pages")
     args = parser.parse_args(argv)
     pages = ROOT / "pages"
