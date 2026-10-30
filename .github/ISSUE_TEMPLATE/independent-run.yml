@@ -50,6 +50,7 @@ body:
         - "vectors-authority-at-dispatch/"
         - "vectors-approval-binding/"
         - "vectors-dispatch-fence/"
+        - "vectors-refund-connected/"
         - "vectors-aggregate-accounting/"
         - "vectors-uncertain-effect/"
         - "vectors-agent-card-receipt/"

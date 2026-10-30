@@ -131,6 +131,7 @@ Choose a corpus for the format your verifier supports. Each has its own manifest
 | `vectors-self-reported-record/` | `self-reported-record-conformance` | a self-reported agent record: turn signatures under the named key, memory-read digests over the bytes at the named path, an attesting key outside the observed runtime's reach, ledgers that name one change set, and covering signatures on declared substrate coverage |
 | `vectors-w3c-intake/` | `w3c-intake-v2-conformance` | the W3C public-agent-conformance group's intake criteria for a submitted conformance result, v2 with the accepted v2.1 deltas: every rejection ground bound to its sentence, each with a record that must be refused and one that must be admitted |
 | `vectors-w3c-report/` | `w3c-report-v01-conformance` | the W3C public-agent-conformance group's v0.1 per-check report: five states, the cause vocabulary, fourteen rejection rows and roll-up claims (including a declared no-void claim), as whole reports |
+| `vectors-refund-connected/` | `refund-connected/v1` | retained runs of a connected refund pilot judged offline from their bytes: inputs, trust files, admission state, signed handoffs and resolutions, the executor streams and the payment simulator record, refused when any link between them breaks |
 
 The distribution gate checks the directory and suite names against the tracked manifests. Read vector counts and digests from those manifests or [release/CORPUS-DIGESTS.txt](release/CORPUS-DIGESTS.txt). The [corpus guide](docs/guides/corpora.md) describes the formats and packaged readers.
 
@@ -152,3 +153,4 @@ Use the [run form](.github/ISSUE_TEMPLATE/independent-run.yml) and retain the fu
 | Releases | [GitHub releases](https://github.com/probityai/agent-evidence-vectors/releases) |
 | Signed digests | [release/CORPUS-DIGESTS.txt](release/CORPUS-DIGESTS.txt) |
 | Archive | [Zenodo concept DOI](https://doi.org/10.5281/zenodo.22758687), with release-specific identifiers on the archive record |
+| Dataset | [Hugging Face](https://huggingface.co/datasets/probityai/agent-evidence-vectors), one revision tag per release, built by [the publish workflow](.github/workflows/publish-hf-dataset.yml) |
