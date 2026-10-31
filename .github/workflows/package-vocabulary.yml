@@ -344,12 +344,17 @@ jobs:
       # outnumber the ones it allows.
       - name: diagnostic (temporary) which scanner and test the runner holds
         run: |
+          f=scripts/pre-push-identity-scan-test.py
           git rev-parse HEAD
-          git hash-object scripts/pre-push-identity-scan.py scripts/pre-push-identity-scan-test.py
-          grep -c CI_HOME_PATHS scripts/pre-push-identity-scan-test.py
-          grep -c _CI_HOMES scripts/pre-push-identity-scan.py
-          python3 --version
-          git status --short | head -5
+          git ls-files -s "$f"
+          git cat-file -p "HEAD:$f" | git hash-object --stdin
+          git hash-object --no-filters "$f"
+          wc -c "$f"
+          git cat-file -s "HEAD:$f"
+          grep -c CI_HOME_PATHS "$f" || true
+          git diff --stat -- scripts | tail -3 || true
+          git config --show-origin --get-regexp 'core\.|filter\.|safe' || true
+          git ls-files -v scripts | grep -v '^H' | head -5 || true
       - name: the owner permit allows a repository path and nothing else
         run: python3 scripts/pre-push-identity-scan-test.py
       - name: every commit in the push range is free of private paths, dossier names and product names
