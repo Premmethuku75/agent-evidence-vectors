@@ -108,7 +108,8 @@ ESCAPED_HTML_HOST = "&#103;" + SITE[1:]
 # the joined shape.
 HOME_PATH = "/".join(("", "home", "someone", "notes.txt"))  # noqa: FLY002 (see above)
 CI_HOME_PATHS = tuple(
-    "/".join(("", "home", user, "work", "out.json")) for user in ("runner", "gate", "default")
+    "/".join(("", "home", user, "work", "out.json"))  # noqa: FLY002 (see above)
+    for user in ("runner", "gate", "default")
 )
 DOSSIER_PATH = "/".join(("research", "123-private-dossier"))  # noqa: FLY002 (see above)
 # Two hex halves, each of which decodes to harmless text, so neither this
