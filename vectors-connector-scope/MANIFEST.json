@@ -1,5 +1,9 @@
 {
   "corpusDigest": "873332850e34c4edad77f2ca89cfb25247a940e106f67f045acbe7186b3d7ca5",
+  "counts": {
+    "accepted": 4,
+    "rejected": 9
+  },
   "schema": "connector-scope-record/v1",
   "specification": {
     "scope": "A connector scope record for a health-system integration: what the connector may read, what it may change, and what it refused. All fixtures are synthetic and carry no protected health information; a rule refuses a fixture that does.",

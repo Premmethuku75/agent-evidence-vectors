@@ -316,6 +316,10 @@ def generate(root: Path = ROOT) -> dict[str, Any]:
     manifest = {
         "suite": SUITE,
         "schema": SCHEMA,
+        "counts": {
+            verdict: sum(e["expected"]["decision"] == verdict for e in entries)
+            for verdict in ("accepted", "rejected")
+        },
         "vectors": entries,
         "specification": SPECIFICATION,
         "verifierContract": "verifier case.json --json",
