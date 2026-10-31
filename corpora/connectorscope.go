@@ -58,7 +58,7 @@ func connectorScope() ruleCorpus {
 		}},
 		{"refusal_not_recorded", func(r any) bool {
 			return rlGet(r, "outcome.result") == "refused" && !csPermitted(r) &&
-				!(rlStr(rlGet(r, "outcome.reason")) != "" && rlStr(rlGet(r, "outcome.refusal_recorded_by")) != "")
+				(rlStr(rlGet(r, "outcome.reason")) == "" || rlStr(rlGet(r, "outcome.refusal_recorded_by")) == "")
 		}},
 		{"action_digest_mismatch", func(r any) bool {
 			return rlStr(rlGet(r, "record.action_digest")) != rlDigest(rlGet(r, "action"))
