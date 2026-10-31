@@ -91,7 +91,7 @@
       },
       "path": "vectors-connector-scope/gen_vectors.py",
       "serialization": "bytes",
-      "sha256": "12c9fade47854ec27fd9d9b4c927448deadf7ed2f771c832f40cd0d3d73ec98f"
+      "sha256": "8b8bfe6c1868be5e5fef93faa49ce6f59a28b1c7e4ae763759e81f7c55d6b49e"
     },
     {
       "consumed": "unconsumed",
@@ -333,7 +333,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "b98237b0eef6d9446f3df474fa9247393968e86c6b287b8a3df69ca6eb65f2fb"
+    "sha256": "627765e8d58ccd694d410b5b4fe2babb4626074566545b402870fdced118db56"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
@@ -358,7 +358,7 @@
       "action-changed-after-record"
     ],
     "path": "vectors-connector-scope/MANIFEST.json",
-    "sha256": "c3a132ea230426c653ddf2cd15712c9abb9887de8e5ed1eb75bd49cdb39c2f8f"
+    "sha256": "1e4693a70f25624bea9dcb756e907a79a789c057676d287ee329e817389c4b27"
   },
   "members": [
     {
