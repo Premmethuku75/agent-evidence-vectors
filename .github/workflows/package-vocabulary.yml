@@ -342,6 +342,14 @@ jobs:
       # loosen, and a loosening nobody notices looks exactly like the control
       # working, so the shapes it must still refuse are asserted here and
       # outnumber the ones it allows.
+      - name: diagnostic (temporary) which scanner and test the runner holds
+        run: |
+          git rev-parse HEAD
+          git hash-object scripts/pre-push-identity-scan.py scripts/pre-push-identity-scan-test.py
+          grep -c CI_HOME_PATHS scripts/pre-push-identity-scan-test.py
+          grep -c _CI_HOMES scripts/pre-push-identity-scan.py
+          python3 --version
+          git status --short | head -5
       - name: the owner permit allows a repository path and nothing else
         run: python3 scripts/pre-push-identity-scan-test.py
       - name: every commit in the push range is free of private paths, dossier names and product names
