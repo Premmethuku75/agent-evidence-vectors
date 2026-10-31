@@ -68,7 +68,7 @@
       },
       "path": "vectors-connector-scope/README.md",
       "serialization": "bytes",
-      "sha256": "d0ec432098debe6a4a952224a29cd39954715407c3ed8685eeebea2af5038f37"
+      "sha256": "c1059fdbb446f4e94f8cdcc0f6b92641bbdcc3770f1765b50ab53418df2da041"
     },
     {
       "consumed": "unconsumed",
@@ -356,7 +356,7 @@
   ],
   "corpus-digest": {
     "serialization": "sha256-listing-v1",
-    "sha256": "089ef759c84a5fe6adac34f13421a265ccc67bfb3b23640fa0ebad348f194004"
+    "sha256": "f03e139c8884ae570c29e0fe7f855a4e829c33b563800463cbf02070975b9f3e"
   },
   "exit-code": 0,
   "exit-rule": "zero-iff-every-check-passes",
