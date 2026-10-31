@@ -167,7 +167,7 @@
       {
         "path": "pyproject.toml",
         "serialization": "bytes",
-        "sha256": "a7d35ccd6976e62087449fc39118ea5f4ac1de6054daf7326c8414b59260c4d9"
+        "sha256": "04ce7308f88971238b9fb5540668c9b473b931a5de6bfe98d77c25cc887d6cd8"
       },
       {
         "path": "uv.lock",
