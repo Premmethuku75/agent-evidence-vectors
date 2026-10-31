@@ -2997,7 +2997,9 @@ MASKS = tuple(
         # otherwise arrive as a fresh false refusal against text claiming
         # nothing. The canonicalization argument this corpus publishes cites
         # floating-point and checksum standards by name throughout.
-        r"\b(?:IEEE|ISO|IEC|ANSI|ECMA|FIPS|NIST\s+SP)[\s-]*\d+",
+        # The number may carry a dash part, `NIST SP 800-184`: the whole run is
+        # the name, so no dash part is left to read as a count.
+        r"\b(?:IEEE|ISO|IEC|ANSI|ECMA|FIPS|NIST\s+SP)[\s-]*\d+(?:-\d+)*",
         # Encoding names. The digit in UTF-16 is part of the name of a character
         # encoding and never a quantity of anything, and this corpus argues about
         # UTF-16 code-unit ordering in a dozen places. It went unmasked only
