@@ -345,16 +345,23 @@ jobs:
       - name: diagnostic (temporary) which scanner and test the runner holds
         run: |
           f=scripts/pre-push-identity-scan-test.py
-          git rev-parse HEAD
+          git rev-parse HEAD 'HEAD^{tree}'
+          git write-tree || true
+          git ls-tree -r HEAD | grep identity-scan || true
+          git ls-files -s | grep identity-scan || true
+          ls -la --time-style=full-iso "$f" scripts/pre-push-identity-scan.py
+          date -u
+          git reflog -3 || true
+          git replace -l || true
+          git count-objects -v
+          ls .git/objects/pack | head -5
+          git status --porcelain | head -5 || true
+          git ls-files -s | awk '{print $2}' | sort | uniq -d | head -3 || true
+          git ls-files | wc -l
+          git ls-tree -r HEAD | wc -l
+          git checkout --force HEAD -- scripts
           git ls-files -s "$f"
-          git cat-file -p "HEAD:$f" | git hash-object --stdin
-          git hash-object --no-filters "$f"
           wc -c "$f"
-          git cat-file -s "HEAD:$f"
-          grep -c CI_HOME_PATHS "$f" || true
-          git diff --stat -- scripts | tail -3 || true
-          git config --show-origin --get-regexp 'core\.|filter\.|safe' || true
-          git ls-files -v scripts | grep -v '^H' | head -5 || true
       - name: the owner permit allows a repository path and nothing else
         run: python3 scripts/pre-push-identity-scan-test.py
       - name: every commit in the push range is free of private paths, dossier names and product names
